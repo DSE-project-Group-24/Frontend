@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import backgroundImage from '../../public/background.jpg';
+import backgroundImage from '../assets/background.jpg';
 import API from '../utils/api';
 
 // Register Government API function

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import backgroundImage from '../../public/background.jpg';
+import backgroundImage from '../assets/background.jpg';
 
 const RoleSelection = ({ setRole, isRegister = false }) => {
   const navigate = useNavigate();
