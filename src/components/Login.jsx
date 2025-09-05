@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import backgroundImage from '../../public/background.jpg';
+import API from '../utils/api';
+
+// Login API function
+const loginUser = async (email, password) => {
+  try {
+    const response = await API.post("/auth/login", { email, password });
+    return response.data; // { access_token, refresh_token, role }
+  } catch (error) {
+    throw error.response?.data || { detail: "Server error" };
+  }
+};
 
 const Login = ({ setIsAuthenticated, setRole }) => {
   const [username, setUsername] = useState('');
@@ -9,40 +20,33 @@ const Login = ({ setIsAuthenticated, setRole }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  // Hardcoded credentials
-  const credentials = {
-    nurse: { username: 'nurse', password: 'nurse_pass' },
-    doctor: { username: 'doctor', password: 'doctor_pass' },
-    admin: { username: 'admin', password: 'admin_pass' },
-    government: { username: 'government', password: 'gov_pass' },
-  };
-
   const handleLogin = async () => {
     setIsLoading(true);
     setError('');
 
-    // Simulate loading time
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    try {
+      // Call backend
+      const data = await loginUser(username, password);
 
-    // Check if username matches a role and password is correct
-    const role = Object.keys(credentials).find(
-      (key) => credentials[key].username === username && credentials[key].password === password
-    );
+      // Save tokens if you want persistence
+      localStorage.setItem("access_token", data.access_token);
+      localStorage.setItem("refresh_token", data.refresh_token);
 
-    if (role) {
+      // Update state
       setIsAuthenticated(true);
-      setRole(role);
-      navigate(`/${role}/dashboard`);
-    } else {
-      setError('Invalid username or password. Please try again.');
+      setRole(data.role);
+
+      // Navigate to dashboard based on role
+      navigate(`/${data.role}/dashboard`);
+    } catch (err) {
+      setError(err.detail || "Invalid username or password. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleLogin();
-    }
+    if (e.key === 'Enter') handleLogin();
   };
 
   return (
