@@ -68,6 +68,8 @@ const Skeleton = ({ className = "" }) => (
   <div className={`animate-pulse rounded bg-slate-200 ${className}`} />
 );
 
+/* ---------------- FilterBuilder: add column → pick categories ---------------- */
+
 function FilterBuilder({ title, grouped, value, onChange, hint }) {
   const [draftCol, setDraftCol] = useState("");
   const [draftVals, setDraftVals] = useState([]);
@@ -82,6 +84,7 @@ function FilterBuilder({ title, grouped, value, onChange, hint }) {
     setDraftCol("");
     setDraftVals([]);
   };
+
   const addFilter = () => {
     if (!draftCol) return;
     const next = value.slice();
@@ -91,8 +94,10 @@ function FilterBuilder({ title, grouped, value, onChange, hint }) {
     onChange(next);
     resetDraft();
   };
+
   const removeFilter = (column) =>
     onChange(value.filter((f) => f.column !== column));
+
   const toggleDraftVal = (v) => {
     const s = new Set(draftVals);
     s.has(v) ? s.delete(v) : s.add(v);
@@ -207,6 +212,95 @@ function FilterBuilder({ title, grouped, value, onChange, hint }) {
   );
 }
 
+/* ---------------- TargetPicker: RHS exact = pick column → pick ONE category ---------------- */
+
+function TargetPicker({
+  title,
+  grouped,
+  enabled,
+  onToggle,
+  targetCol,
+  setTargetCol,
+  targetVal,
+  setTargetVal,
+}) {
+  const colOptions = grouped.map((g) => g.column);
+  const currentValues = React.useMemo(() => {
+    const g = grouped.find((x) => x.column === targetCol);
+    return g ? g.values : [];
+  }, [grouped, targetCol]);
+
+  return (
+    <section className="space-y-3">
+      <h3 className="text-sm font-semibold text-slate-700">{title}</h3>
+      <div className="rounded-lg border bg-white p-3 shadow-sm space-y-3">
+        <div className="flex items-center gap-2">
+          <input
+            id="rhs-exact"
+            type="checkbox"
+            className="h-4 w-4 rounded border-slate-300"
+            checked={enabled}
+            onChange={() => onToggle(!enabled)}
+          />
+          <label htmlFor="rhs-exact" className="text-sm text-slate-700">
+            Enable
+          </label>
+        </div>
+
+        {enabled && (
+          <>
+            <div>
+              <label className="text-xs text-slate-600">Column</label>
+              <select
+                className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-sm"
+                value={targetCol}
+                onChange={(e) => {
+                  setTargetCol(e.target.value);
+                  setTargetVal("");
+                }}
+              >
+                <option value="">— choose —</option>
+                {colOptions.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {targetCol && (
+              <div>
+                <label className="text-xs text-slate-600">Category</label>
+                <div className="mt-1 max-h-40 overflow-auto rounded border border-slate-200 p-2">
+                  {currentValues.map((v) => (
+                    <label
+                      key={v}
+                      className="mr-4 inline-flex items-center gap-2 text-sm"
+                    >
+                      <input
+                        type="radio"
+                        name="rhs-target-radio"
+                        className="h-4 w-4 border-slate-300"
+                        checked={targetVal === v}
+                        onChange={() => setTargetVal(v)}
+                      />
+                      <span className="select-none">{v}</span>
+                    </label>
+                  ))}
+                </div>
+                <p className="mt-1 text-xs text-slate-500">
+                  The consequent will be{" "}
+                  <b>{targetCol ? `${targetCol}_${targetVal || "…"}` : "—"}</b>.
+                </p>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
+
 /* ---------------- Main page ---------------- */
 
 const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
@@ -214,16 +308,19 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
   const [bootLoading, setBootLoading] = useState(true);
   const [bootError, setBootError] = useState("");
 
-  // Filters (structured by column)
+  // Structured filters
   const [preFilters, setPreFilters] = useState([]); // [{ column, selected:[] }]
   const [postAFilters, setPostAFilters] = useState([]);
   const [postCFilters, setPostCFilters] = useState([]);
 
-  // Thresholds and RHS exact
+  // Thresholds
   const [minSupport, setMinSupport] = useState(0.02);
   const [minConfidence, setMinConfidence] = useState(0.3);
+
+  // RHS exact (picker state)
   const [rhsExact, setRhsExact] = useState(false);
-  const [rhsTarget, setRhsTarget] = useState("");
+  const [rhsTargetCol, setRhsTargetCol] = useState("");
+  const [rhsTargetVal, setRhsTargetVal] = useState("");
 
   // Results
   const [running, setRunning] = useState(false);
@@ -231,10 +328,6 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
   const [rules, setRules] = useState([]);
 
   const grouped = useMemo(() => groupTokens(tokens), [tokens]);
-  const severityTokens = useMemo(
-    () => (tokens || []).filter((t) => t.startsWith("Severity_")),
-    [tokens]
-  );
 
   useEffect(() => {
     let mounted = true;
@@ -267,30 +360,53 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
           preTokens.length > 5 ? " …" : ""
         }`
       );
+    if (rhsExact && rhsTargetCol && rhsTargetVal)
+      chips.push(`RHS: ${rhsTargetCol}_${rhsTargetVal}`);
     chips.push(`min_sup ${minSupport}`);
     chips.push(`min_conf ${minConfidence}`);
     return chips;
-  }, [preFilters, minSupport, minConfidence]);
+  }, [
+    preFilters,
+    rhsExact,
+    rhsTargetCol,
+    rhsTargetVal,
+    minSupport,
+    minConfidence,
+  ]);
 
   const runApriori = async () => {
     setRunning(true);
     try {
+      const rhsToken =
+        rhsExact && rhsTargetCol && rhsTargetVal
+          ? `${rhsTargetCol}_${rhsTargetVal}`
+          : null;
+
+      if (rhsExact && !rhsToken) {
+        alert(
+          "Please choose a column and a category for the exact RHS target."
+        );
+        setRunning(false);
+        return;
+      }
+
       const body = {
         pre: {
           target_consequents: filtersToTokens(preFilters),
           min_support: Number(minSupport),
           min_confidence: Number(minConfidence),
           max_len_antecedent: 4,
-          max_rules: 1000,
+          max_rules: 20,
         },
         post: {
           antecedents_contains: filtersToTokens(postAFilters),
           consequents_contains: filtersToTokens(postCFilters),
           rhs_exact: rhsExact,
-          rhs_target: rhsExact ? rhsTarget : null,
+          rhs_target: rhsToken,
         },
         sort: { by: "lift", order: "desc" },
       };
+
       const r = await fetch(`${API_BASE}/gov/rules/run`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -347,6 +463,7 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
               {running ? "Running…" : "Run Apriori"}
             </button>
           </div>
+          {bootError && <div className="text-sm text-red-600">{bootError}</div>}
         </div>
       </header>
 
@@ -354,13 +471,17 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
       <main className="container mx-auto grid grid-cols-12 gap-6 px-4 py-6">
         {/* Left: PRE */}
         <div className="col-span-12 lg:col-span-3 space-y-6">
-          <FilterBuilder
-            title="Pre — Target Consequents (dataset)"
-            grouped={grouped}
-            value={preFilters}
-            onChange={setPreFilters}
-            hint="Records must include at least one selected category per chosen column. If a column has no categories selected, it imposes no restriction."
-          />
+          {bootLoading ? (
+            <Skeleton className="h-48" />
+          ) : (
+            <FilterBuilder
+              title="Pre — Target Consequents (dataset)"
+              grouped={grouped}
+              value={preFilters}
+              onChange={setPreFilters}
+              hint="Records must include at least one selected category per chosen column. If a column has no categories selected, it imposes no restriction."
+            />
+          )}
         </div>
 
         {/* Center: Results */}
@@ -458,61 +579,34 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
 
         {/* Right: POST */}
         <div className="col-span-12 lg:col-span-3 space-y-6">
-          <FilterBuilder
-            title="Post — Antecedents must contain"
-            grouped={grouped}
-            value={postAFilters}
-            onChange={setPostAFilters}
-          />
-          <FilterBuilder
-            title="Post — Consequents must contain"
-            grouped={grouped}
-            value={postCFilters}
-            onChange={setPostCFilters}
-          />
-
-          <section className="space-y-3">
-            <h3 className="text-sm font-semibold text-slate-700">
-              Post — RHS must be exactly target
-            </h3>
-            <div className="rounded-lg border bg-white p-3 shadow-sm">
-              <div className="flex items-center gap-2">
-                <input
-                  id="rhs-exact"
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-slate-300"
-                  checked={rhsExact}
-                  onChange={() => setRhsExact(!rhsExact)}
-                />
-                <label htmlFor="rhs-exact" className="text-sm text-slate-700">
-                  Enable
-                </label>
-              </div>
-              {rhsExact && (
-                <div className="mt-3">
-                  <label className="text-sm text-slate-700">Target</label>
-                  <select
-                    className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-sm"
-                    value={rhsTarget}
-                    onChange={(e) => setRhsTarget(e.target.value)}
-                  >
-                    <option value="">— choose —</option>
-                    {(severityTokens.length ? severityTokens : tokens).map(
-                      (t) => (
-                        <option key={t} value={t}>
-                          {t}
-                        </option>
-                      )
-                    )}
-                  </select>
-                  <p className="mt-1 text-xs text-slate-500">
-                    Keeps only rules whose consequent equals the selected token
-                    (e.g., <b>Severity_S</b>).
-                  </p>
-                </div>
-              )}
-            </div>
-          </section>
+          {bootLoading ? (
+            <Skeleton className="h-48" />
+          ) : (
+            <>
+              <FilterBuilder
+                title="Post — Antecedents must contain"
+                grouped={grouped}
+                value={postAFilters}
+                onChange={setPostAFilters}
+              />
+              <FilterBuilder
+                title="Post — Consequents must contain"
+                grouped={grouped}
+                value={postCFilters}
+                onChange={setPostCFilters}
+              />
+              <TargetPicker
+                title="Post — RHS must be exactly target"
+                grouped={grouped}
+                enabled={rhsExact}
+                onToggle={setRhsExact}
+                targetCol={rhsTargetCol}
+                setTargetCol={setRhsTargetCol}
+                targetVal={rhsTargetVal}
+                setTargetVal={setRhsTargetVal}
+              />
+            </>
+          )}
         </div>
       </main>
     </div>
