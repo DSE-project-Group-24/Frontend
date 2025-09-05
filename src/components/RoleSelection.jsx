@@ -1,14 +1,13 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import backgroundImage from '../../public/background.jpg'; // local file
+import backgroundImage from '../../public/background.jpg';
 
-const RoleSelection = ({ setRole }) => {
+const RoleSelection = ({ setRole, isRegister = false }) => {
   const navigate = useNavigate();
 
   const selectRole = (selectedRole) => {
     setRole(selectedRole);
-    navigate('/login');
+    navigate(isRegister ? `/register/${selectedRole}` : '/login');
   };
 
   const roles = [
@@ -18,7 +17,7 @@ const RoleSelection = ({ setRole }) => {
       description: 'Patient care and medical assistance',
       icon: '🩺',
       color: 'from-emerald-500 to-teal-600',
-      hoverColor: 'from-emerald-600 to-teal-700'
+      hoverColor: 'from-emerald-600 to-teal-700',
     },
     {
       id: 'doctor',
@@ -26,7 +25,7 @@ const RoleSelection = ({ setRole }) => {
       description: 'Medical diagnosis and treatment',
       icon: '👨‍⚕️',
       color: 'from-blue-500 to-indigo-600',
-      hoverColor: 'from-blue-600 to-indigo-700'
+      hoverColor: 'from-blue-600 to-indigo-700',
     },
     {
       id: 'admin',
@@ -34,7 +33,7 @@ const RoleSelection = ({ setRole }) => {
       description: 'Hospital operations and management',
       icon: '🏥',
       color: 'from-purple-500 to-pink-600',
-      hoverColor: 'from-purple-600 to-pink-700'
+      hoverColor: 'from-purple-600 to-pink-700',
     },
     {
       id: 'government',
@@ -42,8 +41,8 @@ const RoleSelection = ({ setRole }) => {
       description: 'Healthcare policy and oversight',
       icon: '🏛️',
       color: 'from-amber-500 to-orange-600',
-      hoverColor: 'from-amber-600 to-orange-700'
-    }
+      hoverColor: 'from-amber-600 to-orange-700',
+    },
   ];
 
   return (
@@ -56,24 +55,21 @@ const RoleSelection = ({ setRole }) => {
         backgroundRepeat: 'no-repeat',
       }}
     >
-      {/* Background overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-900/10 to-indigo-900/20"></div>
       
       <div className="max-w-4xl w-full relative z-10">
-        {/* Header */}
         <div className="text-center mb-12">
           <div className="mx-auto h-20 w-20 bg-white rounded-full flex items-center justify-center shadow-2xl mb-6">
             <span className="text-3xl">⚕️</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
-            Healthcare Portal
+            {isRegister ? 'Register for Healthcare Portal' : 'Healthcare Portal'}
           </h1>
           <p className="text-xl text-blue-100 max-w-2xl mx-auto leading-relaxed">
-            Select your role to access the healthcare management system
+            {isRegister ? 'Select your role to register' : 'Select your role to access the healthcare management system'}
           </p>
         </div>
 
-        {/* Role Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
           {roles.map((role) => (
             <div
@@ -82,14 +78,11 @@ const RoleSelection = ({ setRole }) => {
               className="group cursor-pointer transform transition-all duration-300 hover:scale-105"
             >
               <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl p-8 border border-white/20 transition-all duration-300 hover:bg-white">
-                {/* Role Icon */}
                 <div className="flex items-center justify-center mb-6">
                   <div className={`h-16 w-16 rounded-full bg-gradient-to-r ${role.color} group-hover:bg-gradient-to-r group-hover:${role.hoverColor} flex items-center justify-center text-2xl shadow-lg transition-all duration-300 group-hover:shadow-xl`}>
                     <span className="text-white">{role.icon}</span>
                   </div>
                 </div>
-
-                {/* Role Content */}
                 <div className="text-center">
                   <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-gray-900 transition-colors duration-300">
                     {role.title}
@@ -98,8 +91,6 @@ const RoleSelection = ({ setRole }) => {
                     {role.description}
                   </p>
                 </div>
-
-                {/* Hover Arrow */}
                 <div className="flex justify-center mt-6">
                   <div className="opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-2 transition-all duration-300">
                     <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -112,7 +103,6 @@ const RoleSelection = ({ setRole }) => {
           ))}
         </div>
 
-        {/* Footer */}
         <div className="text-center mt-12">
           <p className="text-blue-100 text-sm">
             Secure • Reliable • Professional Healthcare Management

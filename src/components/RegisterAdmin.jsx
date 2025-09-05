@@ -2,47 +2,23 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import backgroundImage from '../../public/background.jpg';
 
-const Login = ({ setIsAuthenticated, setRole }) => {
+const RegisterAdmin = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  // Hardcoded credentials
-  const credentials = {
-    nurse: { username: 'nurse', password: 'nurse_pass' },
-    doctor: { username: 'doctor', password: 'doctor_pass' },
-    admin: { username: 'admin', password: 'admin_pass' },
-    government: { username: 'government', password: 'gov_pass' },
-  };
-
-  const handleLogin = async () => {
+  const handleRegister = async (e) => {
+    e.preventDefault();
     setIsLoading(true);
     setError('');
 
-    // Simulate loading time
     await new Promise((resolve) => setTimeout(resolve, 800));
+    console.log('Register Admin:', { username, password });
 
-    // Check if username matches a role and password is correct
-    const role = Object.keys(credentials).find(
-      (key) => credentials[key].username === username && credentials[key].password === password
-    );
-
-    if (role) {
-      setIsAuthenticated(true);
-      setRole(role);
-      navigate(`/${role}/dashboard`);
-    } else {
-      setError('Invalid username or password. Please try again.');
-    }
     setIsLoading(false);
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleLogin();
-    }
+    navigate('/');
   };
 
   return (
@@ -60,14 +36,14 @@ const Login = ({ setIsAuthenticated, setRole }) => {
       <div className="max-w-md w-full space-y-8 relative z-10">
         <div className="text-center">
           <div className="mx-auto h-16 w-16 bg-white rounded-full flex items-center justify-center shadow-lg mb-4">
-            <span className="text-2xl">⚕️</span>
+            <span className="text-2xl">🏥</span>
           </div>
-          <h2 className="text-3xl font-bold text-white mb-2">Welcome Back</h2>
-          <p className="text-blue-100 text-sm">Sign in to the Healthcare Portal</p>
+          <h2 className="text-3xl font-bold text-white mb-2">Register as Hospital Administrator</h2>
+          <p className="text-blue-100 text-sm">Create your account</p>
         </div>
 
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
-          <div className="space-y-6">
+          <form className="space-y-6" onSubmit={handleRegister}>
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
                 Username
@@ -78,10 +54,10 @@ const Login = ({ setIsAuthenticated, setRole }) => {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  onKeyPress={handleKeyPress}
                   placeholder="Enter your username"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
                   disabled={isLoading}
+                  required
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,10 +77,10 @@ const Login = ({ setIsAuthenticated, setRole }) => {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  onKeyPress={handleKeyPress}
                   placeholder="Enter your password"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
                   disabled={isLoading}
+                  required
                 />
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
                   <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,7 +102,7 @@ const Login = ({ setIsAuthenticated, setRole }) => {
             )}
 
             <button
-              onClick={handleLogin}
+              type="submit"
               disabled={isLoading || !username.trim() || !password.trim()}
               className="w-full flex justify-center items-center px-4 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
             >
@@ -136,22 +112,22 @@ const Login = ({ setIsAuthenticated, setRole }) => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Signing in...
+                  Registering...
                 </>
               ) : (
-                'Sign In'
+                'Register'
               )}
             </button>
 
             <div className="text-center">
               <Link
-                to="/register"
+                to="/"
                 className="text-sm text-gray-600 hover:text-gray-800 transition-colors duration-200"
               >
-                Don't have an account? Register here
+                Back to Login
               </Link>
             </div>
-          </div>
+          </form>
         </div>
 
         <div className="text-center">
@@ -162,4 +138,4 @@ const Login = ({ setIsAuthenticated, setRole }) => {
   );
 };
 
-export default Login;
+export default RegisterAdmin;
