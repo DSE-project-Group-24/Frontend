@@ -1,557 +1,302 @@
-// import React, { useState } from 'react';
-// import NurseNav from '../../navbars/NurseNav';
+import React, { useState } from "react";
+import NurseNav from "../../navbars/NurseNav";
+import API from "../../utils/api";
 
-// const RecordPatientData = ({ setIsAuthenticated, setRole }) => {
-//   const [formData, setFormData] = useState({
-//     fullName: '',
-//     contactNumber: '',
-//     dateOfBirth: '',
-//     addressStreet: '',
-//     lifeStyle: '',
-//     educationQualification: '',
-//     occupation: '',
-//     ethnicity: '',
-//     gender: '',
-//     employmentTypeName: '',
-//     familyMonthlyIncome: '',
-//     accessToWashRoom: '',
-//     typeOfToiletModification: '',
-//     bloodGroup: '',
-//   });
-
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     setFormData((prev) => ({ ...prev, [name]: value }));
-//   };
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-//     console.log('Form Data:', formData);
-//     // Add backend API call here to save data to the Patient table
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-gray-100">
-//       <NurseNav setIsAuthenticated={setIsAuthenticated} setRole={setRole} />
-//       <div className="container mx-auto p-6">
-//         <h1 className="text-3xl font-bold text-primary mb-4">Record Patient Data</h1>
-//         <div className="bg-white p-6 rounded-lg shadow-md">
-//           <form className="space-y-4" onSubmit={handleSubmit}>
-//             <div>
-//               <label className="block text-gray-700">Full Name</label>
-//               <input
-//                 type="text"
-//                 name="fullName"
-//                 value={formData.fullName}
-//                 onChange={handleChange}
-//                 placeholder="Enter full name"
-//                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-//                 required
-//               />
-//             </div>
-
-//             <div>
-//               <label className="block text-gray-700">Contact Number</label>
-//               <input
-//                 type="text"
-//                 name="contactNumber"
-//                 value={formData.contactNumber}
-//                 onChange={handleChange}
-//                 placeholder="Enter 10-digit contact number"
-//                 pattern="[0-9]{10}"
-//                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-//                 required
-//               />
-//             </div>
-
-//             <div>
-//               <label className="block text-gray-700">Date of Birth</label>
-//               <input
-//                 type="date"
-//                 name="dateOfBirth"
-//                 value={formData.dateOfBirth}
-//                 onChange={handleChange}
-//                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-//                 required
-//               />
-//             </div>
-
-//             <div>
-//               <label className="block text-gray-700">Address Street</label>
-//               <input
-//                 type="text"
-//                 name="addressStreet"
-//                 value={formData.addressStreet}
-//                 onChange={handleChange}
-//                 placeholder="Enter street address"
-//                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-//                 required
-//               />
-//             </div>
-
-//             <div>
-//               <label className="block text-gray-700">Life Style</label>
-//               <select
-//                 name="lifeStyle"
-//                 value={formData.lifeStyle}
-//                 onChange={handleChange}
-//                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-//                 required
-//               >
-//                 <option value="" disabled>Select lifestyle</option>
-//                 <option value="Active">Active</option>
-//                 <option value="Sedentary">Sedentary</option>
-//                 <option value="Moderate">Moderate</option>
-//                 <option value="Other">Other</option>
-//               </select>
-//             </div>
-
-//             <div>
-//               <label className="block text-gray-700">Education Qualification</label>
-//               <input
-//                 type="text"
-//                 name="educationQualification"
-//                 value={formData.educationQualification}
-//                 onChange={handleChange}
-//                 placeholder="Enter education qualification"
-//                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-//                 required
-//               />
-//             </div>
-
-//             <div>
-//               <label className="block text-gray-700">Occupation</label>
-//               <input
-//                 type="text"
-//                 name="occupation"
-//                 value={formData.occupation}
-//                 onChange={handleChange}
-//                 placeholder="Enter occupation"
-//                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-//                 required
-//               />
-//             </div>
-
-//             <div>
-//               <label className="block text-gray-700">Ethnicity</label>
-//               <select
-//                 name="ethnicity"
-//                 value={formData.ethnicity}
-//                 onChange={handleChange}
-//                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-//                 required
-//               >
-//                 <option value="" disabled>Select ethnicity</option>
-//                 <option value="Asian">Asian</option>
-//                 <option value="Black">Black</option>
-//                 <option value="White">White</option>
-//                 <option value="Hispanic">Hispanic</option>
-//                 <option value="Other">Other</option>
-//               </select>
-//             </div>
-
-//             <div>
-//               <label className="block text-gray-700">Gender</label>
-//               <select
-//                 name="gender"
-//                 value={formData.gender}
-//                 onChange={handleChange}
-//                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-//                 required
-//               >
-//                 <option value="" disabled>Select gender</option>
-//                 <option value="Male">Male</option>
-//                 <option value="Female">Female</option>
-//                 <option value="Other">Other</option>
-//               </select>
-//             </div>
-
-//             <div>
-//               <label className="block text-gray-700">Employment Type Name</label>
-//               <input
-//                 type="text"
-//                 name="employmentTypeName"
-//                 value={formData.employmentTypeName}
-//                 onChange={handleChange}
-//                 placeholder="Enter employment type"
-//                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-//                 required
-//               />
-//             </div>
-
-//             <div>
-//               <label className="block text-gray-700">Family Monthly Income</label>
-//               <input
-//                 type="number"
-//                 name="familyMonthlyIncome"
-//                 value={formData.familyMonthlyIncome}
-//                 onChange={handleChange}
-//                 placeholder="Enter monthly income"
-//                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-//                 required
-//               />
-//             </div>
-
-//             <div>
-//               <label className="block text-gray-700">Access to Wash Room</label>
-//               <select
-//                 name="accessToWashRoom"
-//                 value={formData.accessToWashRoom}
-//                 onChange={handleChange}
-//                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-//                 required
-//               >
-//                 <option value="" disabled>Select access</option>
-//                 <option value="Yes">Yes</option>
-//                 <option value="No">No</option>
-//                 <option value="Limited">Limited</option>
-//               </select>
-//             </div>
-
-//             <div>
-//               <label className="block text-gray-700">Type of Toilet Modification</label>
-//               <input
-//                 type="text"
-//                 name="typeOfToiletModification"
-//                 value={formData.typeOfToiletModification}
-//                 onChange={handleChange}
-//                 placeholder="Enter toilet modification type"
-//                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-//               />
-//             </div>
-
-//             <div>
-//               <label className="block text-gray-700">Blood Group</label>
-//               <select
-//                 name="bloodGroup"
-//                 value={formData.bloodGroup}
-//                 onChange={handleChange}
-//                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
-//                 required
-//               >
-//                 <option value="" disabled>Select blood group</option>
-//                 <option value="A+">A+</option>
-//                 <option value="A-">A-</option>
-//                 <option value="B+">B+</option>
-//                 <option value="B-">B-</option>
-//                 <option value="AB+">AB+</option>
-//                 <option value="AB-">AB-</option>
-//                 <option value="O+">O+</option>
-//                 <option value="O-">O-</option>
-//               </select>
-//             </div>
-
-//             <button
-//               type="submit"
-//               className="px-4 py-2 bg-accent text-white rounded-lg hover:bg-blue-600 transition"
-//             >
-//               Submit
-//             </button>
-//           </form>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default RecordPatientData;
-
-import React, { useState } from 'react';
-import NurseNav from '../../navbars/NurseNav';
-
-const RecordPatientData = ({ setIsAuthenticated, setRole }) => {
+const RecordPatientData = () => {
+  // Define dropdown options from provided data
+  const bloodGroupOptions = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+  const ethnicityOptions = ['Tamil', 'Sinhalese', 'Moor'];
+  const lifeStyleOptions = ['Living with children', 'Living with care givers', 'Living alone'];
+  const educationOptions = ['O/L or A/L', 'Grade 5', 'Under Graduate', 'Post Graduate'];
+  const occupationOptions = [
+    'Retired pensioners', 'Unemployed', 'Semi-Skilled Workers', 'Skilled Workers',
+    'Student', 'Business', 'Others', 'Professionals', 'Highly Skilled Workers',
+    'Driver', 'Forces', 'Religious Sevice', 'NGO', 'Road and Field'
+  ];
+  const employmentTypeOptions = [
+    'Permanent - Government', 'Temporary', 'Daily Basis',
+    'Not Necessary for Student and Unemployed', 'Contract', 'Permanent - Private'
+  ];
+  const accessToWashroomOptions = ['No', 'Yes', 'Victim not willing to share/ Unable to respond/  Early Discharge'];
+  const toiletModificationOptions = [
+    'No Modification done', 'Permanent Commode Build',
+    'Victim not willing to share/ Unable to respond/  Early Discharge', 'Commode Chair Bought'
+  ];
+  
   const [formData, setFormData] = useState({
-    fullName: '',
-    contactNumber: '',
-    dateOfBirth: '',
-    addressStreet: '',
-    lifeStyle: '',
-    educationQualification: '',
-    occupation: '',
-    ethnicity: '',
-    gender: '',
-    employmentTypeName: '',
-    familyMonthlyIncome: '',
-    accessToWashRoom: '',
-    typeOfToiletModification: '',
-    bloodGroup: '',
+    full_name: "",
+    contact_number: "",
+    date_of_birth: "",
+    gender: "",
+    ethinicity: "",
+    address_street: "",
+    life_style: "",
+    education_qualification: "",
+    occupation: "",
+    employment_type_name: "",
+    family_monthly_income: "",
+    access_to_wash_room: "",
+    type_of_toilet_modification: "",
+    blood_group: "",
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ type: "", text: "" });
 
+  // Handle form input changes
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!formData.fullName.trim()) newErrors.fullName = 'Full name is required';
-    if (!formData.contactNumber.trim()) newErrors.contactNumber = 'Contact number is required';
-    else if (!/^[0-9]{10}$/.test(formData.contactNumber)) newErrors.contactNumber = 'Contact number must be 10 digits';
-    if (!formData.dateOfBirth) newErrors.dateOfBirth = 'Date of birth is required';
-    if (!formData.addressStreet.trim()) newErrors.addressStreet = 'Address is required';
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
+  // Submit patient data
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) return;
-    
-    setIsSubmitting(true);
-    
+    setLoading(true);
+    setMessage({ type: "", text: "" });
+
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log('Form Data:', formData);
-      
-      // Show success message
-      alert('Patient data recorded successfully!');
-      
-      // Reset form
+      const payload = {
+        "Full Name": formData.full_name,
+        "Contact Number": formData.contact_number,
+        "Date of Birth": formData.date_of_birth,
+        Gender: formData.gender,
+        Ehinicity: formData.ethinicity,
+        "Address Street": formData.address_street,
+        "Life Style": formData.life_style,
+        "Education Qualification": formData.education_qualification,
+        Occupation: formData.occupation,
+        "Employment Type Name": formData.employment_type_name,
+        "Family  Monthly Income": formData.family_monthly_income
+          ? Number(formData.family_monthly_income)
+          : null,
+        "Access to Wash Room": formData.access_to_wash_room,
+        "Type of toilet modification": formData.type_of_toilet_modification,
+        "Blood Group": formData.blood_group,
+      };
+
+      await API.post("/patients", payload);
+      setMessage({ type: "success", text: "Patient record created successfully ✅" });
       setFormData({
-        fullName: '',
-        contactNumber: '',
-        dateOfBirth: '',
-        addressStreet: '',
-        lifeStyle: '',
-        educationQualification: '',
-        occupation: '',
-        ethnicity: '',
-        gender: '',
-        employmentTypeName: '',
-        familyMonthlyIncome: '',
-        accessToWashRoom: '',
-        typeOfToiletModification: '',
-        bloodGroup: '',
+        full_name: "",
+        contact_number: "",
+        date_of_birth: "",
+        gender: "",
+        ethinicity: "",
+        address_street: "",
+        life_style: "",
+        education_qualification: "",
+        occupation: "",
+        employment_type_name: "",
+        family_monthly_income: "",
+        access_to_wash_room: "",
+        type_of_toilet_modification: "",
+        blood_group: "",
       });
     } catch (error) {
-      alert('Error recording patient data. Please try again.');
+      setMessage({
+        type: "error",
+        text: error.response?.data?.detail || "Failed to create patient ❌",
+      });
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
-  const FormSection = ({ title, children, icon }) => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100">
-        <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-          <span className="mr-3 text-xl">{icon}</span>
-          {title}
-        </h3>
-      </div>
-      <div className="p-6 space-y-6">
-        {children}
-      </div>
-    </div>
-  );
-
-  const InputField = ({ label, name, type = "text", placeholder, required = false, options = null, pattern = null }) => (
-    <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-700">
-        {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
-      </label>
-      {options ? (
-        <select
-          name={name}
-          value={formData[name]}
-          onChange={handleChange}
-          className={`w-full px-4 py-3 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 focus:bg-white ${
-            errors[name] ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-          }`}
-          required={required}
-        >
-          <option value="" disabled>Select {label.toLowerCase()}</option>
-          {options.map(option => (
-            <option key={option} value={option}>{option}</option>
-          ))}
-        </select>
-      ) : (
-        <input
-          type={type}
-          name={name}
-          value={formData[name]}
-          onChange={handleChange}
-          placeholder={placeholder}
-          pattern={pattern}
-          className={`w-full px-4 py-3 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 focus:bg-white ${
-            errors[name] ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
-          }`}
-          required={required}
-        />
-      )}
-      {errors[name] && (
-        <p className="text-red-500 text-sm flex items-center">
-          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          {errors[name]}
-        </p>
-      )}
-    </div>
-  );
+  const FormSection = ({ title, children, icon }) => ( <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"> <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100"> <h3 className="text-lg font-semibold text-gray-800 flex items-center"> <span className="mr-3 text-xl">{icon}</span> {title} </h3> </div> <div className="p-6 space-y-6"> {children} </div> </div> );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      <NurseNav setIsAuthenticated={setIsAuthenticated} setRole={setRole} />
-      
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-            <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+      <NurseNav />
+      <div className="max-w-3xl mx-auto mt-8 bg-white rounded-2xl shadow-lg p-6">
+        <h2 className="text-2xl font-bold text-gray-700 mb-4">Record Patient Data</h2>
+
+        {message.text && (
+          <div
+            className={`mb-4 p-3 rounded-md text-white ${
+              message.type === "success" ? "bg-green-500" : "bg-red-500"
+            }`}
+          >
+            {message.text}
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Patient Registration</h1>
-          <p className="text-gray-600">Complete patient information for medical record</p>
-        </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Personal Information */}
-          <FormSection title="Personal Information" icon="👤">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField
-                label="Full Name"
-                name="fullName"
-                placeholder="Enter patient's full name"
-                required
-              />
-              <InputField
-                label="Contact Number"
-                name="contactNumber"
-                placeholder="Enter 10-digit contact number"
-                pattern="[0-9]{10}"
-                required
-              />
-              <InputField
-                label="Date of Birth"
-                name="dateOfBirth"
-                type="date"
-                required
-              />
-              <InputField
-                label="Gender"
-                name="gender"
-                options={['Male', 'Female', 'Other']}
-                required
-              />
-              <InputField
-                label="Blood Group"
-                name="bloodGroup"
-                options={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']}
-                required
-              />
-              <InputField
-                label="Ethnicity"
-                name="ethnicity"
-                options={['Asian', 'Black', 'White', 'Hispanic', 'Other']}
-                required
-              />
-            </div>
-          </FormSection>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Example inputs */}
+          <input
+            type="text"
+            label="Full Name"
+            name="full_name"
+            value={formData.full_name}
+            onChange={handleChange}
+            placeholder="Full Name"
+            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+            required
+          />
 
-          {/* Address Information */}
-          <FormSection title="Address Information" icon="🏠">
-            <InputField
-              label="Street Address"
-              name="addressStreet"
-              placeholder="Enter complete street address"
-              required
-            />
-          </FormSection>
+          <input
+            type="text"
+            name="contact_number"
+            value={formData.contact_number}
+            onChange={handleChange}
+            placeholder="Contact Number"
+            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+            required
+          />
 
-          {/* Social & Economic Information */}
-          <FormSection title="Social & Economic Information" icon="💼">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField
-                label="Education Qualification"
-                name="educationQualification"
-                placeholder="Enter highest qualification"
-                required
-              />
-              <InputField
-                label="Occupation"
-                name="occupation"
-                placeholder="Enter current occupation"
-                required
-              />
-              <InputField
-                label="Employment Type"
-                name="employmentTypeName"
-                placeholder="e.g., Full-time, Part-time, Self-employed"
-                required
-              />
-              <InputField
-                label="Family Monthly Income"
-                name="familyMonthlyIncome"
-                type="number"
-                placeholder="Enter monthly income in USD"
-                required
-              />
-            </div>
-          </FormSection>
+          <input
+            type="date"
+            name="date_of_birth"
+            value={formData.date_of_birth}
+            onChange={handleChange}
+            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+            required
+          />
 
-          {/* Lifestyle Information */}
-          <FormSection title="Lifestyle Information" icon="🌟">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField
-                label="Lifestyle"
-                name="lifeStyle"
-                options={['Active', 'Sedentary', 'Moderate', 'Other']}
-                required
-              />
-              <InputField
-                label="Access to Washroom"
-                name="accessToWashRoom"
-                options={['Yes', 'No', 'Limited']}
-                required
-              />
-              <div className="md:col-span-2">
-                <InputField
-                  label="Type of Toilet Modification"
-                  name="typeOfToiletModification"
-                  placeholder="Specify any toilet modifications (if applicable)"
-                />
-              </div>
-            </div>
-          </FormSection>
+          <select
+            name="gender"
+            value={formData.gender}
+            onChange={handleChange}
+            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+            required
+          >
+            <option value="">Select Gender</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
 
-          {/* Submit Button */}
-          <div className="flex justify-center pt-6">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 active:scale-95 flex items-center"
-            >
-              {isSubmitting ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Recording Patient Data...
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                  </svg>
-                  Record Patient Data
-                </>
-              )}
-            </button>
-          </div>
+          <select
+            name="ethinicity"
+            value={formData.ethinicity}
+            onChange={handleChange}
+            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+            required
+          >
+            <option value="">Select Ethnicity</option>
+            {ethnicityOptions.map(option => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+
+          <input
+            type="text"
+            name="address_street"
+            value={formData.address_street}
+            onChange={handleChange}
+            placeholder="Street Address"
+            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+          />
+
+          <select
+            name="life_style"
+            value={formData.life_style}
+            onChange={handleChange}
+            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+            required
+          >
+            <option value="">Select Life Style</option>
+            {lifeStyleOptions.map(option => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+
+          <select
+            name="education_qualification"
+            value={formData.education_qualification}
+            onChange={handleChange}
+            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+            required
+          >
+            <option value="">Select Education Qualification</option>
+            {educationOptions.map(option => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+
+          <select
+            name="occupation"
+            value={formData.occupation}
+            onChange={handleChange}
+            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+            required
+          >
+            <option value="">Select Occupation</option>
+            {occupationOptions.map(option => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+
+          <select
+            name="employment_type_name"
+            value={formData.employment_type_name}
+            onChange={handleChange}
+            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+            required
+          >
+            <option value="">Select Employment Type</option>
+            {employmentTypeOptions.map(option => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+
+          <input
+            type="number"
+            name="family_monthly_income"
+            value={formData.family_monthly_income}
+            onChange={handleChange}
+            placeholder="Family Monthly Income"
+            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+          />
+
+          <select
+            name="access_to_wash_room"
+            value={formData.access_to_wash_room}
+            onChange={handleChange}
+            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+            required
+          >
+            <option value="">Select Access to Wash Room</option>
+            {accessToWashroomOptions.map(option => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+
+          <select
+            name="type_of_toilet_modification"
+            value={formData.type_of_toilet_modification}
+            onChange={handleChange}
+            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+            required
+          >
+            <option value="">Select Type of Toilet Modification</option>
+            {toiletModificationOptions.map(option => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+
+          <select
+            name="blood_group"
+            value={formData.blood_group}
+            onChange={handleChange}
+            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+            required
+          >
+            <option value="">Select Blood Group</option>
+            {bloodGroupOptions.map(option => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="col-span-1 md:col-span-2 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+          >
+            {loading ? "Saving..." : "Save Patient Record"}
+          </button>
         </form>
       </div>
     </div>

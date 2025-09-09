@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import RoleSelection from './components/RoleSelection';
 import Login from './components/Login';
@@ -20,8 +20,25 @@ import PredictionGovernment from './pages/government/PredictionGovernment';
 import ReportsGovernment from './pages/government/ReportsGovernment';
 
 function App() {
-  const [role, setRole] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Initialize state from localStorage to maintain auth state on refresh
+  const [role, setRole] = useState(() => localStorage.getItem("role") || null);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem("access_token") ? true : false;
+  });
+  
+  // Keep localStorage and state in sync
+  useEffect(() => {
+    if (role) {
+      localStorage.setItem("role", role);
+    } else {
+      localStorage.removeItem("role");
+    }
+    
+    if (!isAuthenticated) {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+    }
+  }, [role, isAuthenticated]);
 
   return (
     <Router>
@@ -36,7 +53,7 @@ function App() {
           {/* Registration Routes */}
           <Route path="/register/nurse" element={<RegisterNurse />} />
           <Route path="/register/doctor" element={<RegisterDoctor />} />
-          <Route path="/register/admin" element={<RegisterAdmin />} />
+          <Route path="/register/hospital_administrator" element={<RegisterAdmin />} />
           <Route path="/register/government" element={<RegisterGovernment />} />
 
           {/* Nurse Routes */}
@@ -91,27 +108,27 @@ function App() {
             } 
           />
           
-          {/* Admin Routes */}
+          {/* hospital_administrator Routes */}
           <Route 
-            path="/admin/dashboard" 
+            path="/hospital_administrator/dashboard" 
             element={
-              isAuthenticated && role === 'admin' ? 
+              isAuthenticated && role === 'hospital_administrator' ? 
                 <DashboardAdmin setIsAuthenticated={setIsAuthenticated} setRole={setRole} /> : 
                 <Navigate to="/" />
             } 
           />
           <Route 
-            path="/admin/prediction" 
+            path="/hospital_administrator/prediction" 
             element={
-              isAuthenticated && role === 'admin' ? 
+              isAuthenticated && role === 'hospital_administrator' ? 
                 <PredictionAdmin setIsAuthenticated={setIsAuthenticated} setRole={setRole} /> : 
                 <Navigate to="/" />
             } 
           />
           <Route 
-            path="/admin/add-staff" 
+            path="/hospital_administrator/add-staff" 
             element={
-              isAuthenticated && role === 'admin' ? 
+              isAuthenticated && role === 'hospital_administrator' ? 
                 <AddStaff setIsAuthenticated={setIsAuthenticated} setRole={setRole} /> : 
                 <Navigate to="/" />
             } 
