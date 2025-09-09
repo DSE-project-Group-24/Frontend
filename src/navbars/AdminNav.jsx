@@ -16,7 +16,7 @@ const AdminNav = ({ setIsAuthenticated, setRole }) => {
 
   const navItems = [
     {
-      path: '/admin/dashboard',
+      path: '/hospital_administrator/dashboard',
       label: 'Dashboard',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,7 +25,7 @@ const AdminNav = ({ setIsAuthenticated, setRole }) => {
       )
     },
     {
-      path: '/admin/prediction',
+      path: '/hospital_administrator/prediction',
       label: 'Prediction',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -34,7 +34,7 @@ const AdminNav = ({ setIsAuthenticated, setRole }) => {
       )
     },
     {
-      path: '/admin/add-staff',
+      path: '/hospital_administrator/add-staff',
       label: 'Add Staff',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,7 +137,7 @@ const AdminNav = ({ setIsAuthenticated, setRole }) => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 flex items-center space-x-3 ${
+                className={` px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 flex items-center space-x-3 ${
                   isActiveRoute(item.path)
                     ? 'bg-white text-indigo-700 shadow-sm'
                     : 'text-indigo-100 hover:bg-indigo-600 hover:text-white'

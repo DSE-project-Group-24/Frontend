@@ -14,7 +14,7 @@ const loginUser = async (email, password) => {
 };
 
 const Login = ({ setIsAuthenticated, setRole }) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -26,11 +26,12 @@ const Login = ({ setIsAuthenticated, setRole }) => {
 
     try {
       // Call backend
-      const data = await loginUser(username, password);
+      const data = await loginUser(email, password);
 
       // Save tokens if you want persistence
       localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("refresh_token", data.refresh_token);
+      localStorage.setItem("role", data.role);
 
       // Update state
       setIsAuthenticated(true);
@@ -39,7 +40,7 @@ const Login = ({ setIsAuthenticated, setRole }) => {
       // Navigate to dashboard based on role
       navigate(`/${data.role}/dashboard`);
     } catch (err) {
-      setError(err.detail || "Invalid username or password. Please try again.");
+      setError(err.detail || "Invalid email or password. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -73,17 +74,17 @@ const Login = ({ setIsAuthenticated, setRole }) => {
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
           <div className="space-y-6">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-                Username
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                Email
               </label>
               <div className="relative">
                 <input
-                  id="username"
+                  id="email"
                   type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Enter your username"
+                  placeholder="Enter your email"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
                   disabled={isLoading}
                 />
@@ -131,7 +132,7 @@ const Login = ({ setIsAuthenticated, setRole }) => {
 
             <button
               onClick={handleLogin}
-              disabled={isLoading || !username.trim() || !password.trim()}
+              disabled={isLoading || !email.trim() || !password.trim()}
               className="w-full flex justify-center items-center px-4 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
             >
               {isLoading ? (
