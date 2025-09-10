@@ -136,7 +136,7 @@ const GovernmentNav = ({ setIsAuthenticated, setRole }) => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 flex items-center space-x-3 ${
+                className={`px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 flex items-center space-x-3 ${
                   isActiveRoute(item.path)
                     ? 'bg-white text-green-700 shadow-sm'
                     : 'text-green-100 hover:bg-green-600 hover:text-white'

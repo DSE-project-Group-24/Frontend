@@ -136,7 +136,7 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 flex items-center space-x-3 ${
+                className={`px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 flex items-center space-x-3 ${
                   isActiveRoute(item.path)
                     ? 'bg-white text-indigo-700 shadow-sm'
                     : 'text-indigo-100 hover:bg-indigo-600 hover:text-white'
