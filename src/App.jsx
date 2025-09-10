@@ -17,7 +17,7 @@ import PredictionAdmin from './pages/admin/PredictionAdmin';
 import AddStaff from './pages/admin/AddStaff';
 import DashboardGovernment from './pages/government/DashboardGovernment';
 import PredictionGovernment from './pages/government/PredictionGovernment';
-import ReportsGovernment from './pages/government/ReportsGovernment';
+//import ReportsGovernment from './pages/government/ReportsGovernment';
 
 function App() {
   // Initialize state from localStorage to maintain auth state on refresh
@@ -151,14 +151,14 @@ function App() {
                 <Navigate to="/" />
             } 
           />
-          <Route 
+          {/* <Route 
             path="/government_personnel/reports" 
             element={
               isAuthenticated && role === 'government_personnel' ? 
                 <ReportsGovernment setIsAuthenticated={setIsAuthenticated} setRole={setRole} /> : 
                 <Navigate to="/" />
             } 
-          />
+          /> */}
         </Routes>
       </div>
     </Router>
