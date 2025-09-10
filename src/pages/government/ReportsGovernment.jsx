@@ -1,7 +1,21 @@
 import React, { useEffect, useMemo, useState } from "react";
 import GovernmentNav from "../../navbars/GovernmentNav";
 
-const API_BASE = import.meta?.env?.VITE_API_BASE || "http://localhost:8000";
+const API = axios.create({
+   baseURL: "http://127.0.0.1:9000/",
+  //baseURL: "https://core-backend-production-5d7c.up.railway.app"
+});
+
+// Add JWT token to every request if available
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem("access_token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+const API_BASE =  API //import.meta?.env?.VITE_API_BASE || "http://127.0.0.1:9000";
 
 /* ---------------- Utils: token grouping & translation ---------------- */
 
