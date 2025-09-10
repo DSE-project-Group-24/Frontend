@@ -136,25 +136,25 @@ function App() {
           
           {/* Government Routes */}
           <Route 
-            path="/government/dashboard" 
+            path="/government_personnel/dashboard" 
             element={
-              isAuthenticated && role === 'government' ? 
+              isAuthenticated && role === 'government_personnel' ? 
                 <DashboardGovernment setIsAuthenticated={setIsAuthenticated} setRole={setRole} /> : 
                 <Navigate to="/" />
             } 
           />
           <Route 
-            path="/government/prediction" 
+            path="/government_personnel/prediction" 
             element={
-              isAuthenticated && role === 'government' ? 
+              isAuthenticated && role === 'government_personnel' ? 
                 <PredictionGovernment setIsAuthenticated={setIsAuthenticated} setRole={setRole} /> : 
                 <Navigate to="/" />
             } 
           />
           <Route 
-            path="/government/reports" 
+            path="/government_personnel/reports" 
             element={
-              isAuthenticated && role === 'government' ? 
+              isAuthenticated && role === 'government_personnel' ? 
                 <ReportsGovernment setIsAuthenticated={setIsAuthenticated} setRole={setRole} /> : 
                 <Navigate to="/" />
             } 
