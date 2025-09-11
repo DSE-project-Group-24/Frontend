@@ -4,25 +4,55 @@ import API from "../../utils/api";
 
 const RecordPatientData = () => {
   // Define dropdown options from provided data
-  const bloodGroupOptions = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
-  const ethnicityOptions = ['Tamil', 'Sinhalese', 'Moor'];
-  const lifeStyleOptions = ['Living with children', 'Living with care givers', 'Living alone'];
-  const educationOptions = ['O/L or A/L', 'Grade 5', 'Under Graduate', 'Post Graduate'];
+  const bloodGroupOptions = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+  const ethnicityOptions = ["Tamil", "Sinhalese", "Moor"];
+  const lifeStyleOptions = [
+    "Living with children",
+    "Living with care givers",
+    "Living alone",
+  ];
+  const educationOptions = [
+    "O/L or A/L",
+    "Grade 5",
+    "Under Graduate",
+    "Post Graduate",
+  ];
   const occupationOptions = [
-    'Retired pensioners', 'Unemployed', 'Semi-Skilled Workers', 'Skilled Workers',
-    'Student', 'Business', 'Others', 'Professionals', 'Highly Skilled Workers',
-    'Driver', 'Forces', 'Religious Sevice', 'NGO', 'Road and Field'
+    "Retired pensioners",
+    "Unemployed",
+    "Semi-Skilled Workers",
+    "Skilled Workers",
+    "Student",
+    "Business",
+    "Others",
+    "Professionals",
+    "Highly Skilled Workers",
+    "Driver",
+    "Forces",
+    "Religious Sevice",
+    "NGO",
+    "Road and Field",
   ];
   const employmentTypeOptions = [
-    'Permanent - Government', 'Temporary', 'Daily Basis',
-    'Not Necessary for Student and Unemployed', 'Contract', 'Permanent - Private'
+    "Permanent - Government",
+    "Temporary",
+    "Daily Basis",
+    "Not Necessary for Student and Unemployed",
+    "Contract",
+    "Permanent - Private",
   ];
-  const accessToWashroomOptions = ['No', 'Yes', 'Victim not willing to share/ Unable to respond/  Early Discharge'];
+  const accessToWashroomOptions = [
+    "No",
+    "Yes",
+    "Victim not willing to share/ Unable to respond/  Early Discharge",
+  ];
   const toiletModificationOptions = [
-    'No Modification done', 'Permanent Commode Build',
-    'Victim not willing to share/ Unable to respond/  Early Discharge', 'Commode Chair Bought'
+    "No Modification done",
+    "Permanent Commode Build",
+    "Victim not willing to share/ Unable to respond/  Early Discharge",
+    "Commode Chair Bought",
   ];
-  
+
   const [formData, setFormData] = useState({
     full_name: "",
     contact_number: "",
@@ -78,7 +108,10 @@ const RecordPatientData = () => {
       };
 
       await API.post("/patients", payload);
-      setMessage({ type: "success", text: "Patient record created successfully ✅" });
+      setMessage({
+        type: "success",
+        text: "Patient record created successfully ✅",
+      });
       setFormData({
         full_name: "",
         contact_number: "",
@@ -105,13 +138,27 @@ const RecordPatientData = () => {
     }
   };
 
-  const FormSection = ({ title, children, icon }) => ( <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"> <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100"> <h3 className="text-lg font-semibold text-gray-800 flex items-center"> <span className="mr-3 text-xl">{icon}</span> {title} </h3> </div> <div className="p-6 space-y-6"> {children} </div> </div> );
+  const FormSection = ({ title, children, icon }) => (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      {" "}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100">
+        {" "}
+        <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+          {" "}
+          <span className="mr-3 text-xl">{icon}</span> {title}{" "}
+        </h3>{" "}
+      </div>{" "}
+      <div className="p-6 space-y-6"> {children} </div>{" "}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
       <NurseNav />
       <div className="max-w-3xl mx-auto mt-8 bg-white rounded-2xl shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-700 mb-4">Record Patient Data</h2>
+        <h2 className="text-2xl font-bold text-gray-700 mb-4">
+          Record Patient Data
+        </h2>
 
         {message.text && (
           <div
@@ -123,7 +170,10 @@ const RecordPatientData = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+        >
           {/* Example inputs */}
           <input
             type="text"
@@ -176,8 +226,10 @@ const RecordPatientData = () => {
             required
           >
             <option value="">Select Ethnicity</option>
-            {ethnicityOptions.map(option => (
-              <option key={option} value={option}>{option}</option>
+            {ethnicityOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
             ))}
           </select>
 
@@ -198,8 +250,10 @@ const RecordPatientData = () => {
             required
           >
             <option value="">Select Life Style</option>
-            {lifeStyleOptions.map(option => (
-              <option key={option} value={option}>{option}</option>
+            {lifeStyleOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
             ))}
           </select>
 
@@ -211,8 +265,10 @@ const RecordPatientData = () => {
             required
           >
             <option value="">Select Education Qualification</option>
-            {educationOptions.map(option => (
-              <option key={option} value={option}>{option}</option>
+            {educationOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
             ))}
           </select>
 
@@ -224,8 +280,10 @@ const RecordPatientData = () => {
             required
           >
             <option value="">Select Occupation</option>
-            {occupationOptions.map(option => (
-              <option key={option} value={option}>{option}</option>
+            {occupationOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
             ))}
           </select>
 
@@ -237,8 +295,10 @@ const RecordPatientData = () => {
             required
           >
             <option value="">Select Employment Type</option>
-            {employmentTypeOptions.map(option => (
-              <option key={option} value={option}>{option}</option>
+            {employmentTypeOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
             ))}
           </select>
 
@@ -259,8 +319,10 @@ const RecordPatientData = () => {
             required
           >
             <option value="">Select Access to Wash Room</option>
-            {accessToWashroomOptions.map(option => (
-              <option key={option} value={option}>{option}</option>
+            {accessToWashroomOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
             ))}
           </select>
 
@@ -272,8 +334,10 @@ const RecordPatientData = () => {
             required
           >
             <option value="">Select Type of Toilet Modification</option>
-            {toiletModificationOptions.map(option => (
-              <option key={option} value={option}>{option}</option>
+            {toiletModificationOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
             ))}
           </select>
 
@@ -285,8 +349,10 @@ const RecordPatientData = () => {
             required
           >
             <option value="">Select Blood Group</option>
-            {bloodGroupOptions.map(option => (
-              <option key={option} value={option}>{option}</option>
+            {bloodGroupOptions.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
             ))}
           </select>
 
