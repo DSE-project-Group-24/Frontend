@@ -1,18 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from "react";
 import API from "../../utils/api";
-import NurseNav from '../../navbars/NurseNav';
-
+import NurseNav from "../../navbars/NurseNav";
 
 const AccidentRecordSystem = () => {
   const [patients, setPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [accidentData, setAccidentData] = useState({
-    "patient_id": "",
+    patient_id: "",
     "incident at date": "",
     "incident at time": "",
     "time of collision": "",
     "Mode of traveling during accident": "",
-    "Visibility": "",
+    Visibility: "",
     "Collision force from": "",
     "Collision with": "",
     "Road Condition": "",
@@ -37,81 +36,104 @@ const AccidentRecordSystem = () => {
     "vehicle insured": "",
     "vehicle insured type": "",
     "Passenger type": "",
-    "First aid given at seen": ""
+    "First aid given at seen": "",
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  // NEW: local search
+  const [q, setQ] = useState("");
+
   useEffect(() => {
-    //console.log("🚀 Component loaded - AccidentRecordSystem");
     fetchPatients();
   }, []);
 
   const fetchPatients = async () => {
     try {
-      console.log("📡 Fetching patients...");
       setLoading(true);
       const response = await API.get("/patients");
-      console.log("✅ Patients fetched:", response.data);
-      console.log("🔍 First patient structure:", response.data[0]);
-      console.log("🔍 Patients array length:", response.data.length);
-      setPatients(response.data);
-      setLoading(false);
+      setPatients(response.data || []);
     } catch (error) {
       console.error("Error fetching patients:", error);
       setMessage("Failed to fetch patients");
+    } finally {
       setLoading(false);
     }
   };
 
+  // Helper to read alias or snake_case keys
+  const val = (obj, ...keys) => {
+    for (const k of keys) {
+      if (obj && obj[k] !== undefined && obj[k] !== null) return obj[k];
+    }
+    return "";
+  };
+
+  // Filtered patients for search
+  const filteredPatients = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    if (!needle) return patients;
+    return patients.filter((p) => {
+      const name = (val(p, "Full Name", "full_name") || "").toLowerCase();
+      const nic = (val(p, "NIC", "nic") || "").toLowerCase();
+      const phone = (
+        val(p, "Contact Number", "contact_number") || ""
+      ).toLowerCase();
+      const dob = (
+        val(p, "Date of Birth", "date_of_birth") || ""
+      ).toLowerCase();
+      return (
+        name.includes(needle) ||
+        nic.includes(needle) ||
+        phone.includes(needle) ||
+        dob.includes(needle)
+      );
+    });
+  }, [q, patients]);
+
   const handlePatientSelect = (patient) => {
-    console.log("🔍 Patient parameter received:", patient);
-    console.log("🔍 Patient type:", typeof patient);
-    console.log("🔍 Patient keys:", patient ? Object.keys(patient) : "No keys - patient is null/undefined");
-    
     if (!patient) {
       alert("Error: Patient data is undefined!");
       return;
     }
-    
     setSelectedPatient(patient);
-    setAccidentData({
-      ...accidentData,
-      patient_id: patient.patient_id
-    });
-    console.log("Selected patient:", patient);
-    alert(`Patient selected: ${patient["Full Name"] || patient.full_name || patient.name || "Unknown name"}`);
+    const pid = patient.patient_id ?? patient.id ?? patient.user_id ?? "";
+    setAccidentData((prev) => ({ ...prev, patient_id: pid }));
+    alert(
+      `Patient selected: ${
+        patient["Full Name"] ||
+        patient.full_name ||
+        patient.name ||
+        "Unknown name"
+      }`
+    );
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setAccidentData({
-      ...accidentData,
-      [name]: value
-    });
+    setAccidentData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(accidentData);
     try {
       setLoading(true);
-      const response = await API.post("/accidents", accidentData);
+      await API.post("/accidents", accidentData);
       setMessage("Accident record created successfully!");
-      setLoading(false);
-      // Reset form
-      setAccidentData({
-        ...accidentData,
+      // Partial reset while keeping selected patient_id
+      setAccidentData((prev) => ({
+        ...prev,
         "incident at date": "",
         "incident at time": "",
         "time of collision": "",
         "Mode of traveling during accident": "",
-        "Visibility": "",
-        "Collision with": ""
-      });
+        Visibility: "",
+        "Collision with": "",
+      }));
     } catch (error) {
       console.error("Error creating accident record:", error);
       setMessage("Failed to create accident record");
+    } finally {
       setLoading(false);
     }
   };
@@ -119,38 +141,70 @@ const AccidentRecordSystem = () => {
   return (
     <div className="container mx-auto p-4">
       <NurseNav />
-      
-      <h1 className="text-2xl font-bold mb-6">Accident Record Management System</h1>
-      
+
+      <h1 className="text-2xl font-bold mb-6">
+        Accident Record Management System
+      </h1>
+
       {message && (
-        <div className={`p-4 mb-4 rounded ${message.includes("success") ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+        <div
+          className={`p-4 mb-4 rounded ${
+            message.includes("success")
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
           {message}
         </div>
       )}
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Patient List */}
+        {/* Patients Card */}
         <div className="bg-white p-4 rounded shadow">
-          <h2 className="text-xl font-semibold mb-4">Patients</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xl font-semibold">Patients</h2>
+          </div>
+
+          {/* Search */}
+          <div className="mb-3">
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search by name / NIC / phone / DOB"
+              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+
           {loading ? (
             <p>Loading patients...</p>
           ) : (
             <div className="overflow-y-auto max-h-96">
-              {patients && patients.length > 0 ? (
-                patients.map((patient, index) => {
-                  console.log(`🔍 Rendering patient ${index}:`, patient);
+              {filteredPatients && filteredPatients.length > 0 ? (
+                filteredPatients.map((patient, index) => {
+                  const pid = patient.patient_id ?? index;
+                  const isSelected =
+                    selectedPatient &&
+                    (selectedPatient.patient_id ?? "") ===
+                      (patient.patient_id ?? "");
                   return (
-                    <div 
-                      key={patient.patient_id || index} 
-                      className={`p-3 mb-2 rounded cursor-pointer ${selectedPatient && selectedPatient.patient_id === patient.patient_id ? 'bg-blue-100' : 'bg-gray-100 hover:bg-gray-200'}`}
-                      onClick={() => {
-                        console.log(`🔍 Clicked patient ${index}:`, patient);
-                        handlePatientSelect(patient);
-                      }}
+                    <div
+                      key={pid}
+                      className={`p-3 mb-2 rounded cursor-pointer ${
+                        isSelected
+                          ? "bg-blue-100"
+                          : "bg-gray-100 hover:bg-gray-200"
+                      }`}
+                      onClick={() => handlePatientSelect(patient)}
                     >
-                      <div className="font-medium">{patient["Full Name"] || patient.full_name || "No Name"}</div>
+                      <div className="font-medium">
+                        {val(patient, "Full Name", "full_name") || "No Name"}
+                      </div>
                       <div className="text-sm text-gray-600">
-                        {patient["Contact Number"] || patient.contact_number || "No Contact"} • {patient["Date of Birth"] || patient.date_of_birth || "No DOB"}
+                        {val(patient, "Contact Number", "contact_number") ||
+                          "No Contact"}{" "}
+                        •{" "}
+                        {val(patient, "Date of Birth", "date_of_birth") ||
+                          "No DOB"}
                       </div>
                     </div>
                   );
@@ -161,18 +215,24 @@ const AccidentRecordSystem = () => {
             </div>
           )}
         </div>
-        
+
         {/* Accident Record Form */}
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-semibold mb-4">
-            {selectedPatient ? `Create Accident Record for ${selectedPatient["Full Name"]}` : "Select a patient to create accident record"}
+            {selectedPatient
+              ? `Create Accident Record for ${
+                  val(selectedPatient, "Full Name", "full_name") || "Patient"
+                }`
+              : "Select a patient to create accident record"}
           </h2>
-          
+
           {selectedPatient && (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Incident Date</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Incident Date
+                  </label>
                   <input
                     type="date"
                     name="incident at date"
@@ -182,9 +242,11 @@ const AccidentRecordSystem = () => {
                     required
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Incident Time</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Incident Time
+                  </label>
                   <input
                     type="time"
                     name="incident at time"
@@ -194,9 +256,11 @@ const AccidentRecordSystem = () => {
                     required
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Time of Collision</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Time of Collision
+                  </label>
                   <input
                     type="time"
                     name="time of collision"
@@ -205,9 +269,11 @@ const AccidentRecordSystem = () => {
                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Mode of Travel</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Mode of Travel
+                  </label>
                   <select
                     name="Mode of traveling during accident"
                     value={accidentData["Mode of traveling during accident"]}
@@ -223,9 +289,11 @@ const AccidentRecordSystem = () => {
                     <option value="other">Other</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Visibility</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Visibility
+                  </label>
                   <select
                     name="Visibility"
                     value={accidentData["Visibility"]}
@@ -238,9 +306,11 @@ const AccidentRecordSystem = () => {
                     <option value="poor">Poor</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Collision With</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Collision With
+                  </label>
                   <select
                     name="Collision with"
                     value={accidentData["Collision with"]}
@@ -258,9 +328,11 @@ const AccidentRecordSystem = () => {
                     <option value="other">Other</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Collision Force From</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Collision Force From
+                  </label>
                   <input
                     type="text"
                     name="Collision force from"
@@ -269,9 +341,11 @@ const AccidentRecordSystem = () => {
                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Road Condition</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Road Condition
+                  </label>
                   <select
                     name="Road Condition"
                     value={accidentData["Road Condition"]}
@@ -285,9 +359,11 @@ const AccidentRecordSystem = () => {
                     <option value="other">Other</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Road Type</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Road Type
+                  </label>
                   <input
                     type="text"
                     name="Road Type"
@@ -296,9 +372,11 @@ const AccidentRecordSystem = () => {
                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Category of Road</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Category of Road
+                  </label>
                   <input
                     type="text"
                     name="Category of Road"
@@ -307,9 +385,11 @@ const AccidentRecordSystem = () => {
                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Road Signals Exist</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Road Signals Exist
+                  </label>
                   <select
                     name="Road signals exist"
                     value={accidentData["Road signals exist"]}
@@ -321,9 +401,11 @@ const AccidentRecordSystem = () => {
                     <option value="no">No</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Approximate Speed (km/h)</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Approximate Speed (km/h)
+                  </label>
                   <input
                     type="number"
                     name="Approximate speed"
@@ -332,9 +414,11 @@ const AccidentRecordSystem = () => {
                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Alcohol Consumption</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Alcohol Consumption
+                  </label>
                   <select
                     name="Alcohol Consumption"
                     value={accidentData["Alcohol Consumption"]}
@@ -346,20 +430,28 @@ const AccidentRecordSystem = () => {
                     <option value="no">No</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Time Between Alcohol and Accident</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Time Between Alcohol and Accident
+                  </label>
                   <input
                     type="text"
                     name="Time between alcohol consumption and accident"
-                    value={accidentData["Time between alcohol consumption and accident"]}
+                    value={
+                      accidentData[
+                        "Time between alcohol consumption and accident"
+                      ]
+                    }
                     onChange={handleInputChange}
                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Illicit Drugs</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Illicit Drugs
+                  </label>
                   <select
                     name="Illicit Drugs"
                     value={accidentData["Illicit Drugs"]}
@@ -371,9 +463,11 @@ const AccidentRecordSystem = () => {
                     <option value="no">No</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Vehicle Type</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Vehicle Type
+                  </label>
                   <input
                     type="text"
                     name="Vehicle type"
@@ -382,9 +476,11 @@ const AccidentRecordSystem = () => {
                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Helmet Worn</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Helmet Worn
+                  </label>
                   <select
                     name="Helmet Worn"
                     value={accidentData["Helmet Worn"]}
@@ -396,9 +492,11 @@ const AccidentRecordSystem = () => {
                     <option value="no">No</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Engine Capacity (cc)</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Engine Capacity (cc)
+                  </label>
                   <input
                     type="number"
                     name="Engine Capacity"
@@ -407,9 +505,11 @@ const AccidentRecordSystem = () => {
                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Mode of Transport to Hospital</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Mode of Transport to Hospital
+                  </label>
                   <input
                     type="text"
                     name="Mode of transport to hospital"
@@ -418,9 +518,11 @@ const AccidentRecordSystem = () => {
                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Time Taken to Reach Hospital (minutes)</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Time Taken to Reach Hospital (minutes)
+                  </label>
                   <input
                     type="number"
                     name="Time taken to reach hospital"
@@ -429,9 +531,11 @@ const AccidentRecordSystem = () => {
                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Bystander Expenditure Per Day (LKR)</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Bystander Expenditure Per Day (LKR)
+                  </label>
                   <input
                     type="number"
                     name="Bystander expenditure per day"
@@ -440,20 +544,26 @@ const AccidentRecordSystem = () => {
                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Family Monthly Income Before Accident (LKR)</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Family Monthly Income Before Accident (LKR)
+                  </label>
                   <input
                     type="number"
                     name="Family monthly income before accident"
-                    value={accidentData["Family monthly income before accident"]}
+                    value={
+                      accidentData["Family monthly income before accident"]
+                    }
                     onChange={handleInputChange}
                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Family Monthly Income After Accident (LKR)</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Family Monthly Income After Accident (LKR)
+                  </label>
                   <input
                     type="number"
                     name="Family monthly income after accident"
@@ -462,9 +572,11 @@ const AccidentRecordSystem = () => {
                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Family Current Status</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Family Current Status
+                  </label>
                   <input
                     type="text"
                     name="Family current status"
@@ -473,9 +585,11 @@ const AccidentRecordSystem = () => {
                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Any Insurance Claim Type</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Any Insurance Claim Type
+                  </label>
                   <input
                     type="text"
                     name="Any insurance claim type"
@@ -484,9 +598,11 @@ const AccidentRecordSystem = () => {
                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Dress Name</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Dress Name
+                  </label>
                   <input
                     type="text"
                     name="Dress name"
@@ -495,9 +611,11 @@ const AccidentRecordSystem = () => {
                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Vehicle Insured</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Vehicle Insured
+                  </label>
                   <select
                     name="vehicle insured"
                     value={accidentData["vehicle insured"]}
@@ -509,9 +627,11 @@ const AccidentRecordSystem = () => {
                     <option value="no">No</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Vehicle Insured Type</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Vehicle Insured Type
+                  </label>
                   <input
                     type="text"
                     name="vehicle insured type"
@@ -520,9 +640,11 @@ const AccidentRecordSystem = () => {
                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Passenger Type</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Passenger Type
+                  </label>
                   <input
                     type="text"
                     name="Passenger type"
@@ -531,9 +653,11 @@ const AccidentRecordSystem = () => {
                     className="mt-1 block w-full p-2 border border-gray-300 rounded"
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">First Aid Given at Scene</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    First Aid Given at Scene
+                  </label>
                   <select
                     name="First aid given at seen"
                     value={accidentData["First aid given at seen"]}
@@ -546,7 +670,7 @@ const AccidentRecordSystem = () => {
                   </select>
                 </div>
               </div>
-              
+
               <button
                 type="submit"
                 disabled={loading}
