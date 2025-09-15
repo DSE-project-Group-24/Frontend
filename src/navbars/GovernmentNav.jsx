@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
-const GovernmentNav = ({ setIsAuthenticated, setRole }) => {
+const GovernmentNav = ({ setIsAuthenticated , setRole  }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
