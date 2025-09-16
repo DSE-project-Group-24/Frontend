@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-   baseURL: "http://127.0.0.1:9000/",
+   baseURL: "http://127.0.0.1:8080/",
   //baseURL: "https://core-backend-production-5d7c.up.railway.app"
 });
 
