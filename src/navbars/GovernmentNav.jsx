@@ -8,8 +8,16 @@ const GovernmentNav = ({ setIsAuthenticated, setRole }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
+    // Clear all authentication data from localStorage
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("role");
+    
+    // Update authentication state
     setIsAuthenticated(false);
     setRole(null);
+    
+    // Navigate to home/login page
     navigate('/');
   };
 
