@@ -3,7 +3,7 @@ import GovernmentNav from '../../navbars/GovernmentNav';
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: "http://127.0.0.1:9000/",
+  baseURL: "http://127.0.0.1:8000/",
 });
 
 // Add JWT token to every request if available
@@ -79,7 +79,7 @@ const PredictionGovernment = ({ setIsAuthenticated, setRole }) => {
         {/* Header Section */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            🔮 Accident Prediction Forecast
+            Accident Prediction Forecast
           </h1>
           <p className="text-gray-600 text-lg">
             Generate statistical forecasts for accident trends and planning
@@ -154,13 +154,13 @@ const PredictionGovernment = ({ setIsAuthenticated, setRole }) => {
                 <p className="text-sm opacity-80">incidents/month</p>
               </div>
               
-              <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
+              {/* <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
                 <h3 className="text-sm font-medium opacity-80 mb-2">Best Case Scenario</h3>
                 <p className="text-3xl font-bold">
                   {formatNumber(Math.min(...forecastData.map(item => item.mean_ci_lower)))}
                 </p>
                 <p className="text-sm opacity-80">minimum expected</p>
-              </div>
+              </div> */}
               
               <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-xl p-6 text-white">
                 <h3 className="text-sm font-medium opacity-80 mb-2">Worst Case Scenario</h3>
