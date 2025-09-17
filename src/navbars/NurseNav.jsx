@@ -7,8 +7,16 @@ const NurseNav = ({ setIsAuthenticated, setRole }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
+    // Clear all authentication data from localStorage
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("role");
+    
+    // Update authentication state
     setIsAuthenticated(false);
     setRole(null);
+    
+    // Navigate to home/login page
     navigate('/');
   };
 
@@ -143,7 +151,7 @@ const NurseNav = ({ setIsAuthenticated, setRole }) => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 flex items-center space-x-3 ${
+                className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
                   isActiveRoute(item.path)
                     ? 'bg-white text-blue-700 shadow-sm'
                     : 'text-blue-100 hover:bg-blue-600 hover:text-white'

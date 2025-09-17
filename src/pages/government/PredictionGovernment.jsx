@@ -188,7 +188,6 @@ const PredictionGovernment = ({ setIsAuthenticated, setRole }) => {
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Month</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Predicted Value</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Confidence Range</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Confidence Level</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Standard Error</th>
                     </tr>
@@ -214,12 +213,6 @@ const PredictionGovernment = ({ setIsAuthenticated, setRole }) => {
                               {formatNumber(item.mean)}
                             </div>
                             <div className="text-sm text-gray-500">incidents</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">
-                              {formatNumber(item.mean_ci_lower)} - {formatNumber(item.mean_ci_upper)}
-                            </div>
-                            <div className="text-xs text-gray-500">95% confidence interval</div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${confidence.bg} ${confidence.color}`}>

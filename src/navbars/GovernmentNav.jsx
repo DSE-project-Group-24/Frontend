@@ -2,14 +2,22 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 
-const GovernmentNav = ({ setIsAuthenticated, setRole }) => {
+const GovernmentNav = ({ setIsAuthenticated , setRole  }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
+    // Clear all authentication data from localStorage
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("role");
+    
+    // Update authentication state
     setIsAuthenticated(false);
     setRole(null);
+    
+    // Navigate to home/login page
     navigate('/');
   };
 
