@@ -50,14 +50,14 @@ export default function NurseDashboard() {
         setErr("");
 
         // Patients are already hospital-scoped by your backend dependency
-        const pat = await API.get("/patients");
+        const pat = await API.get("/patients/");
         if (!ok) return;
         const patientsData = pat.data || [];
         setPatients(patientsData);
 
         // Accidents: your route returns all accidents; we'll still fetch it
         // and join names locally using patient_id
-        const acc = await API.get("/accidents");
+        const acc = await API.get("/accidents/");
         if (!ok) return;
         setAccidents(acc.data || []);
       } catch (e) {
