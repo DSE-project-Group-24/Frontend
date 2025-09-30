@@ -35,6 +35,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
       // 2️⃣ fetch accident details for that patient id
       const accRes = await API.get(`/accidents/patient/${searchId.trim()}`);
       setAccidents(accRes.data);
+      console.log(accRes.data);
     } catch (err) {
       console.error(err);
       setError("Error fetching data");
@@ -95,7 +96,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
               <p><span className="font-medium">Toilet Modification:</span> {filtered["Type of toilet modification"]}</p>
               <p><span className="font-medium">Blood Group:</span> {filtered["Blood Group"]}</p>
               <p><span className="font-medium">Patient ID:</span> {filtered["patient_id"]}</p>
-              <p><span className="font-medium">Hospital ID:</span> {filtered["Hospital ID"]}</p>
+              {/* <p><span className="font-medium">Hospital ID:</span> {filtered["Hospital ID"]}</p> */}
             </div>
           </div>
         )}
@@ -120,6 +121,11 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                   <div className="text-gray-700">
                     <p><span className="font-medium">Incident Date:</span> {acc["incident at date"]}</p>
                     <p><span className="font-medium">Incident Time:</span> {acc["incident at time"]}</p>
+                    <p>
+                      <span className="font-medium">Completed:</span>{" "}
+                      {acc["Completed"] ? "Yes" : "No"}
+                    </p>
+
                   </div>
                   <p className="text-sm text-blue-600 mt-2">Click to view full details →</p>
                 </div>
@@ -187,6 +193,8 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                     <p className="mb-2"><span className="font-medium">Bystander Expenditure/Day:</span> {selectedAccident["Bystander expenditure per day"]}</p>
                     <p className="mb-2"><span className="font-medium">Any Insurance Claim:</span> {selectedAccident["Any insurance claim type"]}</p>
                   </div>
+
+                  <p className="mb-2"><span className="font-medium">Completed:</span> {selectedAccident["Completed"] ? "Yes" : "No"}</p>
                 </div>
                 
                 <div className="mt-6 flex justify-end">
