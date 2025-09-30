@@ -1,164 +1,193 @@
-import React, { useState } from "react";
+// src/pages/nurse/RecordPatientData.jsx
+import React, { useMemo, useState } from "react";
 import NurseNav from "../../navbars/NurseNav";
 import API from "../../utils/api";
 
-const RecordPatientData = () => {
-  // Define dropdown options from provided data
-  const bloodGroupOptions = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-  const ethnicityOptions = ["Tamil", "Sinhalese", "Moor"];
-  const lifeStyleOptions = [
-    "Living with children",
-    "Living with care givers",
-    "Living alone",
-  ];
-  const educationOptions = [
-    "O/L or A/L",
-    "Grade 5",
-    "Under Graduate",
-    "Post Graduate",
-  ];
-  const occupationOptions = [
-    "Retired pensioners",
-    "Unemployed",
-    "Semi-Skilled Workers",
-    "Skilled Workers",
-    "Student",
-    "Business",
-    "Others",
-    "Professionals",
-    "Highly Skilled Workers",
-    "Driver",
-    "Forces",
-    "Religious Sevice",
-    "NGO",
-    "Road and Field",
-  ];
-  const employmentTypeOptions = [
-    "Permanent - Government",
-    "Temporary",
-    "Daily Basis",
-    "Not Necessary for Student and Unemployed",
-    "Contract",
-    "Permanent - Private",
-  ];
-  const accessToWashroomOptions = [
-    "No",
-    "Yes",
-    "Victim not willing to share/ Unable to respond/  Early Discharge",
-  ];
-  const toiletModificationOptions = [
-    "No Modification done",
-    "Permanent Commode Build",
-    "Victim not willing to share/ Unable to respond/  Early Discharge",
-    "Commode Chair Bought",
-  ];
+// --- Dropdown sources (exact categories you specified) ---
+const EDUCATION = [
+  "None",
+  "Grade 5 Scholarship",
+  "OL or AL",
+  "Undergraduate",
+  "Postgraduate",
+  "Unknown",
+];
 
-  const [formData, setFormData] = useState({
+const ETHNICITY = ["Tamil", "Sinhalese", "Moor", "Other"];
+
+const GENDER = ["Male", "Female", "Other"];
+
+const LIFESTYLE = [
+  "Living with care givers",
+  "Living with children",
+  "Living alone",
+  "Unknown",
+];
+
+const OCCUPATION = [
+  "Unemployed",
+  "Semi-Skilled Worker",
+  "Skilled Worker",
+  "Highly Skilled Worker",
+  "Professional",
+  "Retired pensioner",
+  "Other",
+  "Unknown",
+];
+
+const FAMILY_INCOME = [
+  "Less than 15000",
+  "15000-30000",
+  "30000-45000",
+  "45000-60000",
+  "More than 60000",
+  "Unknown",
+];
+
+const BLOOD_GROUP = [
+  "A+",
+  "A-",
+  "B+",
+  "B-",
+  "AB+",
+  "AB-",
+  "O+",
+  "O-",
+  "Unknown",
+];
+
+function getHospitalId(propHospitalId) {
+  if (propHospitalId) return propHospitalId;
+  const stored = window?.localStorage?.getItem("hospital_id");
+  return stored || null;
+}
+
+const Field = ({ label, required, children }) => (
+  <label className="flex flex-col gap-1">
+    <span className="text-sm font-medium text-gray-700">
+      {label} {required && <span className="text-red-500">*</span>}
+    </span>
+    {children}
+  </label>
+);
+
+const Section = ({ title, children }) => (
+  <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-gray-100">
+      <h3 className="text-base font-semibold text-gray-800">{title}</h3>
+    </div>
+    <div className="p-4">{children}</div>
+  </div>
+);
+
+export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
+  const today = useMemo(() => {
+    const d = new Date();
+    // YYYY-MM-DD
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 10);
+  }, []);
+
+  const [hospitalId] = useState(() => getHospitalId(hospitalIdProp));
+  const [message, setMessage] = useState({ type: "", text: "" });
+  const [loading, setLoading] = useState(false);
+
+  // Only the bare minimum is required by your spec:
+  const [form, setForm] = useState({
     full_name: "",
-    contact_number: "",
-    date_of_birth: "",
     gender: "",
-    ethinicity: "",
+    // Optional / quick-fillable:
+    date_of_birth: "",
+    ethnicity: "",
     address_street: "",
     life_style: "",
     education_qualification: "",
     occupation: "",
-    employment_type_name: "",
     family_monthly_income: "",
-    access_to_wash_room: "",
-    type_of_toilet_modification: "",
-    blood_group: "",
+    blood_group: "Unknown",
+    nic: "",
+    registered_date: today, // default to today (editable)
+    contact_number: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ type: "", text: "" });
+  const onChange = (e) => {
+    const { name, value } = e.target;
+    setForm((f) => ({ ...f, [name]: value }));
+  };
 
-  // Handle form input changes
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
+  const resetForNext = () => {
+    setForm((f) => ({
+      ...f,
+      full_name: "",
+      gender: "",
+      // do not reset dropdown defaults except essentials
+      date_of_birth: "",
+      address_street: "",
+      nic: "",
+      contact_number: "",
+      registered_date: today,
     }));
   };
 
-  // Submit patient data
+  const buildPayload = () => ({
+    // Pydantic aliases expected by your backend (see patient.py)
+    "Full Name": form.full_name.trim(),
+    Gender: form.gender,
+    "Date of Birth": form.date_of_birth || null,
+    Ethnicity: form.ethnicity || null,
+    "Address Street": form.address_street || null,
+    "Life Style": form.life_style || null,
+    "Education Qualification": form.education_qualification || null,
+    Occupation: form.occupation || null,
+    "Family Monthly Income": form.family_monthly_income || null,
+    "Blood Group": form.blood_group || null,
+    NIC: form.nic || null,
+    "Registered Date": form.registered_date || null,
+    "Contact Number": form.contact_number || null,
+  });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setMessage({ type: "", text: "" });
 
-    try {
-      const payload = {
-        "Full Name": formData.full_name,
-        "Contact Number": formData.contact_number,
-        "Date of Birth": formData.date_of_birth,
-        Gender: formData.gender,
-        Ehinicity: formData.ethinicity,
-        "Address Street": formData.address_street,
-        "Life Style": formData.life_style,
-        "Education Qualification": formData.education_qualification,
-        Occupation: formData.occupation,
-        "Employment Type Name": formData.employment_type_name,
-        "Family  Monthly Income": formData.family_monthly_income
-          ? Number(formData.family_monthly_income)
-          : null,
-        "Access to Wash Room": formData.access_to_wash_room,
-        "Type of toilet modification": formData.type_of_toilet_modification,
-        "Blood Group": formData.blood_group,
-      };
+    if (!form.full_name.trim() || !form.gender) {
+      setMessage({ type: "error", text: "Full Name and Gender are required." });
+      return;
+    }
 
-      await API.post("/patients", payload);
-      setMessage({
-        type: "success",
-        text: "Patient record created successfully ✅",
-      });
-      setFormData({
-        full_name: "",
-        contact_number: "",
-        date_of_birth: "",
-        gender: "",
-        ethinicity: "",
-        address_street: "",
-        life_style: "",
-        education_qualification: "",
-        occupation: "",
-        employment_type_name: "",
-        family_monthly_income: "",
-        access_to_wash_room: "",
-        type_of_toilet_modification: "",
-        blood_group: "",
-      });
-    } catch (error) {
+    try {
+      setLoading(true);
+      const payload = buildPayload();
+      await API.post("/patients/", payload);
+      setMessage({ type: "success", text: "Patient created and linked ✅" });
+    } catch (err) {
       setMessage({
         type: "error",
-        text: error.response?.data?.detail || "Failed to create patient ❌",
+        text: err?.response?.data?.detail || "Failed to create patient ❌",
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const FormSection = ({ title, children, icon }) => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      {" "}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100">
-        {" "}
-        <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-          {" "}
-          <span className="mr-3 text-xl">{icon}</span> {title}{" "}
-        </h3>{" "}
-      </div>{" "}
-      <div className="p-6 space-y-6"> {children} </div>{" "}
-    </div>
-  );
+  const handleSaveAndNew = async (e) => {
+    await handleSubmit(e);
+    if (message.type !== "error") resetForNext();
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
       <NurseNav />
       <div className="max-w-3xl mx-auto mt-8 bg-white rounded-2xl shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-700 mb-4">
-          Record Patient Data
+        <h2 className="text-2xl font-bold text-gray-700 mb-2">
+          Patient — Quick Intake
         </h2>
+        <p className="text-sm text-gray-500 mb-4">
+          Only <span className="text-red-500">Full Name</span> and{" "}
+          <span className="text-red-500">Gender</span> are required. Everything
+          else can be filled later.
+        </p>
 
         {message.text && (
           <div
@@ -170,203 +199,221 @@ const RecordPatientData = () => {
           </div>
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          className="grid grid-cols-1 md:grid-cols-2 gap-4"
-        >
-          {/* Example inputs */}
-          <input
-            type="text"
-            label="Full Name"
-            name="full_name"
-            value={formData.full_name}
-            onChange={handleChange}
-            placeholder="Full Name"
-            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-            required
-          />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Section title="Essentials">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="Full Name" required>
+                <input
+                  name="full_name"
+                  value={form.full_name}
+                  onChange={onChange}
+                  placeholder="e.g., M.S.I. Weerawansa"
+                  className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+                  autoFocus
+                  required
+                />
+              </Field>
 
-          <input
-            type="text"
-            name="contact_number"
-            value={formData.contact_number}
-            onChange={handleChange}
-            placeholder="Contact Number"
-            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-            required
-          />
+              <Field label="Gender" required>
+                <select
+                  name="gender"
+                  value={form.gender}
+                  onChange={onChange}
+                  className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+                  required
+                >
+                  <option value="">Select Gender</option>
+                  {GENDER.map((g) => (
+                    <option key={g} value={g}>
+                      {g}
+                    </option>
+                  ))}
+                </select>
+              </Field>
 
-          <input
-            type="date"
-            name="date_of_birth"
-            value={formData.date_of_birth}
-            onChange={handleChange}
-            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-            required
-          />
+              <Field label="Contact Number">
+                <input
+                  name="contact_number"
+                  value={form.contact_number}
+                  onChange={onChange}
+                  placeholder="07XXXXXXXX or +947XXXXXXXX"
+                  className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+                  inputMode="tel"
+                />
+              </Field>
 
-          <select
-            name="gender"
-            value={formData.gender}
-            onChange={handleChange}
-            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-            required
-          >
-            <option value="">Select Gender</option>
-            <option>Male</option>
-            <option>Female</option>
-            <option>Other</option>
-          </select>
+              <Field label="Registered Date">
+                <input
+                  type="date"
+                  name="registered_date"
+                  value={form.registered_date}
+                  onChange={onChange}
+                  className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+                />
+              </Field>
+            </div>
+          </Section>
 
-          <select
-            name="ethinicity"
-            value={formData.ethinicity}
-            onChange={handleChange}
-            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-            required
-          >
-            <option value="">Select Ethnicity</option>
-            {ethnicityOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+          <details className="group rounded-xl border border-gray-100 open:shadow-sm">
+            <summary className="px-4 py-3 cursor-pointer list-none flex items-center justify-between">
+              <span className="text-base font-semibold text-gray-800">
+                More details (optional)
+              </span>
+              <span className="text-sm text-gray-500">
+                {/** toggled text not strictly needed **/}
+              </span>
+            </summary>
 
-          <input
-            type="text"
-            name="address_street"
-            value={formData.address_street}
-            onChange={handleChange}
-            placeholder="Street Address"
-            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-          />
+            <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="Date of Birth">
+                <input
+                  type="date"
+                  name="date_of_birth"
+                  value={form.date_of_birth}
+                  onChange={onChange}
+                  className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+                />
+              </Field>
 
-          <select
-            name="life_style"
-            value={formData.life_style}
-            onChange={handleChange}
-            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-            required
-          >
-            <option value="">Select Life Style</option>
-            {lifeStyleOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+              <Field label="Ethnicity">
+                <select
+                  name="ethnicity"
+                  value={form.ethnicity}
+                  onChange={onChange}
+                  className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+                >
+                  <option value="">Select Ethnicity</option>
+                  {ETHNICITY.map((e) => (
+                    <option key={e} value={e}>
+                      {e}
+                    </option>
+                  ))}
+                </select>
+              </Field>
 
-          <select
-            name="education_qualification"
-            value={formData.education_qualification}
-            onChange={handleChange}
-            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-            required
-          >
-            <option value="">Select Education Qualification</option>
-            {educationOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+              <Field label="Address — Street">
+                <input
+                  name="address_street"
+                  value={form.address_street}
+                  onChange={onChange}
+                  placeholder="e.g., 123/A, Lake Rd, Moratuwa"
+                  className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+                />
+              </Field>
 
-          <select
-            name="occupation"
-            value={formData.occupation}
-            onChange={handleChange}
-            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-            required
-          >
-            <option value="">Select Occupation</option>
-            {occupationOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+              <Field label="Life Style">
+                <select
+                  name="life_style"
+                  value={form.life_style}
+                  onChange={onChange}
+                  className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+                >
+                  <option value="">Select Life Style</option>
+                  {LIFESTYLE.map((l) => (
+                    <option key={l} value={l}>
+                      {l}
+                    </option>
+                  ))}
+                </select>
+              </Field>
 
-          <select
-            name="employment_type_name"
-            value={formData.employment_type_name}
-            onChange={handleChange}
-            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-            required
-          >
-            <option value="">Select Employment Type</option>
-            {employmentTypeOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+              <Field label="Education Qualification">
+                <select
+                  name="education_qualification"
+                  value={form.education_qualification}
+                  onChange={onChange}
+                  className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+                >
+                  <option value="">Select Education</option>
+                  {EDUCATION.map((q) => (
+                    <option key={q} value={q}>
+                      {q}
+                    </option>
+                  ))}
+                </select>
+              </Field>
 
-          <input
-            type="number"
-            name="family_monthly_income"
-            value={formData.family_monthly_income}
-            onChange={handleChange}
-            placeholder="Family Monthly Income"
-            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-          />
+              <Field label="Occupation">
+                <select
+                  name="occupation"
+                  value={form.occupation}
+                  onChange={onChange}
+                  className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+                >
+                  <option value="">Select Occupation</option>
+                  {OCCUPATION.map((o) => (
+                    <option key={o} value={o}>
+                      {o}
+                    </option>
+                  ))}
+                </select>
+              </Field>
 
-          <select
-            name="access_to_wash_room"
-            value={formData.access_to_wash_room}
-            onChange={handleChange}
-            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-            required
-          >
-            <option value="">Select Access to Wash Room</option>
-            {accessToWashroomOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+              <Field label="Family Monthly Income">
+                <select
+                  name="family_monthly_income"
+                  value={form.family_monthly_income}
+                  onChange={onChange}
+                  className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+                >
+                  <option value="">Select Income Range</option>
+                  {FAMILY_INCOME.map((i) => (
+                    <option key={i} value={i}>
+                      {i}
+                    </option>
+                  ))}
+                </select>
+              </Field>
 
-          <select
-            name="type_of_toilet_modification"
-            value={formData.type_of_toilet_modification}
-            onChange={handleChange}
-            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-            required
-          >
-            <option value="">Select Type of Toilet Modification</option>
-            {toiletModificationOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+              <Field label="Blood Group">
+                <select
+                  name="blood_group"
+                  value={form.blood_group}
+                  onChange={onChange}
+                  className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+                >
+                  {BLOOD_GROUP.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+              </Field>
 
-          <select
-            name="blood_group"
-            value={formData.blood_group}
-            onChange={handleChange}
-            className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-            required
-          >
-            <option value="">Select Blood Group</option>
-            {bloodGroupOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+              <Field label="NIC">
+                <input
+                  name="nic"
+                  value={form.nic}
+                  onChange={onChange}
+                  placeholder="Old or new format"
+                  className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+                />
+              </Field>
+            </div>
+          </details>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="col-span-1 md:col-span-2 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-          >
-            {loading ? "Saving..." : "Save Patient Record"}
-          </button>
+          <div className="flex flex-col md:flex-row gap-3 pt-2">
+            <button
+              type="button"
+              onClick={handleSaveAndNew}
+              disabled={loading}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
+            >
+              {loading ? "Saving..." : "Save & New"}
+            </button>
+            <button
+              type="button"
+              onClick={() => resetForNext()}
+              className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 transition"
+            >
+              Reset
+            </button>
+            <div className="ml-auto text-sm text-gray-500 self-center">
+              {hospitalId ? `Hospital: ${hospitalId}` : "No hospital selected"}
+            </div>
+          </div>
         </form>
       </div>
     </div>
   );
-};
-
-export default RecordPatientData;
+}
