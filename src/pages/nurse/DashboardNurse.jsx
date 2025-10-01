@@ -448,7 +448,7 @@ export default function NurseDashboard() {
       try {
         setLoading(true);
         setErr("");
-        const pat = await API.get("/patients/");
+        const pat = await API.get("/patients");
         if (!ok) return;
         setPatients(pat.data || []);
       } catch (e) {
