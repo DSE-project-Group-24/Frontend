@@ -202,7 +202,7 @@ const AccidentEDA = () => {
       return entries.sort((a, b) => b[1] - a[1])[0];
     };
 
-    const totalRecords = analyticsData.total_records || summaryData.total_accidents || 0;
+    const totalRecords = analyticsData.total_records || summaryData.total_accidents;
     const peakHour = summaryData.peak_accident_hour || analyticsData.peak_accident_hour || 'N/A';
     const commonCollision = summaryData.most_common_collision || analyticsData.most_common_collision || 'N/A';
     const avgIncomeImpact = summaryData.avg_income_impact || analyticsData.avg_income_impact || 0;
