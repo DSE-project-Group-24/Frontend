@@ -496,7 +496,7 @@ const AccidentEDA = () => {
                 </ul>
               </div>
             </div>
-            <div className="mt-10 pt-8 border-t-2 border-gray-300">
+            {/* <div className="mt-10 pt-8 border-t-2 border-gray-300">
               <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-green-500">
                 <h5 className="text-xl font-bold text-green-700 mb-4 flex items-center justify-center">
                   <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -528,7 +528,7 @@ const AccidentEDA = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </ChartContainer>
       )}
