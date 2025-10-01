@@ -2,79 +2,362 @@ import React, { useState, useEffect, useMemo } from "react";
 import API from "../../utils/api";
 import NurseNav from "../../navbars/NurseNav";
 
+/**
+ * Assumptions
+ * - Backend routes exist:
+ *   GET /patients                     -> list of patients (your existing format)
+ *   GET /accidents/patient/:patientId -> list accident records for a patient
+ *   POST /accidents                   -> create accident record
+ *   PATCH /accidents/:accident_id     -> update accident record
+ *
+ * - The backend enforces:
+ *   - managed_by is set to current nurse user_id on create
+ *   - Updates only allowed if record is not Completed and managed_by == current user
+ *   - Severity defaults to 'U' in DB (we do not send it)
+ *
+ * - We read nurse user_id from localStorage (same as before),
+ *   since your backend auth stub takes `Authorization: Bearer <user_id>`.
+ */
+const useAuth = () => {
+  const id = window.localStorage.getItem("user_id") || "demo-nurse-id";
+  const name = window.localStorage.getItem("name") || "Demo Nurse";
+  //window.localStorage.setItem("user_id", id);
+  return { id, name, role: "nurse" };
+};
+
+/** Categorical options (per your spec) */
+const OPTIONS = {
+  time_of_collision: [
+    "00:00 - 03:00",
+    "03:00 - 06:00",
+    "06:00 - 09:00",
+    "09:00 - 12:00",
+    "12:00 - 15:00",
+    "15:00 - 18:00",
+    "18:00 - 21:00",
+    "21:00 - 00:00",
+    "Unknown",
+  ],
+  mode_of_traveling: [
+    "Motorbike",
+    "Bicycle",
+    "Three Wheeler",
+    "Car/Van",
+    "Heavy Vehicle",
+    "Pedestrian",
+    "Others",
+    "Unknown",
+  ],
+  visibility: ["Adequate", "Poor", "Unknown"],
+  collision_force_from: ["Front", "RightSide", "LeftSide", "Behind", "Unknown"],
+  collision_with: [
+    "Heavy Vehicle",
+    "Motorbike",
+    "Fall From Vehicle",
+    "Animal",
+    "Three Wheeler",
+    "Others",
+    "Car/Van",
+    "Bicycle",
+    "Pedestrian",
+    "Unknown",
+  ],
+  road_condition: ["Poor", "Good", "Unknown"],
+  road_type: ["Junction", "Unknown", "Bend", "Straight"],
+  category_of_road: ["SideRoad", "Unknown", "HighWay", "PathOrField"],
+  road_signals_exist: ["Yes", "No", "Unknown"],
+  approximate_speed: [
+    "Less Than 40 km/h",
+    "Unknown",
+    "40 - 80 km/h",
+    "More Than 80 km/h",
+  ],
+  alcohol_consumption: ["Yes", "No", "Unknown"],
+  time_between_alcohol: [
+    "No alcohol consumption",
+    "Less than one hour",
+    "More than one hour",
+    "Unknown",
+  ],
+  illicit_drugs: ["Yes", "No", "Unknown"],
+  helmet_worn: ["Yes", "No", "Not Necessary", "Unknown"],
+  engine_capacity: [
+    "LessThan50",
+    "50To100",
+    "101To200",
+    "MoreThan200",
+    "Not Necessary",
+    "Unknown",
+  ],
+  mode_of_transport: [
+    "Three wheeler",
+    "Motor Bike",
+    "Unknown",
+    "Ambulance",
+    "Other Vehicle",
+  ],
+  time_to_hospital: [
+    "Less Than 15 Minutes",
+    "15 Minutes - 30 Minutes",
+    "30 Minutes - 1 Hour",
+    "1 Hour - 2 Hour",
+    "More Than 2 Hour",
+    "Unknown",
+  ],
+  bystander_expenditure: [
+    "500-1000",
+    "Less Than 500",
+    "Not Necessary",
+    "More than 1000",
+    "Unknown",
+  ],
+  income_before_accident: [
+    "More than 60000",
+    "30000-45000",
+    "Unknown",
+    "45000-60000",
+    "15000-30000",
+    "Less Than 15000",
+  ],
+  income_after_accident: [
+    "45000-60000",
+    "15000-30000",
+    "Unknown",
+    "30000-45000",
+    "15000-45000",
+    "Less Than 15000",
+    "More Than 60000",
+  ],
+  family_status: [
+    "Severely Affected",
+    "Moderately Affected",
+    "Unknown",
+    "Mildly Affected",
+    "Not Affected",
+  ],
+  vehicle_insured: ["Yes", "Unknown", "No"],
+  passenger_type: [
+    "Driver",
+    "Unknown",
+    "Pillion Rider",
+    "PassengerFallingOfVehicle",
+    "N/A",
+    "FrontSeatPassenger",
+    "RearSeatPassenger",
+  ],
+  first_aid_given: ["Yes", "No", "Unknown"],
+  discharge_outcome: [
+    "Partial Recovery",
+    "Complete Recovery",
+    "Further Interventions",
+  ],
+};
+
+/** Base (snake_case) fields sent to backend models */
+const EMPTY_MODEL = {
+  patient_id: "",
+  incident_at_date: "",
+  time_of_collision: "",
+  mode_of_traveling: "",
+  visibility: "",
+  collision_force_from: "",
+  collision_with: "",
+  road_condition: "",
+  road_type: "",
+  category_of_road: "",
+  road_signals_exist: "",
+  approximate_speed: "",
+  alcohol_consumption: "",
+  time_between_alcohol: "",
+  illicit_drugs: "",
+  helmet_worn: "",
+  engine_capacity: "",
+  mode_of_transport: "",
+  time_to_hospital: "",
+  bystander_expenditure: "",
+  income_before_accident: "",
+  income_after_accident: "",
+  family_status: "",
+  vehicle_insured: "",
+  passenger_type: "",
+  first_aid_given: "",
+  discharge_outcome: "",
+
+  // UX-only
+  notes: "",
+};
+
+const StatusBadge = ({ completed }) => (
+  <span
+    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${
+      completed
+        ? "bg-green-50 text-green-700 border-green-200"
+        : "bg-yellow-50 text-yellow-800 border-yellow-200"
+    }`}
+  >
+    {completed ? "Completed" : "Not Completed"}
+  </span>
+);
+
+const RecordRow = ({ rec, currentUserId, onView, onEdit }) => {
+  const created = new Date(rec.created_on || rec.createdAt || rec.created_at);
+  const dateStr = isNaN(created.getTime())
+    ? "(no created_on)"
+    : created.toLocaleString();
+  const canEdit = !rec.Completed && rec.managed_by === currentUserId;
+
+  return (
+    <div className="rounded-xl border p-3 bg-white shadow-sm">
+      <div className="flex items-center justify-between">
+        <div className="font-medium">{dateStr}</div>
+        <StatusBadge completed={!!rec.Completed} />
+      </div>
+      <div className="text-xs text-gray-500 mt-1">
+        Managed by:{" "}
+        {rec.managed_by === currentUserId ? "You" : rec.managed_by_name}
+      </div>
+      <div className="flex gap-2 mt-3">
+        <button
+          onClick={() => onView(rec)}
+          className="px-3 py-1.5 rounded-lg border bg-gray-100 hover:bg-gray-200 text-sm"
+        >
+          View
+        </button>
+        <button
+          onClick={() => onEdit(rec)}
+          disabled={!canEdit}
+          className={`px-3 py-1.5 rounded-lg text-sm ${
+            canEdit
+              ? "bg-blue-600 text-white hover:bg-blue-700"
+              : "bg-gray-200 text-gray-500 cursor-not-allowed"
+          }`}
+        >
+          Edit
+        </button>
+      </div>
+    </div>
+  );
+};
+
+/** Input helpers */
+const Label = ({ children, htmlFor }) => (
+  <label htmlFor={htmlFor} className="text-sm font-medium text-gray-700">
+    {children}
+  </label>
+);
+
+const Text = ({ name, value, onChange, placeholder = "", disabled }) => (
+  <input
+    type="text"
+    name={name}
+    value={value || ""}
+    onChange={(e) => onChange(name, e.target.value)}
+    placeholder={placeholder}
+    disabled={disabled}
+    className={`mt-1 block w-full p-2 border border-gray-300 rounded ${
+      disabled ? "bg-gray-100" : "bg-white"
+    }`}
+  />
+);
+
+const NumberInput = ({ name, value, onChange, disabled }) => (
+  <input
+    type="number"
+    name={name}
+    value={value || ""}
+    onChange={(e) => onChange(name, e.target.value)}
+    disabled={disabled}
+    className={`mt-1 block w-full p-2 border border-gray-300 rounded ${
+      disabled ? "bg-gray-100" : "bg-white"
+    }`}
+  />
+);
+
+const DateInput = ({ name, value, onChange, disabled }) => (
+  <input
+    type="date"
+    name={name}
+    value={value || ""}
+    onChange={(e) => onChange(name, e.target.value)}
+    disabled={disabled}
+    className={`mt-1 block w-full p-2 border border-gray-300 rounded ${
+      disabled ? "bg-gray-100" : "bg-white"
+    }`}
+  />
+);
+
+const Select = ({ name, value, onChange, options, disabled }) => (
+  <select
+    name={name}
+    value={value || ""}
+    onChange={(e) => onChange(name, e.target.value)}
+    disabled={disabled}
+    className={`mt-1 block w-full p-2 border border-gray-300 rounded ${
+      disabled ? "bg-gray-100" : "bg-white"
+    }`}
+  >
+    <option value="">Select…</option>
+    {options.map((o) => (
+      <option key={o} value={o}>
+        {o}
+      </option>
+    ))}
+  </select>
+);
+
+const Checkbox = ({ checked, onChange, id, disabled }) => (
+  <input
+    id={id}
+    type="checkbox"
+    checked={!!checked}
+    disabled={disabled}
+    onChange={(e) => onChange(e.target.checked)}
+    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+  />
+);
+
+/** Read helper for multi-schema patients */
+const val = (obj, ...keys) => {
+  for (const k of keys) {
+    if (obj && obj[k] !== undefined && obj[k] !== null) return obj[k];
+  }
+  return "";
+};
+
 const AccidentRecordSystem = () => {
+  const me = useAuth();
+
+  // ---- Patient search (kept from your working code) ----
   const [patients, setPatients] = useState([]);
-  const [selectedPatient, setSelectedPatient] = useState(null);
-  const [accidentData, setAccidentData] = useState({
-    patient_id: "",
-    "incident at date": "",
-    "incident at time": "",
-    "time of collision": "",
-    "Mode of traveling during accident": "",
-    Visibility: "",
-    "Collision force from": "",
-    "Collision with": "",
-    "Road Condition": "",
-    "Road Type": "",
-    "Category of Road": "",
-    "Road signals exist": "",
-    "Approximate speed": "",
-    "Alcohol Consumption": "",
-    "Time between alcohol consumption and accident": "",
-    "Illicit Drugs": "",
-    "Vehicle type": "",
-    "Helmet Worn": "",
-    "Engine Capacity": "",
-    "Mode of transport to hospital": "",
-    "Time taken to reach hospital": "",
-    "Bystander expenditure per day": "",
-    "Family monthly income before accident": "",
-    "Family monthly income after accident": "",
-    "Family current status": "",
-    "Any insurance claim type": "",
-    "Dress name": "",
-    "vehicle insured": "",
-    "vehicle insured type": "",
-    "Passenger type": "",
-    "First aid given at seen": "",
-  });
-  const [loading, setLoading] = useState(false);
+  const [q, setQ] = useState("");
+  const [loadingPatients, setLoadingPatients] = useState(false);
   const [message, setMessage] = useState("");
 
-  // NEW: local search
-  const [q, setQ] = useState("");
+  const [selectedPatient, setSelectedPatient] = useState(null);
 
   useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        setLoadingPatients(true);
+        const response = await API.get("/patients/");
+        setPatients(response.data || []);
+      } catch (error) {
+        console.error("Error fetching patients:", error);
+        setMessage("Failed to fetch patients");
+      } finally {
+        setLoadingPatients(false);
+      }
+    };
     fetchPatients();
   }, []);
 
-  const fetchPatients = async () => {
-    try {
-      setLoading(true);
-      const response = await API.get("/patients");
-      setPatients(response.data || []);
-    } catch (error) {
-      console.error("Error fetching patients:", error);
-      setMessage("Failed to fetch patients");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Helper to read alias or snake_case keys
-  const val = (obj, ...keys) => {
-    for (const k of keys) {
-      if (obj && obj[k] !== undefined && obj[k] !== null) return obj[k];
-    }
-    return "";
-  };
-
-  // Filtered patients for search
   const filteredPatients = useMemo(() => {
     const needle = q.trim().toLowerCase();
     if (!needle) return patients;
     return patients.filter((p) => {
-      const name = (val(p, "Full Name", "full_name") || "").toLowerCase();
+      const name = (
+        val(p, "Full Name", "full_name", "name") || ""
+      ).toLowerCase();
       const nic = (val(p, "NIC", "nic") || "").toLowerCase();
       const phone = (
         val(p, "Contact Number", "contact_number") || ""
@@ -91,57 +374,180 @@ const AccidentRecordSystem = () => {
     });
   }, [q, patients]);
 
-  const handlePatientSelect = (patient) => {
-    if (!patient) {
-      alert("Error: Patient data is undefined!");
-      return;
-    }
+  const onSelectPatient = (patient) => {
+    if (!patient) return;
     setSelectedPatient(patient);
-    const pid = patient.patient_id ?? patient.id ?? patient.user_id ?? "";
-    setAccidentData((prev) => ({ ...prev, patient_id: pid }));
-    alert(
-      `Patient selected: ${
-        patient["Full Name"] ||
-        patient.full_name ||
-        patient.name ||
-        "Unknown name"
-      }`
-    );
+    // prefer "id", fallback to patient_id/user_id
+    const pid = patient.id ?? patient.patient_id ?? patient.user_id ?? "";
+    setModel((m) => ({ ...m, patient_id: pid }));
+    setMode("idle"); // show list
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setAccidentData((prev) => ({ ...prev, [name]: value }));
+  // ---- Records + form state ----
+  const [records, setRecords] = useState([]);
+  const [loadingRecords, setLoadingRecords] = useState(false);
+
+  const [mode, setMode] = useState("idle"); // idle | create | edit | view (view renders as read-only)
+  const [current, setCurrent] = useState(null);
+  const [model, setModel] = useState(EMPTY_MODEL);
+  const [completed, setCompleted] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // When patient changes, load records
+  useEffect(() => {
+    const loadRecords = async () => {
+      if (!selectedPatient) return;
+      const pid =
+        selectedPatient.id ??
+        selectedPatient.patient_id ??
+        selectedPatient.user_id;
+      if (!pid) return;
+      try {
+        setLoadingRecords(true);
+        const r = await API.get(`/accidents/patient/${pid}`);
+        setRecords(r.data || []);
+        console.log(r.data);
+      } catch (e) {
+        console.error(e);
+        setRecords([]);
+      } finally {
+        setLoadingRecords(false);
+      }
+    };
+    loadRecords();
+  }, [selectedPatient]);
+
+  const resetForm = () => {
+    setModel((m) => ({ ...EMPTY_MODEL, patient_id: m.patient_id || "" }));
+    setCompleted(false);
+    setSaving(false);
+    setCurrent(null);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const startCreate = () => {
+    if (!selectedPatient) return;
+    const pid =
+      selectedPatient.id ??
+      selectedPatient.patient_id ??
+      selectedPatient.user_id ??
+      "";
+    setModel({ ...EMPTY_MODEL, patient_id: pid });
+    setCompleted(false);
+    setCurrent(null);
+    setMode("create");
+  };
+
+  const startView = (rec) => {
+    setCurrent(rec);
+    // map DB record into model fields (best effort)
+    setModel((m) => ({
+      ...m,
+      patient_id: rec.patient_id || m.patient_id || "",
+      incident_at_date: rec["incident at date"] || rec.incident_at_date || "",
+      time_of_collision:
+        rec["time of collision"] || rec.time_of_collision || "",
+      mode_of_traveling:
+        rec["Mode of traveling during accident"] || rec.mode_of_traveling || "",
+      visibility: rec.Visibility || rec.visibility || "",
+      collision_force_from:
+        rec["Collision force from"] || rec.collision_force_from || "",
+      collision_with: rec["Collision with"] || rec.collision_with || "",
+      road_condition: rec["Road Condition"] || rec.road_condition || "",
+      road_type: rec["Road Type"] || rec.road_type || "",
+      category_of_road: rec["Category of Road"] || rec.category_of_road || "",
+      road_signals_exist:
+        rec["Road signals exist"] || rec.road_signals_exist || "",
+      approximate_speed:
+        rec["Approximate speed"] || rec.approximate_speed || "",
+      alcohol_consumption:
+        rec["Alcohol Consumption"] || rec.alcohol_consumption || "",
+      time_between_alcohol:
+        rec["Time between alcohol consumption and accident"] ||
+        rec.time_between_alcohol ||
+        "",
+      illicit_drugs: rec["Illicit Drugs"] || rec.illicit_drugs || "",
+      helmet_worn: rec["Helmet Worn"] || rec.helmet_worn || "",
+      engine_capacity: rec["Engine Capacity"] || rec.engine_capacity || "",
+      mode_of_transport:
+        rec["Mode of transport to hospital"] || rec.mode_of_transport || "",
+      time_to_hospital:
+        rec["Time taken to reach hospital"] || rec.time_to_hospital || "",
+      bystander_expenditure:
+        rec["Bystander expenditure per day"] || rec.bystander_expenditure || "",
+      income_before_accident:
+        rec["Family monthly income before accident"] ||
+        rec.income_before_accident ||
+        "",
+      income_after_accident:
+        rec["Family monthly income after accident"] ||
+        rec.income_after_accident ||
+        "",
+      family_status: rec["Family current status"] || rec.family_status || "",
+      vehicle_insured: rec["vehicle insured"] || rec.vehicle_insured || "",
+      passenger_type: rec["Passenger type"] || rec.passenger_type || "",
+      first_aid_given:
+        rec["First aid given at seen"] || rec.first_aid_given || "",
+      discharge_outcome:
+        rec["Discharge Outcome"] || rec.discharge_outcome || "",
+      notes: rec.notes || "",
+    }));
+    setCompleted(!!rec.Completed);
+    setMode("view"); // renders read-only based on rules
+  };
+
+  const startEdit = (rec) => {
+    startView(rec);
+    setMode("edit");
+  };
+
+  const canEdit = (rec) => {
+    if (!rec) return false;
+    return !rec.Completed && rec.managed_by === me.id;
+  };
+
+  const updateModel = (name, value) => {
+    setModel((m) => ({ ...m, [name]: value }));
+  };
+
+  const save = async () => {
     try {
-      setLoading(true);
-      await API.post("/accidents", accidentData);
-      setMessage("Accident record created successfully!");
-      // Partial reset while keeping selected patient_id
-      setAccidentData((prev) => ({
-        ...prev,
-        "incident at date": "",
-        "incident at time": "",
-        "time of collision": "",
-        "Mode of traveling during accident": "",
-        Visibility: "",
-        "Collision with": "",
-      }));
-    } catch (error) {
-      console.error("Error creating accident record:", error);
-      setMessage("Failed to create accident record");
+      setSaving(true);
+      // Build payload (snake_case). Backend maps to DB columns by alias.
+      const payload = {
+        ...model,
+        completed: !!completed, // maps to DB "Completed"
+      };
+      console.log("Saving payload", payload);
+      if (mode === "create") {
+        await API.post("/accidents/", payload);
+        setMessage("Accident record created successfully!");
+      } else if (mode === "edit" && current?.accident_id) {
+        await API.patch(`/accidents/${current.accident_id}`, payload);
+        setMessage("Accident record updated successfully!");
+      }
+      // Refresh list and reset
+      if (selectedPatient) {
+        const pid =
+          selectedPatient.id ??
+          selectedPatient.patient_id ??
+          selectedPatient.user_id;
+        const r = await API.get(`/accidents/patient/${pid}`);
+        setRecords(r.data || []);
+      }
+      setMode("idle");
+      resetForm();
+    } catch (e) {
+      console.error(e);
+      setMessage(e?.response?.data?.detail || "Save failed");
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
+  // ----- UI -----
   return (
     <div className="container mx-auto p-4">
       <NurseNav />
-
       <h1 className="text-2xl font-bold mb-6">
         Accident Record Management System
       </h1>
@@ -149,9 +555,9 @@ const AccidentRecordSystem = () => {
       {message && (
         <div
           className={`p-4 mb-4 rounded ${
-            message.includes("success")
+            message.toLowerCase().includes("success")
               ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
+              : "bg-yellow-50 text-yellow-800"
           }`}
         >
           {message}
@@ -159,7 +565,7 @@ const AccidentRecordSystem = () => {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Patients Card */}
+        {/* Left: Patients (kept) */}
         <div className="bg-white p-4 rounded shadow">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xl font-semibold">Patients</h2>
@@ -175,17 +581,17 @@ const AccidentRecordSystem = () => {
             />
           </div>
 
-          {loading ? (
+          {loadingPatients ? (
             <p>Loading patients...</p>
           ) : (
             <div className="overflow-y-auto max-h-96">
               {filteredPatients && filteredPatients.length > 0 ? (
                 filteredPatients.map((patient, index) => {
-                  const pid = patient.patient_id ?? index;
+                  const pid = patient.id ?? patient.patient_id ?? index;
                   const isSelected =
                     selectedPatient &&
-                    (selectedPatient.patient_id ?? "") ===
-                      (patient.patient_id ?? "");
+                    (selectedPatient.id ?? selectedPatient.patient_id ?? "") ===
+                      (patient.id ?? patient.patient_id ?? "");
                   return (
                     <div
                       key={pid}
@@ -194,10 +600,11 @@ const AccidentRecordSystem = () => {
                           ? "bg-blue-100"
                           : "bg-gray-100 hover:bg-gray-200"
                       }`}
-                      onClick={() => handlePatientSelect(patient)}
+                      onClick={() => onSelectPatient(patient)}
                     >
                       <div className="font-medium">
-                        {val(patient, "Full Name", "full_name") || "No Name"}
+                        {val(patient, "Full Name", "full_name", "name") ||
+                          "No Name"}
                       </div>
                       <div className="text-sm text-gray-600">
                         {val(patient, "Contact Number", "contact_number") ||
@@ -216,471 +623,534 @@ const AccidentRecordSystem = () => {
           )}
         </div>
 
-        {/* Accident Record Form */}
-        <div className="bg-white p-4 rounded shadow">
-          <h2 className="text-xl font-semibold mb-4">
-            {selectedPatient
-              ? `Create Accident Record for ${
-                  val(selectedPatient, "Full Name", "full_name") || "Patient"
-                }`
-              : "Select a patient to create accident record"}
-          </h2>
+        {/* Right: Actions + Record list / Form */}
+        <div className="flex flex-col gap-4">
+          {/* Actions */}
+          <div className="bg-white p-4 rounded shadow">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-xl font-semibold">Actions</h2>
+            </div>
+            <div className="text-sm mb-3">
+              Signed in as: <b>{me.name}</b> (role: {me.role})
+            </div>
+            <button
+              onClick={startCreate}
+              disabled={!selectedPatient}
+              className={`px-4 py-2 rounded-lg text-sm ${
+                selectedPatient
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-gray-200 text-gray-500"
+              }`}
+            >
+              Create new record
+            </button>
+          </div>
 
-          {selectedPatient && (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Incident Date
-                  </label>
-                  <input
-                    type="date"
-                    name="incident at date"
-                    value={accidentData["incident at date"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                    required
-                  />
+          {/* Existing records */}
+          {selectedPatient && mode === "idle" && (
+            <div className="bg-white p-4 rounded shadow">
+              <h3 className="text-lg font-semibold mb-2">
+                Existing accident records —{" "}
+                {val(selectedPatient, "Full Name", "full_name", "name")}
+              </h3>
+              {loadingRecords ? (
+                <div className="text-sm">Loading…</div>
+              ) : records.length === 0 ? (
+                <div className="text-sm text-gray-500">No records yet</div>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-3">
+                  {records.map((rec) => (
+                    <RecordRow
+                      key={rec.accident_id}
+                      rec={rec}
+                      currentUserId={me.id}
+                      onView={() => startView(rec)}
+                      onEdit={() => startEdit(rec)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Form (create/edit/view) */}
+          {selectedPatient &&
+            (mode === "create" || mode === "edit" || mode === "view") && (
+              <div className="bg-white p-4 rounded shadow">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">
+                    {mode === "create"
+                      ? "Create accident record"
+                      : mode === "edit"
+                      ? "Edit accident record"
+                      : "View record"}
+                  </h3>
+                  <div className="text-sm text-gray-600">
+                    Patient:{" "}
+                    <b>
+                      {val(selectedPatient, "Full Name", "full_name", "name")}
+                    </b>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Incident Time
-                  </label>
-                  <input
-                    type="time"
-                    name="incident at time"
-                    value={accidentData["incident at time"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                    required
-                  />
+                {/* editability banner */}
+                {mode !== "create" && current && !canEdit(current) && (
+                  <div className="text-sm text-amber-700 p-3 rounded-md bg-amber-50 border mt-3">
+                    This record is read-only (either completed or managed by
+                    another nurse).
+                  </div>
+                )}
+
+                {/* Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <Label>Incident date</Label>
+                    <DateInput
+                      name="incident_at_date"
+                      value={model.incident_at_date}
+                      onChange={updateModel}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Time of collision</Label>
+                    <Select
+                      name="time_of_collision"
+                      value={model.time_of_collision}
+                      onChange={updateModel}
+                      options={OPTIONS.time_of_collision}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Mode of traveling during accident</Label>
+                    <Select
+                      name="mode_of_traveling"
+                      value={model.mode_of_traveling}
+                      onChange={updateModel}
+                      options={OPTIONS.mode_of_traveling}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Visibility</Label>
+                    <Select
+                      name="visibility"
+                      value={model.visibility}
+                      onChange={updateModel}
+                      options={OPTIONS.visibility}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Collision force from</Label>
+                    <Select
+                      name="collision_force_from"
+                      value={model.collision_force_from}
+                      onChange={updateModel}
+                      options={OPTIONS.collision_force_from}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Collision with</Label>
+                    <Select
+                      name="collision_with"
+                      value={model.collision_with}
+                      onChange={updateModel}
+                      options={OPTIONS.collision_with}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Road Condition</Label>
+                    <Select
+                      name="road_condition"
+                      value={model.road_condition}
+                      onChange={updateModel}
+                      options={OPTIONS.road_condition}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Road Type</Label>
+                    <Select
+                      name="road_type"
+                      value={model.road_type}
+                      onChange={updateModel}
+                      options={OPTIONS.road_type}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Category of Road</Label>
+                    <Select
+                      name="category_of_road"
+                      value={model.category_of_road}
+                      onChange={updateModel}
+                      options={OPTIONS.category_of_road}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Road signals exist</Label>
+                    <Select
+                      name="road_signals_exist"
+                      value={model.road_signals_exist}
+                      onChange={updateModel}
+                      options={OPTIONS.road_signals_exist}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Approximate speed</Label>
+                    <Select
+                      name="approximate_speed"
+                      value={model.approximate_speed}
+                      onChange={updateModel}
+                      options={OPTIONS.approximate_speed}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Alcohol Consumption</Label>
+                    <Select
+                      name="alcohol_consumption"
+                      value={model.alcohol_consumption}
+                      onChange={updateModel}
+                      options={OPTIONS.alcohol_consumption}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Time between alcohol consumption and accident</Label>
+                    <Select
+                      name="time_between_alcohol"
+                      value={model.time_between_alcohol}
+                      onChange={updateModel}
+                      options={OPTIONS.time_between_alcohol}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Illicit Drugs</Label>
+                    <Select
+                      name="illicit_drugs"
+                      value={model.illicit_drugs}
+                      onChange={updateModel}
+                      options={OPTIONS.illicit_drugs}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Helmet Worn</Label>
+                    <Select
+                      name="helmet_worn"
+                      value={model.helmet_worn}
+                      onChange={updateModel}
+                      options={OPTIONS.helmet_worn}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Engine Capacity</Label>
+                    <Select
+                      name="engine_capacity"
+                      value={model.engine_capacity}
+                      onChange={updateModel}
+                      options={OPTIONS.engine_capacity}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Mode of transport to hospital</Label>
+                    <Select
+                      name="mode_of_transport"
+                      value={model.mode_of_transport}
+                      onChange={updateModel}
+                      options={OPTIONS.mode_of_transport}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Time taken to reach hospital</Label>
+                    <Select
+                      name="time_to_hospital"
+                      value={model.time_to_hospital}
+                      onChange={updateModel}
+                      options={OPTIONS.time_to_hospital}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Bystander expenditure per day</Label>
+                    <Select
+                      name="bystander_expenditure"
+                      value={model.bystander_expenditure}
+                      onChange={updateModel}
+                      options={OPTIONS.bystander_expenditure}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Family monthly income before accident</Label>
+                    <Select
+                      name="income_before_accident"
+                      value={model.income_before_accident}
+                      onChange={updateModel}
+                      options={OPTIONS.income_before_accident}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Family monthly income after accident</Label>
+                    <Select
+                      name="income_after_accident"
+                      value={model.income_after_accident}
+                      onChange={updateModel}
+                      options={OPTIONS.income_after_accident}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <Label>Family current status</Label>
+                    <Select
+                      name="family_status"
+                      value={model.family_status}
+                      onChange={updateModel}
+                      options={OPTIONS.family_status}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Vehicle insured</Label>
+                    <Select
+                      name="vehicle_insured"
+                      value={model.vehicle_insured}
+                      onChange={updateModel}
+                      options={OPTIONS.vehicle_insured}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Passenger type</Label>
+                    <Select
+                      name="passenger_type"
+                      value={model.passenger_type}
+                      onChange={updateModel}
+                      options={OPTIONS.passenger_type}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>First aid given at scene</Label>
+                    <Select
+                      name="first_aid_given"
+                      value={model.first_aid_given}
+                      onChange={updateModel}
+                      options={OPTIONS.first_aid_given}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Discharge Outcome</Label>
+                    <Select
+                      name="discharge_outcome"
+                      value={model.discharge_outcome}
+                      onChange={updateModel}
+                      options={OPTIONS.discharge_outcome}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <Label>Notes (optional)</Label>
+                    <textarea
+                      name="notes"
+                      value={model.notes}
+                      onChange={(e) => updateModel("notes", e.target.value)}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                      className={`mt-1 block w-full p-2 border border-gray-300 rounded h-24 ${
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                          ? "bg-gray-100"
+                          : "bg-white"
+                      }`}
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Time of Collision
-                  </label>
-                  <input
-                    type="time"
-                    name="time of collision"
-                    value={accidentData["time of collision"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
+                {/* Completed toggle + actions */}
+                <div className="mt-4 border-t pt-4">
+                  <div className="flex items-center gap-3">
+                    <Checkbox
+                      id="completed"
+                      checked={completed}
+                      onChange={setCompleted}
+                      disabled={
+                        mode === "view" ||
+                        (mode === "edit" && !canEdit(current))
+                      }
+                    />
+                    <Label htmlFor="completed" className="cursor-pointer">
+                      Mark as <b>Completed</b> before saving
+                    </Label>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Severity is set automatically later (default “U”).
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Mode of Travel
-                  </label>
-                  <select
-                    name="Mode of traveling during accident"
-                    value={accidentData["Mode of traveling during accident"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  >
-                    <option value="">Select mode</option>
-                    <option value="bus">Bus</option>
-                    <option value="car">Car</option>
-                    <option value="motorcycle">Motorcycle</option>
-                    <option value="bicycle">Bicycle</option>
-                    <option value="pedestrian">Pedestrian</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Visibility
-                  </label>
-                  <select
-                    name="Visibility"
-                    value={accidentData["Visibility"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  >
-                    <option value="">Select visibility</option>
-                    <option value="good">Good</option>
-                    <option value="moderate">Moderate</option>
-                    <option value="poor">Poor</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Collision With
-                  </label>
-                  <select
-                    name="Collision with"
-                    value={accidentData["Collision with"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  >
-                    <option value="">Select collision type</option>
-                    <option value="car">Car</option>
-                    <option value="lorry">Lorry</option>
-                    <option value="bus">Bus</option>
-                    <option value="motorcycle">Motorcycle</option>
-                    <option value="bicycle">Bicycle</option>
-                    <option value="pedestrian">Pedestrian</option>
-                    <option value="object">Object</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Collision Force From
-                  </label>
-                  <input
-                    type="text"
-                    name="Collision force from"
-                    value={accidentData["Collision force from"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Road Condition
-                  </label>
-                  <select
-                    name="Road Condition"
-                    value={accidentData["Road Condition"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  >
-                    <option value="">Select road condition</option>
-                    <option value="dry">Dry</option>
-                    <option value="wet">Wet</option>
-                    <option value="icy">Icy</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Road Type
-                  </label>
-                  <input
-                    type="text"
-                    name="Road Type"
-                    value={accidentData["Road Type"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Category of Road
-                  </label>
-                  <input
-                    type="text"
-                    name="Category of Road"
-                    value={accidentData["Category of Road"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Road Signals Exist
-                  </label>
-                  <select
-                    name="Road signals exist"
-                    value={accidentData["Road signals exist"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  >
-                    <option value="">Select</option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Approximate Speed (km/h)
-                  </label>
-                  <input
-                    type="number"
-                    name="Approximate speed"
-                    value={accidentData["Approximate speed"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Alcohol Consumption
-                  </label>
-                  <select
-                    name="Alcohol Consumption"
-                    value={accidentData["Alcohol Consumption"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  >
-                    <option value="">Select</option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Time Between Alcohol and Accident
-                  </label>
-                  <input
-                    type="text"
-                    name="Time between alcohol consumption and accident"
-                    value={
-                      accidentData[
-                        "Time between alcohol consumption and accident"
-                      ]
-                    }
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Illicit Drugs
-                  </label>
-                  <select
-                    name="Illicit Drugs"
-                    value={accidentData["Illicit Drugs"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  >
-                    <option value="">Select</option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Vehicle Type
-                  </label>
-                  <input
-                    type="text"
-                    name="Vehicle type"
-                    value={accidentData["Vehicle type"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Helmet Worn
-                  </label>
-                  <select
-                    name="Helmet Worn"
-                    value={accidentData["Helmet Worn"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  >
-                    <option value="">Select</option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Engine Capacity (cc)
-                  </label>
-                  <input
-                    type="number"
-                    name="Engine Capacity"
-                    value={accidentData["Engine Capacity"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Mode of Transport to Hospital
-                  </label>
-                  <input
-                    type="text"
-                    name="Mode of transport to hospital"
-                    value={accidentData["Mode of transport to hospital"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Time Taken to Reach Hospital (minutes)
-                  </label>
-                  <input
-                    type="number"
-                    name="Time taken to reach hospital"
-                    value={accidentData["Time taken to reach hospital"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Bystander Expenditure Per Day (LKR)
-                  </label>
-                  <input
-                    type="number"
-                    name="Bystander expenditure per day"
-                    value={accidentData["Bystander expenditure per day"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Family Monthly Income Before Accident (LKR)
-                  </label>
-                  <input
-                    type="number"
-                    name="Family monthly income before accident"
-                    value={
-                      accidentData["Family monthly income before accident"]
-                    }
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Family Monthly Income After Accident (LKR)
-                  </label>
-                  <input
-                    type="number"
-                    name="Family monthly income after accident"
-                    value={accidentData["Family monthly income after accident"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Family Current Status
-                  </label>
-                  <input
-                    type="text"
-                    name="Family current status"
-                    value={accidentData["Family current status"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Any Insurance Claim Type
-                  </label>
-                  <input
-                    type="text"
-                    name="Any insurance claim type"
-                    value={accidentData["Any insurance claim type"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Dress Name
-                  </label>
-                  <input
-                    type="text"
-                    name="Dress name"
-                    value={accidentData["Dress name"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Vehicle Insured
-                  </label>
-                  <select
-                    name="vehicle insured"
-                    value={accidentData["vehicle insured"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  >
-                    <option value="">Select</option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Vehicle Insured Type
-                  </label>
-                  <input
-                    type="text"
-                    name="vehicle insured type"
-                    value={accidentData["vehicle insured type"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Passenger Type
-                  </label>
-                  <input
-                    type="text"
-                    name="Passenger type"
-                    value={accidentData["Passenger type"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    First Aid Given at Scene
-                  </label>
-                  <select
-                    name="First aid given at seen"
-                    value={accidentData["First aid given at seen"]}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded"
-                  >
-                    <option value="">Select</option>
-                    <option value="true">Yes</option>
-                    <option value="false">No</option>
-                  </select>
+                  <div className="flex gap-2 mt-4">
+                    <button
+                      onClick={() => {
+                        setMode("idle");
+                        resetForm();
+                      }}
+                      className="px-4 py-2 rounded-lg border bg-gray-100 hover:bg-gray-200 text-sm"
+                    >
+                      Cancel
+                    </button>
+                    {(mode === "create" ||
+                      (mode === "edit" && canEdit(current))) && (
+                      <button
+                        onClick={save}
+                        disabled={saving}
+                        className={`px-4 py-2 rounded-lg text-sm ${
+                          saving
+                            ? "bg-blue-400 text-white"
+                            : "bg-blue-600 text-white hover:bg-blue-700"
+                        }`}
+                      >
+                        {saving ? "Saving…" : "Save"}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-2 px-4 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-400"
-              >
-                {loading ? "Creating..." : "Create Accident Record"}
-              </button>
-            </form>
-          )}
+            )}
         </div>
+      </div>
+
+      <div className="text-xs text-gray-500 mt-6">
+        <ul className="list-disc ml-5">
+          <li>
+            All form fields are optional. <b>Completed</b> must be checked
+            manually to finalize a record.
+          </li>
+          <li>
+            <b>Severity</b> is omitted (DB default “U”).
+          </li>
+          <li>
+            <b>managed_by</b> is enforced by the backend to the current nurse
+            user.
+          </li>
+        </ul>
       </div>
     </div>
   );
