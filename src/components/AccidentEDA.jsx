@@ -480,12 +480,7 @@ const AccidentEDA = () => {
                       <span><strong>Common collision:</strong> {Object.entries(accidentChars.collisionTypes).sort((a,b) => b[1] - a[1])[0][0]}</span>
                     </li>
                   )}
-                  {Object.keys(accidentChars.roadCategories).length > 0 && (
-                    <li className="flex items-start">
-                      <span className="text-red-500 mr-2">🛣</span>
-                      <span><strong>Risky roads:</strong> {Object.entries(accidentChars.roadCategories).sort((a,b) => b[1] - a[1])[0][0]}</span>
-                    </li>
-                  )}
+         
                   {Object.keys(accidentChars.hourlyDistribution).length === 0 && Object.keys(accidentChars.collisionTypes).length === 0 && Object.keys(accidentChars.roadCategories).length === 0 && (
                     <li className="text-gray-500 text-center py-4">
                       <div className="bg-gray-100 rounded-lg p-4">
