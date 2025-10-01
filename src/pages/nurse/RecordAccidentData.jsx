@@ -20,8 +20,9 @@ import NurseNav from "../../navbars/NurseNav";
  */
 const useAuth = () => {
   const id = window.localStorage.getItem("user_id") || "demo-nurse-id";
-  window.localStorage.setItem("user_id", id);
-  return { id, role: "nurse" };
+  const name = window.localStorage.getItem("name") || "Demo Nurse";
+  //window.localStorage.setItem("user_id", id);
+  return { id, name, role: "nurse" };
 };
 
 /** Categorical options (per your spec) */
@@ -628,7 +629,7 @@ const AccidentRecordSystem = () => {
               <h2 className="text-xl font-semibold">Actions</h2>
             </div>
             <div className="text-sm mb-3">
-              Signed in as: <b>{me.id}</b> (role: {me.role})
+              Signed in as: <b>{me.name}</b> (role: {me.role})
             </div>
             <button
               onClick={startCreate}
