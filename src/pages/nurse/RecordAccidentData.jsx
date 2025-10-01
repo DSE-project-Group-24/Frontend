@@ -213,7 +213,8 @@ const RecordRow = ({ rec, currentUserId, onView, onEdit }) => {
         <StatusBadge completed={!!rec.Completed} />
       </div>
       <div className="text-xs text-gray-500 mt-1">
-        Managed by: {rec.managed_by === currentUserId ? "You" : rec.managed_by}
+        Managed by:{" "}
+        {rec.managed_by === currentUserId ? "You" : rec.managed_by_name}
       </div>
       <div className="flex gap-2 mt-3">
         <button
@@ -405,6 +406,7 @@ const AccidentRecordSystem = () => {
         setLoadingRecords(true);
         const r = await API.get(`/accidents/patient/${pid}`);
         setRecords(r.data || []);
+        console.log(r.data);
       } catch (e) {
         console.error(e);
         setRecords([]);
