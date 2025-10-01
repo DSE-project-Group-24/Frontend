@@ -200,7 +200,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
     // Bystander Expenditure
     const expenditure_map = {
       'Not Necessary': 0,
-      '0-500': 1,
+      'Less Than 500': 1,
       '500-1000': 2,
       'More than 1000': 4
     };
@@ -343,8 +343,8 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
       data["First Hospital Name_" + accident.hospital] = 1;
     } else {
       missingValues.push(`Hospital (value: "${accident?.hospital}")`);
-      // Default to Teaching Hospital Jaffna if no hospital specified
-      data["First Hospital Name_Teaching hospital - Jaffna (THJ)"] = 1;
+      // Default to DGH – Vavuniya if no hospital specified
+      data["First Hospital Name_DGH – Vavuniya"] = 1;
     }
 
     // Log missing values for debugging
@@ -456,7 +456,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                     {/* Prediction Display for Incomplete Accidents */}
                     {!acc["Completed"] && (
                       <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <h4 className="font-semibold text-blue-800 mb-2">AI Transfer Prediction:</h4>
+                        <h4 className="font-semibold text-blue-800 mb-2">ML Transfer Prediction:</h4>
                         {loadingPredictions[acc.accident_id] ? (
                           <div className="flex items-center gap-2 text-blue-600">
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
@@ -481,7 +481,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                                 {transferProbabilities[acc.accident_id].message}
                               </p>
                             )}
-                            {transferProbabilities[acc.accident_id].missingValues && 
+                            {/* {transferProbabilities[acc.accident_id].missingValues && 
                              transferProbabilities[acc.accident_id].missingValues.length > 0 && (
                               <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
                                 <p className="text-xs font-semibold text-yellow-800 mb-1">
@@ -496,7 +496,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                                   )}
                                 </ul>
                               </div>
-                            )}
+                            )} */}
                           </div>
                         ) : (
                           <p className="text-sm text-red-600">Prediction not available</p>
@@ -542,7 +542,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                 {!selectedAccident["Completed"] && transferProbabilities[selectedAccident.accident_id] && (
                   <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                     <h3 className="text-lg font-bold text-blue-800 mb-3 flex items-center gap-2">
-                      🧠 AI Transfer Prediction Analysis
+                      🧠 ML Transfer Prediction Analysis
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="text-center p-3 bg-white rounded-lg shadow-sm">
@@ -566,7 +566,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                     </div>
                     
                     {/* Missing Values Section */}
-                    {transferProbabilities[selectedAccident.accident_id].missingValues && 
+                    {/* {transferProbabilities[selectedAccident.accident_id].missingValues && 
                      transferProbabilities[selectedAccident.accident_id].missingValues.length > 0 && (
                       <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                         <h4 className="font-semibold text-yellow-800 mb-2 flex items-center gap-2">
@@ -583,7 +583,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                           *These fields were null/undefined when making the prediction
                         </p>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 )}
                 
