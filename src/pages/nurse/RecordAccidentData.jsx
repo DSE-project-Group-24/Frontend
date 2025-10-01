@@ -339,7 +339,7 @@ const AccidentRecordSystem = () => {
     const fetchPatients = async () => {
       try {
         setLoadingPatients(true);
-        const response = await API.get("/patients/");
+        const response = await API.get("/patients");
         setPatients(response.data || []);
       } catch (error) {
         console.error("Error fetching patients:", error);
