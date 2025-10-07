@@ -967,49 +967,149 @@ const AccidentEDA = () => {
     );
   };
 
-  // Modern Vertical Bar Chart
+  // Modern Vertical Bar Chart with Dynamic Hover Effects
   const VerticalBarChart = ({ data, colorScheme = "gradient" }) => {
     if (!data || Object.keys(data).length === 0) return <EmptyChart />;
 
+    const [hoveredIndex, setHoveredIndex] = useState(null);
+    const [totalValue, setTotalValue] = useState(0);
+
     const maxValue = Math.max(...Object.values(data));
     const sortedData = Object.entries(data).sort(([,a], [,b]) => b - a).slice(0, 8);
+    const total = sortedData.reduce((sum, [, value]) => sum + value, 0);
+    
+    React.useEffect(() => {
+      setTotalValue(total);
+    }, [total]);
     
     return (
-      <div className="h-80">
-        <div className="flex items-end justify-center space-x-4 h-full px-4 pb-16">
+      <div className="h-80 relative">
+        {/* Dynamic title with hover info */}
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 text-center mb-4">
+          <div className="transition-all duration-300">
+            {hoveredIndex !== null ? (
+              <div className="bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
+                <div className="text-sm font-semibold text-blue-800">
+                  {sortedData[hoveredIndex][0]}
+                </div>
+                <div className="text-lg font-bold text-blue-900">
+                  {sortedData[hoveredIndex][1].toLocaleString()}
+                </div>
+                <div className="text-xs text-blue-600">
+                  {((sortedData[hoveredIndex][1] / total) * 100).toFixed(1)}% of total
+                </div>
+              </div>
+            ) : (
+              <div className="text-sm text-gray-600">
+                <div className="font-semibold">Total Cases</div>
+                <div className="text-lg font-bold text-gray-800">{total.toLocaleString()}</div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-end justify-center space-x-4 h-full px-4 pb-16 pt-20">
           {sortedData.map(([key, value], index) => {
-            const height = maxValue > 0 ? (value / maxValue) * 180 : 0;
+            const height = maxValue > 0 ? (value / maxValue) * 150 : 0;
             const hue = (index * 45) % 360;
+            const isHovered = hoveredIndex === index;
+            const isOtherHovered = hoveredIndex !== null && hoveredIndex !== index;
+            const percentage = ((value / total) * 100).toFixed(1);
             
             return (
-              <div key={key} className="flex flex-col items-center group">
+              <div 
+                key={key} 
+                className="flex flex-col items-center cursor-pointer transition-all duration-300"
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                style={{
+                  transform: isHovered ? 'scale(1.05)' : isOtherHovered ? 'scale(0.95)' : 'scale(1)',
+                  opacity: isOtherHovered ? 0.6 : 1
+                }}
+              >
                 <div className="relative mb-3">
-                  {/* Value label above bar */}
-                  <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-semibold text-gray-700 whitespace-nowrap">
+                  {/* Dynamic value label above bar */}
+                  <div className={`absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-semibold whitespace-nowrap transition-all duration-300 ${
+                    isHovered ? 'text-blue-700 font-bold -top-10' : 'text-gray-700'
+                  }`}>
                     {value.toLocaleString()}
+                    {isHovered && (
+                      <div className="text-xs font-normal text-blue-600 mt-1">
+                        {percentage}%
+                      </div>
+                    )}
                   </div>
-                  {/* Bar */}
+                  
+                  {/* Enhanced Bar with animations */}
                   <div
-                    className="w-12 rounded-t-lg transition-all duration-700 ease-out shadow-lg hover:shadow-xl group-hover:scale-105 relative"
+                    className="rounded-t-lg transition-all duration-500 ease-out relative overflow-hidden"
                     style={{
-                      height: `${height}px`,
-                      background: `linear-gradient(to top, hsl(${hue}, 70%, 50%), hsl(${hue}, 70%, 60%))`,
+                      width: isHovered ? '56px' : '48px',
+                      height: `${isHovered ? height + 10 : height}px`,
+                      background: isHovered 
+                        ? `linear-gradient(to top, hsl(${hue}, 85%, 45%), hsl(${hue}, 85%, 65%), hsl(${hue}, 85%, 75%))`
+                        : `linear-gradient(to top, hsl(${hue}, 70%, 50%), hsl(${hue}, 70%, 60%))`,
+                      boxShadow: isHovered 
+                        ? '0 10px 30px rgba(0,0,0,0.2), 0 0 20px rgba(59, 130, 246, 0.3)' 
+                        : '0 4px 15px rgba(0,0,0,0.1)',
                       animationDelay: `${index * 100}ms`
                     }}
-                  />
-                  {/* Hover tooltip */}
-                  <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
-                    {key}: {value.toLocaleString()}
+                  >
+                    {/* Animated shine effect on hover */}
+                    {isHovered && (
+                      <div 
+                        className="absolute inset-0 bg-gradient-to-t from-transparent via-white to-transparent opacity-20 animate-pulse"
+                        style={{ animation: `shine 2s ease-in-out infinite` }}
+                      />
+                    )}
+                    
+                    {/* Progress fill animation */}
+                    <div 
+                      className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white/20 to-transparent transition-all duration-1000"
+                      style={{ 
+                        height: '100%',
+                        transform: `scaleY(${isHovered ? 1 : 0.8})`,
+                        transformOrigin: 'bottom'
+                      }}
+                    />
                   </div>
+                  
+                  {/* Enhanced floating tooltip */}
+                  {isHovered && (
+                    <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-xl z-20 whitespace-nowrap">
+                      <div className="font-semibold">{key}</div>
+                      <div className="text-blue-300">{value.toLocaleString()} cases</div>
+                      <div className="text-gray-300">{percentage}% of total</div>
+                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                    </div>
+                  )}
                 </div>
-                {/* Age range label below bar - no rotation, full text */}
-                <div className="text-xs font-medium text-gray-700 text-center whitespace-nowrap mt-2">
+                
+                {/* Enhanced age range label */}
+                <div className={`text-xs font-medium text-center whitespace-nowrap mt-2 transition-all duration-300 ${
+                  isHovered ? 'text-blue-700 font-bold text-sm' : 'text-gray-700'
+                }`}>
                   {key}
+                  {isHovered && (
+                    <div className="flex items-center justify-center mt-1">
+                      <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                      </svg>
+                    </div>
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
+
+        {/* Add CSS animation for shine effect */}
+        <style jsx>{`
+          @keyframes shine {
+            0% { transform: translateX(-100%) skewX(-15deg); }
+            100% { transform: translateX(200%) skewX(-15deg); }
+          }
+        `}</style>
       </div>
     );
   };
