@@ -726,50 +726,279 @@ const AccidentEDA = () => {
     </div>
   );
 
-  const ChartContainer = ({ title, children }) => (
-    <div className="bg-white p-8 rounded-xl shadow-lg mb-8 hover:shadow-xl transition-shadow duration-300">
-      <h3 className="text-2xl font-bold mb-6 text-gray-800 text-center border-b border-gray-200 pb-4">{title}</h3>
-      <div className="mt-6">
-        {children}
+  // Professional Chart Container with enhanced styling
+  const ChartContainer = ({ title, children, className = "", size = "default" }) => {
+    const sizeClasses = {
+      small: "p-4",
+      default: "p-6",
+      large: "p-8"
+    };
+    
+    return (
+      <div className={`bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 hover:shadow-xl transition-all duration-300 ${sizeClasses[size]} ${className}`}>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-bold text-gray-800">{title}</h3>
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-xs text-gray-500">Live</span>
+          </div>
+        </div>
+        <div className="chart-content">
+          {children}
+        </div>
       </div>
+    );
+  };
+
+  // Empty State Component
+  const EmptyChart = ({ message = "No data available for current filters" }) => (
+    <div className="flex flex-col items-center justify-center h-48 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300">
+      <div className="text-gray-400 mb-3">
+        <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      </div>
+      <p className="text-gray-500 text-center text-sm">{message}</p>
     </div>
   );
 
-  const BarChart = ({ data, title }) => {
-    // Handle empty or invalid data
-    if (!data || Object.keys(data).length === 0) {
-      return (
-        <div className="flex flex-col items-center justify-center h-40 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300">
-          <div className="text-gray-400 mb-2">
-            <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-          <p className="text-gray-500 text-center">No data available for current filters</p>
-        </div>
-      );
-    }
+  // Modern Horizontal Bar Chart
+  const HorizontalBarChart = ({ data, colorScheme = "blue" }) => {
+    if (!data || Object.keys(data).length === 0) return <EmptyChart />;
 
     const maxValue = Math.max(...Object.values(data));
+    const colorSchemes = {
+      blue: { from: 'from-blue-500', to: 'to-blue-600', bg: 'bg-blue-50' },
+      red: { from: 'from-red-500', to: 'to-red-600', bg: 'bg-red-50' },
+      green: { from: 'from-green-500', to: 'to-green-600', bg: 'bg-green-50' },
+      purple: { from: 'from-purple-500', to: 'to-purple-600', bg: 'bg-purple-50' },
+      orange: { from: 'from-orange-500', to: 'to-orange-600', bg: 'bg-orange-50' }
+    };
+    const colors = colorSchemes[colorScheme];
     
     return (
       <div className="space-y-4">
-        {Object.entries(data).map(([key, value]) => (
-          <div key={key} className="flex items-center group hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200">
-            <div className="w-36 text-sm font-semibold text-gray-700 truncate">{key}:</div>
-            <div className="flex-1 bg-gray-200 rounded-full h-8 ml-6 relative overflow-hidden shadow-inner">
-              <div 
-                className="bg-gradient-to-r from-blue-500 to-blue-600 h-8 rounded-full flex items-center justify-end pr-3 shadow-sm transition-all duration-500 ease-out"
-                style={{ width: `${maxValue > 0 ? (value / maxValue) * 100 : 0}%` }}
-              >
-                <span className="text-white text-sm font-bold">{value}</span>
+        {Object.entries(data)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 6)
+          .map(([key, value], index) => {
+            const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
+            return (
+              <div key={key} className="group">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700 truncate max-w-[150px]">{key}</span>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-bold text-gray-900">{value.toLocaleString()}</span>
+                    <span className="text-xs text-gray-500">({Math.round(percentage)}%)</span>
+                  </div>
+                </div>
+                <div className={`w-full ${colors.bg} rounded-full h-3 relative overflow-hidden`}>
+                  <div 
+                    className={`h-3 bg-gradient-to-r ${colors.from} ${colors.to} rounded-full transition-all duration-700 ease-out shadow-sm relative`}
+                    style={{ 
+                      width: `${percentage}%`,
+                      animationDelay: `${index * 100}ms`
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="ml-3 text-sm font-medium text-gray-600 w-12 text-right">
-              {maxValue > 0 ? Math.round((value / maxValue) * 100) : 0}%
+            );
+          })}
+      </div>
+    );
+  };
+
+  // Modern Donut Chart
+  const DonutChart = ({ data, colorScheme = "mixed" }) => {
+    if (!data || Object.keys(data).length === 0) return <EmptyChart />;
+
+    const total = Object.values(data).reduce((sum, value) => sum + value, 0);
+    const sortedData = Object.entries(data).sort(([,a], [,b]) => b - a).slice(0, 5);
+    
+    const colors = [
+      { bg: 'bg-blue-500', border: 'border-blue-600', text: 'text-blue-700' },
+      { bg: 'bg-emerald-500', border: 'border-emerald-600', text: 'text-emerald-700' },
+      { bg: 'bg-amber-500', border: 'border-amber-600', text: 'text-amber-700' },
+      { bg: 'bg-purple-500', border: 'border-purple-600', text: 'text-purple-700' },
+      { bg: 'bg-rose-500', border: 'border-rose-600', text: 'text-rose-700' }
+    ];
+
+    let cumulativePercentage = 0;
+
+    return (
+      <div className="flex items-center justify-center space-x-8">
+        {/* Donut Chart Visual */}
+        <div className="relative w-48 h-48">
+          <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+            <circle
+              cx="50"
+              cy="50"
+              r="35"
+              fill="none"
+              stroke="#f3f4f6"
+              strokeWidth="8"
+            />
+            {sortedData.map(([key, value], index) => {
+              const percentage = (value / total) * 100;
+              const strokeDasharray = `${percentage * 2.199} ${219.9 - percentage * 2.199}`;
+              const strokeDashoffset = -cumulativePercentage * 2.199;
+              cumulativePercentage += percentage;
+              
+              return (
+                <circle
+                  key={key}
+                  cx="50"
+                  cy="50"
+                  r="35"
+                  fill="none"
+                  stroke={colors[index % colors.length].bg.replace('bg-', '#').replace('-500', '')}
+                  strokeWidth="8"
+                  strokeDasharray={strokeDasharray}
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                  className="transition-all duration-700 ease-in-out"
+                  style={{ animationDelay: `${index * 200}ms` }}
+                />
+              );
+            })}
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-gray-900">{total.toLocaleString()}</div>
+              <div className="text-sm text-gray-500">Total</div>
             </div>
           </div>
-        ))}
+        </div>
+
+        {/* Legend */}
+        <div className="space-y-3">
+          {sortedData.map(([key, value], index) => {
+            const percentage = ((value / total) * 100).toFixed(1);
+            return (
+              <div key={key} className="flex items-center space-x-3">
+                <div className={`w-4 h-4 rounded-full ${colors[index % colors.length].bg} shadow-sm`}></div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-gray-700 truncate">{key}</div>
+                  <div className="text-xs text-gray-500">{value.toLocaleString()} ({percentage}%)</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Modern Vertical Bar Chart
+  const VerticalBarChart = ({ data, colorScheme = "gradient" }) => {
+    if (!data || Object.keys(data).length === 0) return <EmptyChart />;
+
+    const maxValue = Math.max(...Object.values(data));
+    const sortedData = Object.entries(data).sort(([,a], [,b]) => b - a).slice(0, 8);
+    
+    return (
+      <div className="h-64">
+        <div className="flex items-end justify-center space-x-2 h-full px-4">
+          {sortedData.map(([key, value], index) => {
+            const height = maxValue > 0 ? (value / maxValue) * 200 : 0;
+            const hue = (index * 45) % 360;
+            
+            return (
+              <div key={key} className="flex flex-col items-center space-y-2 group">
+                <div className="relative">
+                  <div
+                    className="w-8 rounded-t-lg transition-all duration-700 ease-out shadow-lg hover:shadow-xl group-hover:scale-105"
+                    style={{
+                      height: `${height}px`,
+                      background: `linear-gradient(to top, hsl(${hue}, 70%, 50%), hsl(${hue}, 70%, 60%))`,
+                      animationDelay: `${index * 100}ms`
+                    }}
+                  />
+                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                    {value.toLocaleString()}
+                  </div>
+                </div>
+                <div className="text-xs text-gray-600 transform -rotate-45 origin-top-left w-16 text-center">
+                  {key.length > 8 ? `${key.substring(0, 8)}...` : key}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Modern Line Chart (simplified)
+  const LineChart = ({ data, colorScheme = "blue" }) => {
+    if (!data || Object.keys(data).length === 0) return <EmptyChart />;
+
+    const maxValue = Math.max(...Object.values(data));
+    const minValue = Math.min(...Object.values(data));
+    const range = maxValue - minValue || 1;
+    
+    const points = Object.entries(data).map(([key, value], index, arr) => {
+      const x = (index / (arr.length - 1)) * 300;
+      const y = 150 - ((value - minValue) / range) * 120;
+      return { x, y, value, key };
+    });
+
+    const pathData = points.map((point, index) => 
+      `${index === 0 ? 'M' : 'L'} ${point.x},${point.y}`
+    ).join(' ');
+
+    return (
+      <div className="h-48 relative">
+        <svg viewBox="0 0 300 150" className="w-full h-full">
+          {/* Grid lines */}
+          <defs>
+            <pattern id="grid" width="30" height="15" patternUnits="userSpaceOnUse">
+              <path d="M 30 0 L 0 0 0 15" fill="none" stroke="#f3f4f6" strokeWidth="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="300" height="150" fill="url(#grid)" />
+          
+          {/* Area under curve */}
+          <path
+            d={`${pathData} L 300,150 L 0,150 Z`}
+            fill="url(#gradient)"
+            fillOpacity="0.2"
+          />
+          
+          {/* Line */}
+          <path
+            d={pathData}
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="drop-shadow-sm"
+          />
+          
+          {/* Data points */}
+          {points.map((point, index) => (
+            <circle
+              key={index}
+              cx={point.x}
+              cy={point.y}
+              r="4"
+              fill="#3b82f6"
+              stroke="white"
+              strokeWidth="2"
+              className="drop-shadow-sm hover:r-6 transition-all duration-200"
+            />
+          ))}
+          
+          <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.8"/>
+              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.1"/>
+            </linearGradient>
+          </defs>
+        </svg>
       </div>
     );
   };
@@ -896,30 +1125,43 @@ const AccidentEDA = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
-          <ChartContainer title="🏥 Medical Outcomes">
-            <BarChart data={medicalFactors.outcomesDist} />
-          </ChartContainer>
+        {/* Modern Chart Grid with Mixed Types */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+          {/* Row 1: Large charts */}
+          <div className="lg:col-span-7">
+            <ChartContainer title="🏥 Medical Outcomes Distribution" size="default">
+              <DonutChart data={medicalFactors.outcomesDist} colorScheme="mixed" />
+            </ChartContainer>
+          </div>
+          <div className="lg:col-span-5">
+            <ChartContainer title="👥 Age Demographics" size="default">
+              <VerticalBarChart data={demographics.ageGroups} colorScheme="gradient" />
+            </ChartContainer>
+          </div>
 
-          <ChartContainer title="👥 Age Group Distribution">
-            <BarChart data={demographics.ageGroups} />
-          </ChartContainer>
+          {/* Row 2: Medium charts */}
+          <div className="lg:col-span-6">
+            <ChartContainer title="🚗 Collision Type Analysis" size="default">
+              <HorizontalBarChart data={accidentChars.collisionTypes} colorScheme="red" />
+            </ChartContainer>
+          </div>
+          <div className="lg:col-span-3">
+            <ChartContainer title="⚧ Gender Split" size="small">
+              <DonutChart data={demographics.genderDist} colorScheme="mixed" />
+            </ChartContainer>
+          </div>
+          <div className="lg:col-span-3">
+            <ChartContainer title="🌍 Ethnicity" size="small">
+              <DonutChart data={demographics.ethnicityDist} colorScheme="mixed" />
+            </ChartContainer>
+          </div>
 
-          <ChartContainer title="🚗 Collision Types">
-            <BarChart data={accidentChars.collisionTypes} />
-          </ChartContainer>
-                  
-          <ChartContainer title="⚧ Gender Distribution">
-            <BarChart data={demographics.genderDist} />
-          </ChartContainer>
-
-          <ChartContainer title="🌍 Ethnicity Distribution">
-            <BarChart data={demographics.ethnicityDist} />
-          </ChartContainer>
-
-          <ChartContainer title="🎓 Education Levels">
-            <BarChart data={demographics.educationDist} />
-          </ChartContainer>
+          {/* Row 3: Full width chart */}
+          <div className="lg:col-span-12">
+            <ChartContainer title="🎓 Education Level Distribution" size="default">
+              <HorizontalBarChart data={demographics.educationDist} colorScheme="purple" />
+            </ChartContainer>
+          </div>
         </div>
       </div>
     );
@@ -958,53 +1200,88 @@ const AccidentEDA = () => {
     };
 
     return (
-      <div className="space-y-10">
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
-          <ChartContainer title="📅 Monthly Accident Distribution">
-            <BarChart data={monthlyData} />
-          </ChartContainer>
-          
-          <ChartContainer title="📊 Day of Week Distribution">
-            <BarChart data={dailyData} />
-          </ChartContainer>
+      <div className="space-y-8">
+        {/* Temporal Analysis Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Monthly Trends - Line Chart */}
+          <div className="lg:col-span-8">
+            <ChartContainer title="📅 Monthly Accident Trends" size="default">
+              <LineChart data={monthlyData} colorScheme="blue" />
+            </ChartContainer>
+          </div>
+
+          {/* Day of Week - Donut Chart */}
+          <div className="lg:col-span-4">
+            <ChartContainer title="📊 Weekly Pattern" size="default">
+              <DonutChart data={dailyData} colorScheme="mixed" />
+            </ChartContainer>
+          </div>
+
+          {/* Hourly Distribution - Full Width */}
+          <div className="lg:col-span-12">
+            <ChartContainer title="🕒 24-Hour Accident Pattern" size="default">
+              <HorizontalBarChart data={accidentChars.hourlyDistribution} colorScheme="orange" />
+            </ChartContainer>
+          </div>
         </div>
 
-        <ChartContainer title="🕒 Hourly Accident Distribution">
-          <BarChart data={accidentChars.hourlyDistribution} />
-        </ChartContainer>
-
-        <ChartContainer title="🎯 Temporal Patterns Analysis">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-gradient-to-br from-red-50 to-red-100 p-8 rounded-xl border-l-4 border-red-500 shadow-md hover:shadow-lg transition-shadow duration-300">
-              <div className="text-center">
-                <div className="flex justify-center mb-4">
-                  <div className="bg-red-500 p-3 rounded-full">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                </div>
-                <h4 className="text-lg font-bold text-red-800 mb-3">Peak Accident Month</h4>
-                <p className="text-2xl font-bold text-red-700 mb-1">{getTopEntry(monthlyData)[0]}</p>
-                <p className="text-sm text-red-600">{getTopEntry(monthlyData)[1]} accidents</p>
+        {/* Key Insights Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-gradient-to-br from-red-50 via-white to-red-50 p-6 rounded-2xl border border-red-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
+                </svg>
               </div>
-            </div>
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-8 rounded-xl border-l-4 border-orange-500 shadow-md hover:shadow-lg transition-shadow duration-300">
-              <div className="text-center">
-                <div className="flex justify-center mb-4">
-                  <div className="bg-orange-500 p-3 rounded-full">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707" />
-                    </svg>
-                  </div>
-                </div>
-                <h4 className="text-lg font-bold text-orange-800 mb-3">Peak Accident Day</h4>
-                <p className="text-2xl font-bold text-orange-700 mb-1">{getTopEntry(dailyData)[0]}</p>
-                <p className="text-sm text-orange-600">{getTopEntry(dailyData)[1]} accidents</p>
+              <div>
+                <h4 className="text-sm font-semibold text-red-700 mb-1">Peak Month</h4>
+                <p className="text-xl font-bold text-red-800">{getTopEntry(monthlyData)[0]}</p>
+                <p className="text-sm text-red-600">{getTopEntry(monthlyData)[1]} incidents</p>
               </div>
             </div>
           </div>
-        </ChartContainer>
+
+          <div className="bg-gradient-to-br from-orange-50 via-white to-orange-50 p-6 rounded-2xl border border-orange-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-orange-700 mb-1">Peak Day</h4>
+                <p className="text-xl font-bold text-orange-800">{getTopEntry(dailyData)[0]}</p>
+                <p className="text-sm text-orange-600">{getTopEntry(dailyData)[1]} incidents</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-blue-50 via-white to-blue-50 p-6 rounded-2xl border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-blue-700 mb-1">Peak Hour</h4>
+                <p className="text-xl font-bold text-blue-800">
+                  {Object.keys(accidentChars.hourlyDistribution).length > 0 
+                    ? `${getTopEntry(accidentChars.hourlyDistribution)[0]}:00`
+                    : 'N/A'
+                  }
+                </p>
+                <p className="text-sm text-blue-600">
+                  {Object.keys(accidentChars.hourlyDistribution).length > 0 
+                    ? `${getTopEntry(accidentChars.hourlyDistribution)[1]} incidents`
+                    : 'No data'
+                  }
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   };
