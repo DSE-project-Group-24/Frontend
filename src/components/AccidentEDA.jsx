@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import API from '../utils/api';
 
-// Fetch analytics data from backend with optional filters
 const fetchAnalyticsData = async (filters = {}) => {
   try {
     const params = new URLSearchParams();
@@ -808,6 +807,7 @@ const AccidentEDA = () => {
 
     const [hoveredIndex, setHoveredIndex] = useState(null);
     const [hoveredData, setHoveredData] = useState(null);
+    const [isInteracting, setIsInteracting] = useState(false);
 
     const total = Object.values(data).reduce((sum, value) => sum + value, 0);
     const sortedData = Object.entries(data).sort(([,a], [,b]) => b - a).slice(0, 5);
@@ -820,7 +820,17 @@ const AccidentEDA = () => {
       { hex: '#ef4444', bg: 'bg-red-500', name: 'Red' }
     ];
 
-    let cumulativePercentage = 0;
+    // Pre-calculate segments to prevent render issues
+    const segments = React.useMemo(() => {
+      let cumulativePercentage = 0;
+      return sortedData.map(([key, value], index) => {
+        const percentage = (value / total) * 100;
+        const strokeDasharray = `${percentage * 2.199} ${219.9 - percentage * 2.199}`;
+        const strokeDashoffset = -cumulativePercentage * 2.199;
+        cumulativePercentage += percentage;
+        return { key, value, percentage, strokeDasharray, strokeDashoffset, index };
+      });
+    }, [sortedData, total]);
 
     return (
       <div className="flex items-center justify-center space-x-8">
@@ -837,45 +847,62 @@ const AccidentEDA = () => {
               strokeWidth="8"
             />
             {/* Data segments */}
-            {sortedData.map(([key, value], index) => {
-              const percentage = (value / total) * 100;
-              const strokeDasharray = `${percentage * 2.199} ${219.9 - percentage * 2.199}`;
-              const strokeDashoffset = -cumulativePercentage * 2.199;
-              const isHovered = hoveredIndex === index;
-              const isOtherHovered = hoveredIndex !== null && hoveredIndex !== index;
-              cumulativePercentage += percentage;
+            {segments.map((segment) => {
+              const isHovered = hoveredIndex === segment.index;
+              const isOtherHovered = hoveredIndex !== null && hoveredIndex !== segment.index;
               
               return (
-                <circle
-                  key={key}
-                  cx="50"
-                  cy="50"
-                  r={isHovered ? "37" : "35"}
-                  fill="none"
-                  stroke={colors[index % colors.length].hex}
-                  strokeWidth={isHovered ? "10" : "8"}
-                  strokeDasharray={strokeDasharray}
-                  strokeDashoffset={strokeDashoffset}
-                  strokeLinecap="round"
-                  className="transition-all duration-300 ease-in-out cursor-pointer"
-                  style={{ 
-                    animationDelay: `${index * 200}ms`,
-                    filter: isHovered 
-                      ? 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' 
-                      : isOtherHovered 
-                        ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.1)) opacity(0.6)'
-                        : 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
-                    opacity: isOtherHovered ? 0.4 : 1
-                  }}
-                  onMouseEnter={() => {
-                    setHoveredIndex(index);
-                    setHoveredData({ key, value, percentage: percentage.toFixed(1) });
-                  }}
-                  onMouseLeave={() => {
-                    setHoveredIndex(null);
-                    setHoveredData(null);
-                  }}
-                />
+                <g key={segment.key}>
+                  {/* Invisible hover area - larger for better interaction */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="42"
+                    fill="transparent"
+                    stroke="transparent"
+                    strokeWidth="15"
+                    strokeDasharray={segment.strokeDasharray}
+                    strokeDashoffset={segment.strokeDashoffset}
+                    className="cursor-pointer"
+                    onMouseEnter={() => {
+                      setHoveredIndex(segment.index);
+                      setHoveredData({ 
+                        key: segment.key, 
+                        value: segment.value, 
+                        percentage: segment.percentage.toFixed(1) 
+                      });
+                      setIsInteracting(true);
+                    }}
+                    onMouseLeave={() => {
+                      setHoveredIndex(null);
+                      setHoveredData(null);
+                      setIsInteracting(false);
+                    }}
+                  />
+                  
+                  {/* Visible segment */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r={isHovered ? "37" : "35"}
+                    fill="none"
+                    stroke={colors[segment.index % colors.length].hex}
+                    strokeWidth={isHovered ? "10" : "8"}
+                    strokeDasharray={segment.strokeDasharray}
+                    strokeDashoffset={segment.strokeDashoffset}
+                    strokeLinecap="round"
+                    className="transition-all duration-300 ease-in-out pointer-events-none"
+                    style={{ 
+                      animationDelay: `${segment.index * 200}ms`,
+                      filter: isHovered 
+                        ? 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' 
+                        : isOtherHovered 
+                          ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))'
+                          : 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+                      opacity: isOtherHovered ? 0.4 : 1
+                    }}
+                  />
+                </g>
               );
             })}
           </svg>
@@ -910,14 +937,13 @@ const AccidentEDA = () => {
 
         {/* Legend with enhanced hover effects */}
         <div className="space-y-3">
-          {sortedData.map(([key, value], index) => {
-            const percentage = ((value / total) * 100).toFixed(1);
-            const isHovered = hoveredIndex === index;
-            const isOtherHovered = hoveredIndex !== null && hoveredIndex !== index;
+          {segments.map((segment) => {
+            const isHovered = hoveredIndex === segment.index;
+            const isOtherHovered = hoveredIndex !== null && hoveredIndex !== segment.index;
             
             return (
               <div 
-                key={key} 
+                key={segment.key} 
                 className={`flex items-center space-x-3 p-2 rounded-lg transition-all duration-300 cursor-pointer ${
                   isHovered 
                     ? 'bg-blue-50 border-2 border-blue-200 shadow-md scale-105' 
@@ -926,30 +952,36 @@ const AccidentEDA = () => {
                       : 'hover:bg-gray-50'
                 }`}
                 onMouseEnter={() => {
-                  setHoveredIndex(index);
-                  setHoveredData({ key, value, percentage });
+                  setHoveredIndex(segment.index);
+                  setHoveredData({ 
+                    key: segment.key, 
+                    value: segment.value, 
+                    percentage: segment.percentage.toFixed(1) 
+                  });
+                  setIsInteracting(true);
                 }}
                 onMouseLeave={() => {
                   setHoveredIndex(null);
                   setHoveredData(null);
+                  setIsInteracting(false);
                 }}
               >
                 <div 
                   className={`rounded-full shadow-sm border-2 border-white transition-all duration-300 ${
                     isHovered ? 'w-5 h-5' : 'w-4 h-4'
                   }`}
-                  style={{ backgroundColor: colors[index % colors.length].hex }}
+                  style={{ backgroundColor: colors[segment.index % colors.length].hex }}
                 ></div>
                 <div className="flex-1 min-w-0">
                   <div className={`text-sm font-medium text-gray-700 truncate transition-all duration-300 ${
                     isHovered ? 'font-bold' : ''
                   }`}>
-                    {key}
+                    {segment.key}
                   </div>
                   <div className={`text-xs text-gray-500 transition-all duration-300 ${
                     isHovered ? 'text-gray-700 font-semibold' : ''
                   }`}>
-                    {value.toLocaleString()} ({percentage}%)
+                    {segment.value.toLocaleString()} ({segment.percentage.toFixed(1)}%)
                   </div>
                 </div>
                 {isHovered && (
@@ -1907,63 +1939,7 @@ const AccidentEDA = () => {
         )}
         </main>
 
-        {/* Professional Footer */}
-        <footer className="bg-white/80 backdrop-blur-md border-t border-gray-200/50 mt-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div>
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  </div>
-                  <span className="text-lg font-bold text-gray-900">Analytics Platform</span>
-                </div>
-                <p className="text-gray-600 text-sm">
-                  Advanced road accident analytics for evidence-based decision making and improved public safety.
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-4">Analytics</h3>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li>Demographic Analysis</li>
-                  <li>Temporal Patterns</li>
-                  <li>Risk Assessment</li>
-                  <li>Outcome Prediction</li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-4">System Status</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-gray-600">Data Pipeline: Active</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-gray-600">Analytics Engine: Online</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                    <span className="text-gray-600">Last Sync: {new Date().toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="border-t border-gray-200 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-              <p className="text-sm text-gray-500">
-                © {new Date().getFullYear()} Road Safety Analytics Platform. All rights reserved.
-              </p>
-              <div className="flex items-center space-x-4 mt-4 md:mt-0">
-                <span className="text-xs text-gray-400">Powered by Advanced Analytics</span>
-              </div>
-            </div>
-          </div>
-        </footer>
+        
       </div>
     </div>
   );

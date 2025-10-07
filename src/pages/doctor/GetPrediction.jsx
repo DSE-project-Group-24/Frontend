@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, Activity, MapPin, DollarSign, Users, Home, Building, Stethoscope, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import DoctorNav from '../../navbars/DoctorNav';
+import Footer from '../../components/Footer';
 
 const GetPrediction = ({ setIsAuthenticated, setRole }) => {
   const [formData, setFormData] = useState({
@@ -661,6 +662,7 @@ const GetPrediction = ({ setIsAuthenticated, setRole }) => {
           </div>
         )}
       </div>
+      <Footer/>
     </div>
   );
 };

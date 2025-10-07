@@ -1,6 +1,7 @@
 import React from 'react';
 import DoctorNav from '../../navbars/DoctorNav';
 import AccidentEDA from '../../components/AccidentEDA';
+import Footer from '../../components/Footer';
 
 const DashboardDoctor = ({ setIsAuthenticated, setRole }) => {
   return (
@@ -20,7 +21,9 @@ const DashboardDoctor = ({ setIsAuthenticated, setRole }) => {
 
         {/* EDA Component */}
         <AccidentEDA />
+        
       </div>
+        <Footer />
     </div>
   );
 };
