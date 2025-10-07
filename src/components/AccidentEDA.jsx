@@ -1114,74 +1114,252 @@ const AccidentEDA = () => {
     );
   };
 
-  // Modern Line Chart (simplified)
+  // Enhanced Monthly Trends Line Chart with Dynamic Movements
   const LineChart = ({ data, colorScheme = "blue" }) => {
     if (!data || Object.keys(data).length === 0) return <EmptyChart />;
+
+    const [hoveredPoint, setHoveredPoint] = useState(null);
+    const [animationPhase, setAnimationPhase] = useState(0);
+    const [isInteracting, setIsInteracting] = useState(false);
 
     const maxValue = Math.max(...Object.values(data));
     const minValue = Math.min(...Object.values(data));
     const range = maxValue - minValue || 1;
+    const total = Object.values(data).reduce((sum, val) => sum + val, 0);
     
-    const points = Object.entries(data).map(([key, value], index, arr) => {
-      const x = (index / (arr.length - 1)) * 300;
-      const y = 150 - ((value - minValue) / range) * 120;
-      return { x, y, value, key };
+    // Ensure months are ordered correctly
+    const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const sortedData = Object.entries(data).sort(([a], [b]) => {
+      const indexA = monthOrder.indexOf(a);
+      const indexB = monthOrder.indexOf(b);
+      return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+    });
+    
+    const points = sortedData.map(([key, value], index, arr) => {
+      const x = 40 + (index / Math.max(arr.length - 1, 1)) * 220; // Added margins
+      const y = 30 + (1 - (value - minValue) / range) * 90; // Added margins
+      return { x, y, value, key, index };
     });
 
     const pathData = points.map((point, index) => 
       `${index === 0 ? 'M' : 'L'} ${point.x},${point.y}`
     ).join(' ');
 
+    // Animation effect - only when not interacting
+    React.useEffect(() => {
+      if (isInteracting) return;
+      
+      const timer = setInterval(() => {
+        setAnimationPhase(prev => (prev + 1) % 100);
+      }, 150);
+      return () => clearInterval(timer);
+    }, [isInteracting]);
+
     return (
-      <div className="h-48 relative">
-        <svg viewBox="0 0 300 150" className="w-full h-full">
-          {/* Grid lines */}
+      <div className="h-64 relative bg-gradient-to-br from-blue-50/30 to-white rounded-xl p-4">
+        {/* Dynamic header with hover info */}
+        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 text-center mb-4 z-10">
+          <div className="transition-all duration-300">
+            {hoveredPoint !== null ? (
+              <div className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg">
+                <div className="text-sm font-semibold">
+                  {points[hoveredPoint].key} 2024
+                </div>
+                <div className="text-lg font-bold">
+                  {points[hoveredPoint].value.toLocaleString()} accidents
+                </div>
+                <div className="text-xs opacity-90">
+                  {((points[hoveredPoint].value / total) * 100).toFixed(1)}% of yearly total
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white/90 backdrop-blur-md px-3 py-1 rounded-lg shadow-md text-sm text-gray-600">
+                Yearly Total: {total.toLocaleString()} accidents
+              </div>
+            )}
+          </div>
+        </div>
+
+        <svg viewBox="0 0 300 150" className="w-full h-full mt-8">
+          {/* Enhanced Grid */}
           <defs>
-            <pattern id="grid" width="30" height="15" patternUnits="userSpaceOnUse">
-              <path d="M 30 0 L 0 0 0 15" fill="none" stroke="#f3f4f6" strokeWidth="0.5"/>
+            <pattern id="monthlyGrid" width="25" height="15" patternUnits="userSpaceOnUse">
+              <path d="M 25 0 L 0 0 0 15" fill="none" stroke="#e5e7eb" strokeWidth="0.5" opacity="0.7"/>
             </pattern>
+            <linearGradient id="monthlyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3"/>
+              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.05"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge> 
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
           </defs>
-          <rect width="300" height="150" fill="url(#grid)" />
           
-          {/* Area under curve */}
+          <rect width="300" height="150" fill="url(#monthlyGrid)" />
+          
+          {/* Animated area under curve */}
           <path
-            d={`${pathData} L 300,150 L 0,150 Z`}
-            fill="url(#gradient)"
-            fillOpacity="0.2"
+            d={`M 40,120 ${pathData.replace('M', 'L')} L 260,120 Z`}
+            fill="url(#monthlyGradient)"
+            className="transition-all duration-1000"
+            style={{
+              animationDelay: '500ms',
+              opacity: hoveredPoint !== null ? 0.6 : 0.3
+            }}
           />
           
-          {/* Line */}
+          {/* Main trend line with stable animation */}
           <path
             d={pathData}
             fill="none"
             stroke="#3b82f6"
-            strokeWidth="3"
+            strokeWidth={hoveredPoint !== null ? "4" : "3"}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="drop-shadow-sm"
+            filter="url(#glow)"
+            className="transition-all duration-300"
           />
           
-          {/* Data points */}
+          {/* Interactive data points */}
+          {points.map((point, index) => {
+            const isHovered = hoveredPoint === index;
+            const isAdjacent = hoveredPoint !== null && Math.abs(hoveredPoint - index) === 1;
+            
+            return (
+              <g key={index}>
+                {/* Hover area - larger invisible circle for better interaction */}
+                <circle
+                  cx={point.x}
+                  cy={point.y}
+                  r="15"
+                  fill="transparent"
+                  className="cursor-pointer"
+                  onMouseEnter={() => {
+                    setHoveredPoint(index);
+                    setIsInteracting(true);
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredPoint(null);
+                    setIsInteracting(false);
+                  }}
+                />
+                
+                {/* Outer ring animation */}
+                <circle
+                  cx={point.x}
+                  cy={point.y}
+                  r={isHovered ? "12" : "8"}
+                  fill="none"
+                  stroke="#3b82f6"
+                  strokeWidth="1"
+                  opacity={isHovered ? 0.3 : 0}
+                  className="transition-all duration-300 pointer-events-none"
+                  style={{
+                    animation: isHovered ? 'pulse 2s infinite' : 'none'
+                  }}
+                />
+                
+                {/* Main point */}
+                <circle
+                  cx={point.x}
+                  cy={point.y}
+                  r={isHovered ? "6" : isAdjacent ? "5" : "4"}
+                  fill={isHovered ? "#1d4ed8" : "#3b82f6"}
+                  stroke="white"
+                  strokeWidth="2"
+                  className="transition-all duration-300 pointer-events-none"
+                  style={{
+                    filter: isHovered ? 'drop-shadow(0 4px 8px rgba(59, 130, 246, 0.4))' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+                    transform: isHovered ? 'scale(1.2)' : 'scale(1)'
+                  }}
+                />
+                
+                {/* Value label on hover */}
+                {isHovered && (
+                  <g>
+                    <rect
+                      x={point.x - 20}
+                      y={point.y - 25}
+                      width="40"
+                      height="15"
+                      fill="#1f2937"
+                      rx="3"
+                      opacity="0.9"
+                    />
+                    <text
+                      x={point.x}
+                      y={point.y - 15}
+                      textAnchor="middle"
+                      fill="white"
+                      fontSize="10"
+                      fontWeight="bold"
+                    >
+                      {point.value}
+                    </text>
+                  </g>
+                )}
+              </g>
+            );
+          })}
+          
+          {/* Month labels */}
           {points.map((point, index) => (
-            <circle
-              key={index}
-              cx={point.x}
-              cy={point.y}
-              r="4"
-              fill="#3b82f6"
-              stroke="white"
-              strokeWidth="2"
-              className="drop-shadow-sm hover:r-6 transition-all duration-200"
-            />
+            <text
+              key={`label-${index}`}
+              x={point.x}
+              y="140"
+              textAnchor="middle"
+              fontSize="10"
+              fontWeight={hoveredPoint === index ? "bold" : "normal"}
+              fill={hoveredPoint === index ? "#1d4ed8" : "#6b7280"}
+              className="transition-all duration-300"
+            >
+              {point.key}
+            </text>
           ))}
           
-          <defs>
-            <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.8"/>
-              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.1"/>
-            </linearGradient>
-          </defs>
+          {/* Y-axis value indicators */}
+          {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
+            const y = 30 + (1 - ratio) * 90;
+            const value = Math.round(minValue + ratio * range);
+            return (
+              <g key={idx}>
+                <line x1="35" y1={y} x2="40" y2={y} stroke="#9ca3af" strokeWidth="1"/>
+                <text x="30" y={y + 3} textAnchor="end" fontSize="8" fill="#6b7280">
+                  {value}
+                </text>
+              </g>
+            );
+          })}
         </svg>
+
+        {/* Floating stats panel */}
+        {hoveredPoint !== null && (
+          <div className="absolute bottom-4 right-4 bg-white shadow-xl rounded-lg p-3 border border-gray-200 z-10">
+            <div className="text-xs text-gray-500 mb-1">Month Details</div>
+            <div className="text-sm font-semibold text-gray-800">
+              {points[hoveredPoint].key} 2024
+            </div>
+            <div className="text-lg font-bold text-blue-600">
+              {points[hoveredPoint].value.toLocaleString()}
+            </div>
+            <div className="text-xs text-gray-500">
+              Rank #{points[hoveredPoint].index + 1} of {points.length}
+            </div>
+          </div>
+        )}
+
+        {/* CSS animations */}
+        <style jsx>{`
+          @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.1; transform: scale(1.1); }
+          }
+        `}</style>
       </div>
     );
   };
@@ -1358,8 +1536,9 @@ const AccidentEDA = () => {
     const dailyData = {};
     
     // Convert numeric month/day keys to readable names
+    // Backend sends months as 1-12, so we need to subtract 1 for array indexing
     Object.entries(temporalTrends.monthlyTrends || {}).forEach(([month, count]) => {
-      const monthIndex = parseInt(month);
+      const monthIndex = parseInt(month) - 1; // Convert 1-12 to 0-11
       if (monthIndex >= 0 && monthIndex < 12) {
         monthlyData[monthNames[monthIndex]] = count;
       } else {
