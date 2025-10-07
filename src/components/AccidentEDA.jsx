@@ -818,11 +818,11 @@ const AccidentEDA = () => {
     const sortedData = Object.entries(data).sort(([,a], [,b]) => b - a).slice(0, 5);
     
     const colors = [
-      { bg: 'bg-blue-500', border: 'border-blue-600', text: 'text-blue-700' },
-      { bg: 'bg-emerald-500', border: 'border-emerald-600', text: 'text-emerald-700' },
-      { bg: 'bg-amber-500', border: 'border-amber-600', text: 'text-amber-700' },
-      { bg: 'bg-purple-500', border: 'border-purple-600', text: 'text-purple-700' },
-      { bg: 'bg-rose-500', border: 'border-rose-600', text: 'text-rose-700' }
+      { hex: '#3b82f6', bg: 'bg-blue-500', name: 'Blue' },
+      { hex: '#10b981', bg: 'bg-emerald-500', name: 'Emerald' },
+      { hex: '#f59e0b', bg: 'bg-amber-500', name: 'Amber' },
+      { hex: '#8b5cf6', bg: 'bg-purple-500', name: 'Purple' },
+      { hex: '#ef4444', bg: 'bg-red-500', name: 'Red' }
     ];
 
     let cumulativePercentage = 0;
@@ -832,6 +832,7 @@ const AccidentEDA = () => {
         {/* Donut Chart Visual */}
         <div className="relative w-48 h-48">
           <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+            {/* Background circle */}
             <circle
               cx="50"
               cy="50"
@@ -840,6 +841,7 @@ const AccidentEDA = () => {
               stroke="#f3f4f6"
               strokeWidth="8"
             />
+            {/* Data segments */}
             {sortedData.map(([key, value], index) => {
               const percentage = (value / total) * 100;
               const strokeDasharray = `${percentage * 2.199} ${219.9 - percentage * 2.199}`;
@@ -853,13 +855,16 @@ const AccidentEDA = () => {
                   cy="50"
                   r="35"
                   fill="none"
-                  stroke={colors[index % colors.length].bg.replace('bg-', '#').replace('-500', '')}
+                  stroke={colors[index % colors.length].hex}
                   strokeWidth="8"
                   strokeDasharray={strokeDasharray}
                   strokeDashoffset={strokeDashoffset}
                   strokeLinecap="round"
-                  className="transition-all duration-700 ease-in-out"
-                  style={{ animationDelay: `${index * 200}ms` }}
+                  className="transition-all duration-700 ease-in-out hover:stroke-opacity-80"
+                  style={{ 
+                    animationDelay: `${index * 200}ms`,
+                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+                  }}
                 />
               );
             })}
@@ -877,8 +882,11 @@ const AccidentEDA = () => {
           {sortedData.map(([key, value], index) => {
             const percentage = ((value / total) * 100).toFixed(1);
             return (
-              <div key={key} className="flex items-center space-x-3">
-                <div className={`w-4 h-4 rounded-full ${colors[index % colors.length].bg} shadow-sm`}></div>
+              <div key={key} className="flex items-center space-x-3 group hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200">
+                <div 
+                  className="w-4 h-4 rounded-full shadow-sm border-2 border-white"
+                  style={{ backgroundColor: colors[index % colors.length].hex }}
+                ></div>
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-gray-700 truncate">{key}</div>
                   <div className="text-xs text-gray-500">{value.toLocaleString()} ({percentage}%)</div>
@@ -1469,10 +1477,8 @@ const AccidentEDA = () => {
             </div>
           </div>
 
-
-
         {/* Tab Content */}
-        <div className="tab-content px-4">
+        <div className="tab-content py-8 px-4 mt-12">
           {tabs.find(tab => tab.id === activeTab)?.component()}
         </div>
 
