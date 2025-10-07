@@ -162,7 +162,6 @@ const AccidentEDA = () => {
     const genderDist = {};
     const ethnicityDist = {};
     const educationDist = {};
-    const occupationDist = {};
 
     data.forEach(record => {
       const patientData = record.patient_data;
@@ -205,16 +204,10 @@ const AccidentEDA = () => {
         if (education) {
           educationDist[education] = (educationDist[education] || 0) + 1;
         }
-
-        // Occupation
-        const occupation = patientData.Occupation;
-        if (occupation) {
-          occupationDist[occupation] = (occupationDist[occupation] || 0) + 1;
-        }
       }
     });
 
-    return { age_groups: ageGroups, gender_dist: genderDist, ethnicity_dist: ethnicityDist, education_dist: educationDist, occupation_dist: occupationDist };
+    return { age_groups: ageGroups, gender_dist: genderDist, ethnicity_dist: ethnicityDist, education_dist: educationDist };
   };
 
   const calculateMedicalFactors = (data) => {
@@ -653,8 +646,7 @@ const AccidentEDA = () => {
     ageGroups: analyticsData.demographics?.age_groups || {},
     genderDist: analyticsData.demographics?.gender_dist || {},
     ethnicityDist: analyticsData.demographics?.ethnicity_dist || {},
-    educationDist: analyticsData.demographics?.education_dist || {},
-    occupationDist: analyticsData.demographics?.occupation_dist || {}
+    educationDist: analyticsData.demographics?.education_dist || {}
   };
 
   const medicalFactors = {
@@ -1591,13 +1583,7 @@ const AccidentEDA = () => {
                         <span><strong>Gender:</strong> {Object.entries(demographics.genderDist).sort((a,b) => b[1] - a[1])[0][0]} ({Math.round((Object.entries(demographics.genderDist).sort((a,b) => b[1] - a[1])[0][1] / (analyticsData.total_records || 1)) * 100)}% of cases)</span>
                       </li>
                     )}
-                    {Object.keys(demographics.occupationDist).length > 0 && (
-                      <li className="flex items-start">
-                        <span className="text-blue-500 mr-2">💼</span>
-                        <span><strong>Occupation:</strong> {Object.entries(demographics.occupationDist).sort((a,b) => b[1] - a[1])[0][0]} (most affected)</span>
-                      </li>
-                    )}
-                    {Object.keys(demographics.ageGroups).length === 0 && Object.keys(demographics.genderDist).length === 0 && Object.keys(demographics.occupationDist).length === 0 && (
+                    {Object.keys(demographics.ageGroups).length === 0 && Object.keys(demographics.genderDist).length === 0 && (
                       <li className="text-gray-500 text-center py-4">
                         <div className="bg-gray-100 rounded-lg p-4">
                           <span>📋 No demographic data available for current filters</span>
