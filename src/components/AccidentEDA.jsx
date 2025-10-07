@@ -907,29 +907,36 @@ const AccidentEDA = () => {
     const sortedData = Object.entries(data).sort(([,a], [,b]) => b - a).slice(0, 8);
     
     return (
-      <div className="h-64">
-        <div className="flex items-end justify-center space-x-2 h-full px-4">
+      <div className="h-80">
+        <div className="flex items-end justify-center space-x-4 h-full px-4 pb-16">
           {sortedData.map(([key, value], index) => {
-            const height = maxValue > 0 ? (value / maxValue) * 200 : 0;
+            const height = maxValue > 0 ? (value / maxValue) * 180 : 0;
             const hue = (index * 45) % 360;
             
             return (
-              <div key={key} className="flex flex-col items-center space-y-2 group">
-                <div className="relative">
+              <div key={key} className="flex flex-col items-center group">
+                <div className="relative mb-3">
+                  {/* Value label above bar */}
+                  <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-semibold text-gray-700 whitespace-nowrap">
+                    {value.toLocaleString()}
+                  </div>
+                  {/* Bar */}
                   <div
-                    className="w-8 rounded-t-lg transition-all duration-700 ease-out shadow-lg hover:shadow-xl group-hover:scale-105"
+                    className="w-12 rounded-t-lg transition-all duration-700 ease-out shadow-lg hover:shadow-xl group-hover:scale-105 relative"
                     style={{
                       height: `${height}px`,
                       background: `linear-gradient(to top, hsl(${hue}, 70%, 50%), hsl(${hue}, 70%, 60%))`,
                       animationDelay: `${index * 100}ms`
                     }}
                   />
-                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-                    {value.toLocaleString()}
+                  {/* Hover tooltip */}
+                  <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-10">
+                    {key}: {value.toLocaleString()}
                   </div>
                 </div>
-                <div className="text-xs text-gray-600 transform -rotate-45 origin-top-left w-16 text-center">
-                  {key.length > 8 ? `${key.substring(0, 8)}...` : key}
+                {/* Age range label below bar - no rotation, full text */}
+                <div className="text-xs font-medium text-gray-700 text-center whitespace-nowrap mt-2">
+                  {key}
                 </div>
               </div>
             );
