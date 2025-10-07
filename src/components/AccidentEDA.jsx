@@ -1,10 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import API from '../utils/api';
 
-// Fetch analytics data from backend
-const fetchAnalyticsData = async () => {
+// Fetch analytics data from backend with optional filters
+const fetchAnalyticsData = async (filters = {}) => {
   try {
-    const response = await API.get('/analytics');
+    const params = new URLSearchParams();
+    
+    // Add filters as query parameters
+    if (filters.start_date) params.append('start_date', filters.start_date);
+    if (filters.end_date) params.append('end_date', filters.end_date);
+    if (filters.gender) params.append('gender', filters.gender);
+    if (filters.age_min !== undefined && filters.age_min !== null) params.append('age_min', filters.age_min);
+    if (filters.age_max !== undefined && filters.age_max !== null) params.append('age_max', filters.age_max);
+    if (filters.ethnicity) params.append('ethnicity', filters.ethnicity);
+    if (filters.collision_type) params.append('collision_type', filters.collision_type);
+    if (filters.road_category) params.append('road_category', filters.road_category);
+    if (filters.discharge_outcome) params.append('discharge_outcome', filters.discharge_outcome);
+    
+    const url = `/analytics${params.toString() ? '?' + params.toString() : ''}`;
+    const response = await API.get(url);
     return response.data; 
   } catch (error) {
     console.error('Error fetching analytics data:', error);
@@ -12,10 +26,17 @@ const fetchAnalyticsData = async () => {
   }
 };
 
-// Fetch summary data from backend
-const fetchSummaryData = async () => {
+// Fetch summary data from backend with optional filters
+const fetchSummaryData = async (filters = {}) => {
   try {
-    const response = await API.get('/analytics/summary');
+    const params = new URLSearchParams();
+    
+    // Add date filters for summary
+    if (filters.start_date) params.append('start_date', filters.start_date);
+    if (filters.end_date) params.append('end_date', filters.end_date);
+    
+    const url = `/analytics/summary${params.toString() ? '?' + params.toString() : ''}`;
+    const response = await API.get(url);
     return response.data; 
   } catch (error) {
     console.error('Error fetching summary data:', error);
@@ -23,12 +44,268 @@ const fetchSummaryData = async () => {
   }
 };
 
+// Fetch filter options from backend (initial load to get available options)
+const fetchFilterOptions = async () => {
+  try {
+    const response = await API.get('/analytics');
+    console.log('Filter options response:', response.data);
+    return response.data; 
+  } catch (error) {
+    console.error('Error fetching filter options:', error);
+    throw error;
+  }
+};
+
 const AccidentEDA = () => {
   const [analyticsData, setAnalyticsData] = useState(null);
   const [summaryData, setSummaryData] = useState(null);
+  const [filterOptions, setFilterOptions] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [applying, setApplying] = useState(false);
+
+  // Backend filter states
+  const [filters, setFilters] = useState({
+    start_date: '',
+    end_date: '',
+    gender: '',
+    age_min: '',
+    age_max: '',
+    ethnicity: '',
+    collision_type: '',
+    road_category: '',
+    discharge_outcome: ''
+  });
+
+  // Apply filters by fetching filtered data from backend
+  const applyFilters = async () => {
+    try {
+      setApplying(true);
+      setError(null);
+
+      // Build filter object for API call
+      const apiFilters = {};
+      
+      if (filters.start_date) apiFilters.start_date = filters.start_date;
+      if (filters.end_date) apiFilters.end_date = filters.end_date;
+      if (filters.gender) apiFilters.gender = filters.gender;
+      if (filters.age_min) apiFilters.age_min = parseInt(filters.age_min);
+      if (filters.age_max) apiFilters.age_max = parseInt(filters.age_max);
+      if (filters.ethnicity) apiFilters.ethnicity = filters.ethnicity;
+      if (filters.collision_type) apiFilters.collision_type = filters.collision_type;
+      if (filters.road_category) apiFilters.road_category = filters.road_category;
+      if (filters.discharge_outcome) apiFilters.discharge_outcome = filters.discharge_outcome;
+
+      // Fetch filtered data from backend
+      const [analytics, summary] = await Promise.all([
+        fetchAnalyticsData(apiFilters),
+        fetchSummaryData(apiFilters)
+      ]);
+
+      setAnalyticsData(analytics);
+      setSummaryData(summary);
+    } catch (err) {
+      console.error('Failed to apply filters:', err);
+      setError(`Failed to apply filters: ${err.message}`);
+    } finally {
+      setApplying(false);
+    }
+  };
+
+  // Analytics calculation functions
+  const calculateAccidentCharacteristics = (data) => {
+    const hourlyDistribution = {};
+    const collisionTypes = {};
+    const travelModes = {};
+    const roadCategories = {};
+
+    data.forEach(record => {
+      // Hourly distribution
+      const timeStr = record['time of collision'];
+      if (timeStr && timeStr !== 'Victim Unable to recall the Time or Early Discharge') {
+        try {
+          if (timeStr.includes(':')) {
+            let hour = parseInt(timeStr.split(':')[0]);
+            if (timeStr.toUpperCase().includes('PM') && hour !== 12) hour += 12;
+            if (timeStr.toUpperCase().includes('AM') && hour === 12) hour = 0;
+            hourlyDistribution[hour] = (hourlyDistribution[hour] || 0) + 1;
+          }
+        } catch (e) {}
+      }
+
+      // Collision types
+      const collision = record['Collision with'];
+      if (collision && collision !== 'Victim not willing to share/ Unable to respond/  Early Discharge') {
+        collisionTypes[collision] = (collisionTypes[collision] || 0) + 1;
+      }
+
+      // Travel modes
+      const travelMode = record['Mode of traveling during accident'];
+      if (travelMode) {
+        travelModes[travelMode] = (travelModes[travelMode] || 0) + 1;
+      }
+
+      // Road categories
+      const roadCategory = record['Category of Road'];
+      if (roadCategory && roadCategory !== 'Victim not willing to share/ Unable to respond/  Early Discharge') {
+        roadCategories[roadCategory] = (roadCategories[roadCategory] || 0) + 1;
+      }
+    });
+
+    return { hourly_distribution: hourlyDistribution, collision_types: collisionTypes, travel_modes: travelModes, road_categories: roadCategories };
+  };
+
+  const calculateDemographics = (data) => {
+    const ageGroups = {};
+    const genderDist = {};
+    const ethnicityDist = {};
+    const educationDist = {};
+    const occupationDist = {};
+
+    data.forEach(record => {
+      const patientData = record.patient_data;
+      if (patientData) {
+        // Age groups
+        const dob = patientData['Date of Birth'];
+        if (dob) {
+          try {
+            const birthDate = new Date(dob);
+            const today = new Date();
+            const age = today.getFullYear() - birthDate.getFullYear() - 
+              ((today.getMonth(), today.getDate()) < (birthDate.getMonth(), birthDate.getDate()) ? 1 : 0);
+            
+            let ageGroup;
+            if (age < 18) ageGroup = 'Under 18';
+            else if (age <= 25) ageGroup = '18-25';
+            else if (age <= 35) ageGroup = '26-35';
+            else if (age <= 45) ageGroup = '36-45';
+            else if (age <= 55) ageGroup = '46-55';
+            else ageGroup = '56+';
+
+            ageGroups[ageGroup] = (ageGroups[ageGroup] || 0) + 1;
+          } catch (e) {}
+        }
+
+        // Gender
+        const gender = patientData.Gender;
+        if (gender) {
+          genderDist[gender] = (genderDist[gender] || 0) + 1;
+        }
+
+        // Ethnicity
+        const ethnicity = patientData.Ethnicity;
+        if (ethnicity) {
+          ethnicityDist[ethnicity] = (ethnicityDist[ethnicity] || 0) + 1;
+        }
+
+        // Education
+        const education = patientData['Education Qualification'];
+        if (education) {
+          educationDist[education] = (educationDist[education] || 0) + 1;
+        }
+
+        // Occupation
+        const occupation = patientData.Occupation;
+        if (occupation) {
+          occupationDist[occupation] = (occupationDist[occupation] || 0) + 1;
+        }
+      }
+    });
+
+    return { age_groups: ageGroups, gender_dist: genderDist, ethnicity_dist: ethnicityDist, education_dist: educationDist, occupation_dist: occupationDist };
+  };
+
+  const calculateMedicalFactors = (data) => {
+    const outcomesDist = {};
+    let expenditures = [];
+
+    data.forEach(record => {
+      const outcome = record['Discharge Outcome'];
+      if (outcome) {
+        outcomesDist[outcome] = (outcomesDist[outcome] || 0) + 1;
+      }
+
+      const bystanderExp = record['Bystander expenditure per day'];
+      if (bystanderExp && bystanderExp !== '0') {
+        try {
+          expenditures.push(parseFloat(bystanderExp));
+        } catch (e) {}
+      }
+    });
+
+    const avgHospitalExpenditure = expenditures.length > 0 ? expenditures.reduce((a, b) => a + b, 0) / expenditures.length : 0;
+
+    return { outcomes_dist: outcomesDist, wash_room_access: {}, toilet_modification: {}, avg_hospital_expenditure: avgHospitalExpenditure };
+  };
+
+  const calculateFinancialImpact = (data) => {
+    const incomeComparison = {};
+    const familyStatusDist = {};
+    const insuranceClaimDist = {};
+    let bystanderExpenses = [];
+    let incomeChanges = [];
+
+    data.forEach(record => {
+      // Family status
+      const familyStatus = record['Family current status'];
+      if (familyStatus && familyStatus !== 'Victim not willing to share/ Unable to respond/  Early Discharge') {
+        familyStatusDist[familyStatus] = (familyStatusDist[familyStatus] || 0) + 1;
+      }
+
+      // Insurance
+      const vehicleInsured = record['vehicle insured'];
+      if (vehicleInsured && vehicleInsured !== 'Victim not willing to share/ Unable to respond/  Early Discharge') {
+        insuranceClaimDist[vehicleInsured] = (insuranceClaimDist[vehicleInsured] || 0) + 1;
+      }
+
+      // Income comparison would need more complex parsing
+      // Simplified for now
+      incomeComparison['same'] = (incomeComparison['same'] || 0) + 1;
+    });
+
+    const avgIncomeChange = incomeChanges.length > 0 ? incomeChanges.reduce((a, b) => a + b, 0) / incomeChanges.length : 0;
+    const avgBystanderExp = bystanderExpenses.length > 0 ? bystanderExpenses.reduce((a, b) => a + b, 0) / bystanderExpenses.length : 0;
+
+    return { income_comparison: incomeComparison, avg_income_change: avgIncomeChange, family_status_dist: familyStatusDist, insurance_claim_dist: insuranceClaimDist, avg_bystander_exp: avgBystanderExp, avg_travel_exp: 0 };
+  };
+
+  const calculateTemporalTrends = (data) => {
+    const monthlyTrends = {};
+    const dailyTrends = {};
+
+    data.forEach(record => {
+      if (record.incident_year && record.incident_month) {
+        monthlyTrends[record.incident_month] = (monthlyTrends[record.incident_month] || 0) + 1;
+      }
+
+      const incidentDate = record['incident at date'];
+      if (incidentDate) {
+        try {
+          const date = new Date(incidentDate);
+          const dayOfWeek = date.getDay();
+          dailyTrends[dayOfWeek] = (dailyTrends[dayOfWeek] || 0) + 1;
+        } catch (e) {}
+      }
+    });
+
+    return { monthly_trends: monthlyTrends, daily_trends: dailyTrends };
+  };
+
+  const calculateDataQuality = (data) => {
+    const complete = data.filter(record => 
+      record['incident at date'] && 
+      record.patient_data && 
+      record.patient_data.Gender
+    ).length;
+
+    return {
+      quality_dist: { 'Complete': complete, 'Missing/Incomplete': data.length - complete },
+      total_records: data.length,
+      completion_rate: data.length > 0 ? (complete / data.length) * 100 : 0
+    };
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -36,14 +313,16 @@ const AccidentEDA = () => {
         setLoading(true);
         setError(null);
         
-        // Fetch both analytics and summary data
-        const [analytics, summary] = await Promise.all([
+        // Fetch initial data without filters (all data)
+        const [analytics, summary, filterOpts] = await Promise.all([
           fetchAnalyticsData(),
-          fetchSummaryData()
+          fetchSummaryData(),
+          fetchFilterOptions()
         ]);
         
         setAnalyticsData(analytics);
         setSummaryData(summary);
+        setFilterOptions(filterOpts);
       } catch (err) {
         console.error('Failed to load data:', err);
         setError(`Failed to load data: ${err.message}`);
@@ -54,6 +333,300 @@ const AccidentEDA = () => {
 
     loadData();
   }, []);
+
+  const handleFilterChange = (filterType, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterType]: value
+    }));
+  };
+
+  const clearAllFilters = () => {
+    setFilters({
+      start_date: '',
+      end_date: '',
+      gender: '',
+      age_min: '',
+      age_max: '',
+      ethnicity: '',
+      collision_type: '',
+      road_category: '',
+      discharge_outcome: ''
+    });
+  };
+
+  const FilterSidebar = () => {
+    if (!filterOptions) return null;
+
+    return (
+      <>
+        {/* Sidebar Toggle Button */}
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="fixed top-1/2 left-4 z-40 bg-blue-500 text-white p-3 rounded-r-lg shadow-lg hover:bg-blue-600 transition-all duration-300 transform -translate-y-1/2"
+          style={{ display: sidebarOpen ? 'none' : 'block' }}
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707L9 19.414V15a1 1 0 00-.293-.707L2.293 7.707A1 1 0 012 7V4z" />
+          </svg>
+        </button>
+
+        {/* Sidebar Overlay */}
+        {sidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* Sidebar */}
+        <div className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}>
+          <div className="p-6 h-full overflow-y-auto">
+            {/* Sidebar Header */}
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-800 flex items-center">
+                <svg className="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707L9 19.414V15a1 1 0 00-.293-.707L2.293 7.707A1 1 0 012 7V4z" />
+                </svg>
+                Filters
+              </h2>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="text-gray-500 hover:text-gray-700 p-1"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Filter Controls */}
+            <div className="space-y-6">
+              {/* Date Range Filters */}
+              <div className="filter-group">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">📅 Date Range</label>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">Start Date</label>
+                    <input
+                      type="date"
+                      value={filters.start_date}
+                      onChange={(e) => handleFilterChange('start_date', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">End Date</label>
+                    <input
+                      type="date"
+                      value={filters.end_date}
+                      onChange={(e) => handleFilterChange('end_date', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Gender Filter */}
+              <div className="filter-group">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">⚧ Gender</label>
+                <select
+                  value={filters.gender}
+                  onChange={(e) => handleFilterChange('gender', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">All Genders</option>
+                  {filterOptions.genders?.map(gender => (
+                    <option key={gender} value={gender}>{gender}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Age Range Filter */}
+              <div className="filter-group">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">👥 Age Range</label>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">Minimum Age</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="120"
+                      value={filters.age_min}
+                      onChange={(e) => handleFilterChange('age_min', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Min age"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1">Maximum Age</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="120"
+                      value={filters.age_max}
+                      onChange={(e) => handleFilterChange('age_max', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Max age"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Ethnicity Filter */}
+              <div className="filter-group">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">🌍 Ethnicity</label>
+                <select
+                  value={filters.ethnicity}
+                  onChange={(e) => handleFilterChange('ethnicity', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">All Ethnicities</option>
+                  {filterOptions.ethnicities?.map(ethnicity => (
+                    <option key={ethnicity} value={ethnicity}>{ethnicity}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Collision Type Filter */}
+              <div className="filter-group">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">🚗 Collision Type</label>
+                <select
+                  value={filters.collision_type}
+                  onChange={(e) => handleFilterChange('collision_type', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">All Collision Types</option>
+                  {filterOptions.collision_types?.map(collision => (
+                    <option key={collision} value={collision}>{collision}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Road Category Filter */}
+              <div className="filter-group">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">🛣️ Road Category</label>
+                <select
+                  value={filters.road_category}
+                  onChange={(e) => handleFilterChange('road_category', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">All Road Categories</option>
+                  {filterOptions.road_categories?.map(road => (
+                    <option key={road} value={road}>{road}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Discharge Outcome Filter */}
+              <div className="filter-group">
+                <label className="block text-sm font-semibold text-gray-700 mb-3">🏥 Discharge Outcome</label>
+                <select
+                  value={filters.discharge_outcome}
+                  onChange={(e) => handleFilterChange('discharge_outcome', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">All Outcomes</option>
+                  {filterOptions.discharge_outcomes?.map(outcome => (
+                    <option key={outcome} value={outcome}>{outcome}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="mt-8 pt-6 border-t border-gray-200 space-y-3">
+              <button
+                onClick={applyFilters}
+                disabled={applying}
+                className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition-colors duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {applying ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Applying...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707L9 19.414V15a1 1 0 00-.293-.707L2.293 7.707A1 1 0 012 7V4z" />
+                    </svg>
+                    Apply Filters
+                  </>
+                )}
+              </button>
+              
+              <button
+                onClick={clearAllFilters}
+                className="w-full bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors duration-200 flex items-center justify-center"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Clear All
+              </button>
+            </div>
+
+            {/* Active Filters Display */}
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">Active Filters</h4>
+              <div className="space-y-1 text-xs">
+                {filters.start_date && (
+                  <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                    Start: {filters.start_date}
+                  </div>
+                )}
+                {filters.end_date && (
+                  <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                    End: {filters.end_date}
+                  </div>
+                )}
+                {filters.gender && (
+                  <div className="bg-green-100 text-green-800 px-2 py-1 rounded">
+                    Gender: {filters.gender}
+                  </div>
+                )}
+                {(filters.age_min || filters.age_max) && (
+                  <div className="bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                    Age: {filters.age_min || '0'}-{filters.age_max || '120'}
+                  </div>
+                )}
+                {filters.ethnicity && (
+                  <div className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                    Ethnicity: {filters.ethnicity}
+                  </div>
+                )}
+                {filters.collision_type && (
+                  <div className="bg-red-100 text-red-800 px-2 py-1 rounded">
+                    Collision: {filters.collision_type}
+                  </div>
+                )}
+                {filters.road_category && (
+                  <div className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded">
+                    Road: {filters.road_category}
+                  </div>
+                )}
+                {filters.discharge_outcome && (
+                  <div className="bg-pink-100 text-pink-800 px-2 py-1 rounded">
+                    Outcome: {filters.discharge_outcome}
+                  </div>
+                )}
+                {!filters.start_date && !filters.end_date && !filters.gender && !filters.age_min && !filters.age_max && 
+                 !filters.ethnicity && !filters.collision_type && !filters.road_category && !filters.discharge_outcome && (
+                  <div className="text-gray-500 italic">No active filters</div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  };
 
   if (loading) {
     return (
@@ -165,7 +738,7 @@ const AccidentEDA = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
           </div>
-          <p className="text-gray-500 text-center">No data available</p>
+          <p className="text-gray-500 text-center">No data available for current filters</p>
         </div>
       );
     }
@@ -215,7 +788,7 @@ const AccidentEDA = () => {
             <div className="text-center">
               <h3 className="text-xl font-bold text-blue-800 mb-4 flex items-center justify-center">
                 <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
                 </svg>
                 Data Period
               </h3>
@@ -279,13 +852,9 @@ const AccidentEDA = () => {
             <BarChart data={demographics.educationDist} />
           </ChartContainer>
         </div>
-    </div>
+      </div>
     );
   };
-
-
-
-  
 
   const renderTemporalTrends = () => {
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -371,26 +940,29 @@ const AccidentEDA = () => {
     );
   };
 
-  
-
   const tabs = [
     { id: 'overview', label: 'Overview', component: renderOverview },
     { id: 'temporal', label: 'Temporal Trends', component: renderTemporalTrends },
   ];
 
   return (
-    <div className="w-full bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            🚗 Road Accident Analytics Dashboard
-          </h1>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Comprehensive analysis of road accident data with insights into patterns, demographics, 
-            medical outcomes, and socioeconomic impacts for evidence-based decision making.
-          </p>
-        </div>
+    <div className="w-full bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen relative">
+      {/* Filter Sidebar */}
+      <FilterSidebar />
+      
+      {/* Main Content */}
+      <div className={`transition-all duration-300 ${sidebarOpen ? 'ml-0' : 'ml-0'}`}>
+        <div className="container mx-auto px-4 py-8">
+          {/* Header Section */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+              🚗 Road Accident Analytics Dashboard
+            </h1>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Comprehensive analysis of road accident data with insights into patterns, demographics, 
+              medical outcomes, and socioeconomic impacts for evidence-based decision making.
+            </p>
+          </div>
 
         {/* Tab Navigation */}
         <div className="flex justify-center mb-12">
@@ -412,126 +984,89 @@ const AccidentEDA = () => {
             </div>
           </div>
         </div>
-      </div>
 
         {/* Tab Content */}
         <div className="tab-content px-4">
           {tabs.find(tab => tab.id === activeTab)?.component()}
         </div>
 
-      {/* Summary Section */}
-      {activeTab === 'overview' && (
-        <ChartContainer title="🔍 Key Insights Summary">
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-xl shadow-inner">
-            <h4 className="text-2xl font-bold text-gray-800 mb-8 text-center">📊 Major Findings</h4>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-blue-500">
-                <h5 className="text-xl font-bold text-blue-700 mb-4 flex items-center">
-                  <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  Vulnerable Groups
-                </h5>
-                <ul className="space-y-3 text-gray-700">
-                  {Object.keys(demographics.ageGroups).length > 0 && (
-                    <li className="flex items-start">
-                      <span className="text-blue-500 mr-2">🎯</span>
-                      <span><strong>Age group:</strong> {Object.entries(demographics.ageGroups).sort((a,b) => b[1] - a[1])[0][0]} years (highest risk)</span>
-                    </li>
-                  )}
-                  {Object.keys(demographics.genderDist).length > 0 && (
-                    <li className="flex items-start">
-                      <span className="text-blue-500 mr-2">⚧</span>
-                      <span><strong>Gender:</strong> {Object.entries(demographics.genderDist).sort((a,b) => b[1] - a[1])[0][0]} ({Math.round((Object.entries(demographics.genderDist).sort((a,b) => b[1] - a[1])[0][1] / (analyticsData.total_records || 1)) * 100)}% of cases)</span>
-                    </li>
-                  )}
-                  {Object.keys(demographics.occupationDist).length > 0 && (
-                    <li className="flex items-start">
-                      <span className="text-blue-500 mr-2">💼</span>
-                      <span><strong>Occupation:</strong> {Object.entries(demographics.occupationDist).sort((a,b) => b[1] - a[1])[0][0]} (most affected)</span>
-                    </li>
-                  )}
-                  {Object.keys(demographics.ageGroups).length === 0 && Object.keys(demographics.genderDist).length === 0 && Object.keys(demographics.occupationDist).length === 0 && (
-                    <li className="text-gray-500 text-center py-4">
-                      <div className="bg-gray-100 rounded-lg p-4">
-                        <span>📋 No demographic data available</span>
-                      </div>
-                    </li>
-                  )}
-                </ul>
-              </div>
-              <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-red-500">
-                <h5 className="text-xl font-bold text-red-700 mb-4 flex items-center">
-                  <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
-                  </svg>
-                  High-Risk Conditions
-                </h5>
-                <ul className="space-y-3 text-gray-700">
-                  {Object.keys(accidentChars.hourlyDistribution).length > 0 && (
-                    <li className="flex items-start">
-                      <span className="text-red-500 mr-2">🕒</span>
-                      <span><strong>Peak time:</strong> {Object.entries(accidentChars.hourlyDistribution).sort((a,b) => b[1] - a[1])[0][0]}:00 hours</span>
-                    </li>
-                  )}
-                  {Object.keys(accidentChars.collisionTypes).length > 0 && (
-                    <li className="flex items-start">
-                      <span className="text-red-500 mr-2">🚗</span>
-                      <span><strong>Common collision:</strong> {Object.entries(accidentChars.collisionTypes).sort((a,b) => b[1] - a[1])[0][0]}</span>
-                    </li>
-                  )}
-                  {Object.keys(accidentChars.roadCategories).length > 0 && (
-                    <li className="flex items-start">
-                      <span className="text-red-500 mr-2">🛣</span>
-                      <span><strong>Risky roads:</strong> {Object.entries(accidentChars.roadCategories).sort((a,b) => b[1] - a[1])[0][0]}</span>
-                    </li>
-                  )}
-                  {Object.keys(accidentChars.hourlyDistribution).length === 0 && Object.keys(accidentChars.collisionTypes).length === 0 && Object.keys(accidentChars.roadCategories).length === 0 && (
-                    <li className="text-gray-500 text-center py-4">
-                      <div className="bg-gray-100 rounded-lg p-4">
-                        <span>📊 No accident condition data available</span>
-                      </div>
-                    </li>
-                  )}
-                </ul>
-              </div>
-            </div>
-            {/* <div className="mt-10 pt-8 border-t-2 border-gray-300">
-              <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-green-500">
-                <h5 className="text-xl font-bold text-green-700 mb-4 flex items-center justify-center">
-                  <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  Recovery & Financial Impact
-                </h5>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                  <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600 mb-1">
-                      {Object.keys(medicalFactors.outcomesDist).length > 0 && medicalFactors.outcomesDist['Full Recovery'] ? 
-                        `${Math.round((medicalFactors.outcomesDist['Full Recovery'] / (analyticsData.total_records || 1)) * 100)}%` :
-                        'N/A'
-                      }
-                    </div>
-                    <div className="text-sm text-green-700">Recovery Rate</div>
-                  </div>
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600 mb-1">
-                      ₹{Math.round(financialImpact.avgIncomeChange || 0).toLocaleString()}
-                    </div>
-                    <div className="text-sm text-blue-700">Avg Income Impact</div>
-                  </div>
-                  <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600 mb-1">
-                      {analyticsData.total_records || 0}
-                    </div>
-                    <div className="text-sm text-purple-700">Total Cases</div>
-                  </div>
+        {/* Summary Section */}
+        {activeTab === 'overview' && (
+          <ChartContainer title="🔍 Key Insights Summary">
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-xl shadow-inner">
+              <h4 className="text-2xl font-bold text-gray-800 mb-8 text-center">📊 Major Findings</h4>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-blue-500">
+                  <h5 className="text-xl font-bold text-blue-700 mb-4 flex items-center">
+                    <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    Vulnerable Groups
+                  </h5>
+                  <ul className="space-y-3 text-gray-700">
+                    {Object.keys(demographics.ageGroups).length > 0 && (
+                      <li className="flex items-start">
+                        <span className="text-blue-500 mr-2">🎯</span>
+                        <span><strong>Age group:</strong> {Object.entries(demographics.ageGroups).sort((a,b) => b[1] - a[1])[0][0]} years (highest risk)</span>
+                      </li>
+                    )}
+                    {Object.keys(demographics.genderDist).length > 0 && (
+                      <li className="flex items-start">
+                        <span className="text-blue-500 mr-2">⚧</span>
+                        <span><strong>Gender:</strong> {Object.entries(demographics.genderDist).sort((a,b) => b[1] - a[1])[0][0]} ({Math.round((Object.entries(demographics.genderDist).sort((a,b) => b[1] - a[1])[0][1] / (analyticsData.total_records || 1)) * 100)}% of cases)</span>
+                      </li>
+                    )}
+                    {Object.keys(demographics.occupationDist).length > 0 && (
+                      <li className="flex items-start">
+                        <span className="text-blue-500 mr-2">💼</span>
+                        <span><strong>Occupation:</strong> {Object.entries(demographics.occupationDist).sort((a,b) => b[1] - a[1])[0][0]} (most affected)</span>
+                      </li>
+                    )}
+                    {Object.keys(demographics.ageGroups).length === 0 && Object.keys(demographics.genderDist).length === 0 && Object.keys(demographics.occupationDist).length === 0 && (
+                      <li className="text-gray-500 text-center py-4">
+                        <div className="bg-gray-100 rounded-lg p-4">
+                          <span>📋 No demographic data available for current filters</span>
+                        </div>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-red-500">
+                  <h5 className="text-xl font-bold text-red-700 mb-4 flex items-center">
+                    <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                    High-Risk Conditions
+                  </h5>
+                  <ul className="space-y-3 text-gray-700">
+                    {Object.keys(accidentChars.hourlyDistribution).length > 0 && (
+                      <li className="flex items-start">
+                        <span className="text-red-500 mr-2">🕒</span>
+                        <span><strong>Peak time:</strong> {Object.entries(accidentChars.hourlyDistribution).sort((a,b) => b[1] - a[1])[0][0]}:00 hours</span>
+                      </li>
+                    )}
+                    {Object.keys(accidentChars.collisionTypes).length > 0 && (
+                      <li className="flex items-start">
+                        <span className="text-red-500 mr-2">🚗</span>
+                        <span><strong>Common collision:</strong> {Object.entries(accidentChars.collisionTypes).sort((a,b) => b[1] - a[1])[0][0]}</span>
+                      </li>
+                    )}
+           
+                    {Object.keys(accidentChars.hourlyDistribution).length === 0 && Object.keys(accidentChars.collisionTypes).length === 0 && Object.keys(accidentChars.roadCategories).length === 0 && (
+                      <li className="text-gray-500 text-center py-4">
+                        <div className="bg-gray-100 rounded-lg p-4">
+                          <span>📊 No accident condition data available for current filters</span>
+                        </div>
+                      </li>
+                    )}
+                  </ul>
                 </div>
               </div>
-            </div> */}
-          </div>
-        </ChartContainer>
-      )}
+            </div>
+          </ChartContainer>
+        )}
+        </div>
+      </div>
     </div>
   );
 };
