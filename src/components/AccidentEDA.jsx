@@ -1050,6 +1050,42 @@ const AccidentEDA = () => {
               </div>
             </div>
           </div>
+          
+          {/* Secondary Navigation - Tab Bar */}
+          <div className="border-t border-gray-200/30">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex justify-center py-3">
+                <nav className="flex space-x-1 bg-gray-100/50 rounded-xl p-1 backdrop-blur-sm">
+                  {tabs.map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`relative px-6 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 flex items-center space-x-2 ${
+                        activeTab === tab.id 
+                        ? 'bg-white text-blue-600 shadow-md border border-blue-100' 
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+                      }`}
+                    >
+                      {tab.id === 'overview' && (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                      )}
+                      {tab.id === 'temporal' && (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      )}
+                      <span>{tab.label}</span>
+                      {activeTab === tab.id && (
+                        <div className="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-blue-600 rounded-full"></div>
+                      )}
+                    </button>
+                  ))}
+                </nav>
+              </div>
+            </div>
+          </div>
         </header>
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -1156,41 +1192,7 @@ const AccidentEDA = () => {
             </div>
           </div>
 
-          {/* Modern Tab Navigation */}
-          <div className="flex justify-center mb-16">
-            <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 p-2">
-              <div className="flex space-x-2">
-                {tabs.map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`relative px-8 py-4 text-base font-semibold rounded-xl transition-all duration-300 overflow-hidden ${
-                      activeTab === tab.id 
-                      ? 'text-white shadow-lg' 
-                      : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100/80'
-                    }`}
-                  >
-                    {activeTab === tab.id && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl"></div>
-                    )}
-                    <span className="relative z-10 flex items-center space-x-2">
-                      {tab.id === 'overview' && (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                      )}
-                      {tab.id === 'temporal' && (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      )}
-                      <span>{tab.label}</span>
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+
 
         {/* Tab Content */}
         <div className="tab-content px-4">
