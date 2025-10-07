@@ -54,33 +54,38 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
   ];
 
   return (
-    <nav className="bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 text-white shadow-lg sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 text-white overflow-hidden sticky top-0 z-50 shadow-2xl">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -translate-y-32 translate-x-32"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-300 rounded-full translate-y-24 -translate-x-24"></div>
+      </div>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo/Brand */}
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-indigo-600" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2a10 10 0 100 20 10 10 0 000-20zM11 14h2v2h-2v-2zm0-8h2v6h-2V6z" />
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg font-bold">MedRecord</h1>
-              <p className="text-xs text-indigo-100">Doctor Portal</p>
+              <h1 className="text-xl font-bold text-white">Road Accident Care System</h1>
+              <p className="text-sm text-blue-200">Doctor Portal</p>
             </div>
           </div>
 
           {/* Desktop Nav */}
           <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-2">
+            <div className="ml-10 flex items-center space-x-2">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
                     isActiveRoute(item.path)
-                      ? 'bg-white text-indigo-700 shadow-sm'
-                      : 'text-indigo-100 hover:bg-indigo-600 hover:text-white'
+                      ? 'bg-white/20 text-white shadow-sm backdrop-blur-sm'
+                      : 'text-blue-100 hover:bg-white/10 hover:text-white'
                   }`}
                 >
                   {item.icon}
@@ -94,19 +99,17 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
           <div className="hidden md:block">
             <div className="ml-4 flex items-center space-x-4">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                  </svg>
+                <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                  <div className="w-3 h-3 bg-green-200 rounded-full animate-pulse"></div>
                 </div>
                 <div className="text-sm">
-                  <p className="font-medium">Doctor</p>
-                  <p className="text-indigo-100 text-xs">Online</p>
+                  <p className="font-medium text-white">Doctor</p>
+                  <p className="text-blue-200 text-xs">Online</p>
                 </div>
               </div>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-indigo-700 transition-all duration-200 flex items-center space-x-2 shadow-sm"
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all duration-200 flex items-center space-x-2 shadow-sm"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -120,7 +123,7 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
           <div className="md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="bg-indigo-600 inline-flex items-center justify-center p-2 rounded-md text-indigo-100 hover:text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-all duration-200"
+              className="bg-white/20 inline-flex items-center justify-center p-2 rounded-md text-blue-100 hover:text-white hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-all duration-200"
             >
               {!isMobileMenuOpen ? (
                 <svg className="block h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,16 +141,16 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
 
       {/* Mobile Nav */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-indigo-600">
-          <div className="px-2 pt-2 pb-3 space-y-1 bg-indigo-800">
+        <div className="md:hidden border-t border-blue-800">
+          <div className="px-2 pt-2 pb-3 space-y-1 bg-slate-800">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
                 className={`px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 flex items-center space-x-3 ${
                   isActiveRoute(item.path)
-                    ? 'bg-white text-indigo-700 shadow-sm'
-                    : 'text-indigo-100 hover:bg-indigo-600 hover:text-white'
+                    ? 'bg-white/20 text-white shadow-sm'
+                    : 'text-blue-100 hover:bg-white/10 hover:text-white'
                 }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -157,14 +160,12 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
             ))}
 
             {/* Mobile User Info & Logout */}
-            <div className="border-t border-indigo-600 mt-4 pt-4">
+            <div className="border-t border-blue-800 mt-4 pt-4">
               <div className="flex items-center px-4 py-2 space-x-3">
-                <div className="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                  </svg>
+                <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                  <div className="w-4 h-4 bg-green-200 rounded-full animate-pulse"></div>
                 </div>
-                <div className="text-sm text-indigo-100">
+                <div className="text-sm text-blue-100">
                   <p className="font-medium text-white">Doctor Portal</p>
                   <p className="text-xs">Currently Online</p>
                 </div>
