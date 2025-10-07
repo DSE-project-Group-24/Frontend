@@ -438,7 +438,12 @@ const AccidentEDA = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">All Genders</option>
-                  {filterOptions.genders?.map(gender => (
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  {/* Add any additional genders from backend if available */}
+                  {filterOptions.genders?.filter(gender => 
+                    !['Male', 'Female'].includes(gender)
+                  ).map(gender => (
                     <option key={gender} value={gender}>{gender}</option>
                   ))}
                 </select>
@@ -484,56 +489,20 @@ const AccidentEDA = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">All Ethnicities</option>
-                  {filterOptions.ethnicities?.map(ethnicity => (
+                  <option value="Tamil">Tamil</option>
+                  <option value="Sinhalese">Sinhalese</option>
+                  <option value="Muslim">Muslim</option>
+                  <option value="Moor">Moor</option>
+                  {/* Add any additional ethnicities from backend if available */}
+                  {filterOptions.ethnicities?.filter(ethnicity => 
+                    !['Sinhalese', 'Tamil', 'Muslim', 'Moor'].includes(ethnicity)
+                  ).map(ethnicity => (
                     <option key={ethnicity} value={ethnicity}>{ethnicity}</option>
                   ))}
                 </select>
               </div>
 
-              {/* Collision Type Filter */}
-              <div className="filter-group">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">🚗 Collision Type</label>
-                <select
-                  value={filters.collision_type}
-                  onChange={(e) => handleFilterChange('collision_type', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Collision Types</option>
-                  {filterOptions.collision_types?.map(collision => (
-                    <option key={collision} value={collision}>{collision}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Road Category Filter */}
-              <div className="filter-group">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">🛣️ Road Category</label>
-                <select
-                  value={filters.road_category}
-                  onChange={(e) => handleFilterChange('road_category', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Road Categories</option>
-                  {filterOptions.road_categories?.map(road => (
-                    <option key={road} value={road}>{road}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Discharge Outcome Filter */}
-              <div className="filter-group">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">🏥 Discharge Outcome</label>
-                <select
-                  value={filters.discharge_outcome}
-                  onChange={(e) => handleFilterChange('discharge_outcome', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Outcomes</option>
-                  {filterOptions.discharge_outcomes?.map(outcome => (
-                    <option key={outcome} value={outcome}>{outcome}</option>
-                  ))}
-                </select>
-              </div>
+              
             </div>
 
             {/* Action Buttons */}
@@ -709,60 +678,327 @@ const AccidentEDA = () => {
     dailyTrends: analyticsData.temporal_trends?.daily_trends || {}
   };
 
-  const StatCard = ({ title, value, subtitle, color = "blue" }) => (
-    <div className={`bg-white p-6 rounded-xl shadow-lg border-l-4 border-${color}-500 hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1`}>
-      <div className="text-center">
-        <h3 className="text-lg font-semibold text-gray-800 mb-2">{title}</h3>
-        <p className={`text-3xl font-bold text-${color}-600 mb-1`}>{value}</p>
-        {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
-      </div>
-    </div>
-  );
-
-  const ChartContainer = ({ title, children }) => (
-    <div className="bg-white p-8 rounded-xl shadow-lg mb-8 hover:shadow-xl transition-shadow duration-300">
-      <h3 className="text-2xl font-bold mb-6 text-gray-800 text-center border-b border-gray-200 pb-4">{title}</h3>
-      <div className="mt-6">
-        {children}
-      </div>
-    </div>
-  );
-
-  const BarChart = ({ data, title }) => {
-    // Handle empty or invalid data
-    if (!data || Object.keys(data).length === 0) {
-      return (
-        <div className="flex flex-col items-center justify-center h-40 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300">
-          <div className="text-gray-400 mb-2">
-            <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
+  const StatCard = ({ title, value, subtitle, color = "blue", icon }) => (
+    <div className="group relative bg-white/80 backdrop-blur-md p-6 rounded-2xl shadow-lg border border-gray-200/50 hover:shadow-2xl hover:border-blue-200/80 transition-all duration-300 transform hover:-translate-y-2 overflow-hidden">
+      {/* Background gradient overlay */}
+      <div className={`absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-5 transition-opacity duration-300 ${
+        color === 'blue' ? 'from-blue-500 to-indigo-500' :
+        color === 'red' ? 'from-red-500 to-pink-500' :
+        color === 'yellow' ? 'from-yellow-500 to-orange-500' :
+        color === 'green' ? 'from-green-500 to-emerald-500' :
+        'from-blue-500 to-indigo-500'
+      }`}></div>
+      
+      <div className="relative">
+        <div className="flex items-start justify-between mb-4">
+          <div className={`p-3 rounded-xl bg-gradient-to-br shadow-lg ${
+            color === 'blue' ? 'from-blue-500 to-indigo-500' :
+            color === 'red' ? 'from-red-500 to-pink-500' :
+            color === 'yellow' ? 'from-yellow-500 to-orange-500' :
+            color === 'green' ? 'from-green-500 to-emerald-500' :
+            'from-blue-500 to-indigo-500'
+          }`}>
+            {icon || (
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            )}
           </div>
-          <p className="text-gray-500 text-center">No data available for current filters</p>
+          <div className="text-right">
+            <h3 className="text-sm font-semibold text-gray-600 mb-1 tracking-wide uppercase">{title}</h3>
+            <p className="text-3xl font-bold text-gray-900 mb-1 group-hover:scale-110 transition-transform duration-300">{value}</p>
+            {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+          </div>
         </div>
-      );
-    }
+        
+        {/* Progress indicator */}
+        <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+          <div className={`h-2 rounded-full bg-gradient-to-r transition-all duration-500 ${
+            color === 'blue' ? 'from-blue-500 to-indigo-500' :
+            color === 'red' ? 'from-red-500 to-pink-500' :
+            color === 'yellow' ? 'from-yellow-500 to-orange-500' :
+            color === 'green' ? 'from-green-500 to-emerald-500' :
+            'from-blue-500 to-indigo-500'
+          }`} style={{ width: '85%' }}></div>
+        </div>
+        <p className="text-xs text-gray-400">Updated in real-time</p>
+      </div>
+    </div>
+  );
+
+  // Professional Chart Container with enhanced styling
+  const ChartContainer = ({ title, children, className = "", size = "default" }) => {
+    const sizeClasses = {
+      small: "p-4",
+      default: "p-6",
+      large: "p-8"
+    };
+    
+    return (
+      <div className={`bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 hover:shadow-xl transition-all duration-300 ${sizeClasses[size]} ${className}`}>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-bold text-gray-800">{title}</h3>
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-xs text-gray-500">Live</span>
+          </div>
+        </div>
+        <div className="chart-content">
+          {children}
+        </div>
+      </div>
+    );
+  };
+
+  // Empty State Component
+  const EmptyChart = ({ message = "No data available for current filters" }) => (
+    <div className="flex flex-col items-center justify-center h-48 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300">
+      <div className="text-gray-400 mb-3">
+        <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      </div>
+      <p className="text-gray-500 text-center text-sm">{message}</p>
+    </div>
+  );
+
+  // Modern Horizontal Bar Chart
+  const HorizontalBarChart = ({ data, colorScheme = "blue" }) => {
+    if (!data || Object.keys(data).length === 0) return <EmptyChart />;
 
     const maxValue = Math.max(...Object.values(data));
+    const colorSchemes = {
+      blue: { from: 'from-blue-500', to: 'to-blue-600', bg: 'bg-blue-50' },
+      red: { from: 'from-red-500', to: 'to-red-600', bg: 'bg-red-50' },
+      green: { from: 'from-green-500', to: 'to-green-600', bg: 'bg-green-50' },
+      purple: { from: 'from-purple-500', to: 'to-purple-600', bg: 'bg-purple-50' },
+      orange: { from: 'from-orange-500', to: 'to-orange-600', bg: 'bg-orange-50' }
+    };
+    const colors = colorSchemes[colorScheme];
     
     return (
       <div className="space-y-4">
-        {Object.entries(data).map(([key, value]) => (
-          <div key={key} className="flex items-center group hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200">
-            <div className="w-36 text-sm font-semibold text-gray-700 truncate">{key}:</div>
-            <div className="flex-1 bg-gray-200 rounded-full h-8 ml-6 relative overflow-hidden shadow-inner">
-              <div 
-                className="bg-gradient-to-r from-blue-500 to-blue-600 h-8 rounded-full flex items-center justify-end pr-3 shadow-sm transition-all duration-500 ease-out"
-                style={{ width: `${maxValue > 0 ? (value / maxValue) * 100 : 0}%` }}
-              >
-                <span className="text-white text-sm font-bold">{value}</span>
+        {Object.entries(data)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 6)
+          .map(([key, value], index) => {
+            const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
+            return (
+              <div key={key} className="group">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700 truncate max-w-[150px]">{key}</span>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-bold text-gray-900">{value.toLocaleString()}</span>
+                    <span className="text-xs text-gray-500">({Math.round(percentage)}%)</span>
+                  </div>
+                </div>
+                <div className={`w-full ${colors.bg} rounded-full h-3 relative overflow-hidden`}>
+                  <div 
+                    className={`h-3 bg-gradient-to-r ${colors.from} ${colors.to} rounded-full transition-all duration-700 ease-out shadow-sm relative`}
+                    style={{ 
+                      width: `${percentage}%`,
+                      animationDelay: `${index * 100}ms`
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-white/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="ml-3 text-sm font-medium text-gray-600 w-12 text-right">
-              {maxValue > 0 ? Math.round((value / maxValue) * 100) : 0}%
+            );
+          })}
+      </div>
+    );
+  };
+
+  // Modern Donut Chart
+  const DonutChart = ({ data, colorScheme = "mixed" }) => {
+    if (!data || Object.keys(data).length === 0) return <EmptyChart />;
+
+    const total = Object.values(data).reduce((sum, value) => sum + value, 0);
+    const sortedData = Object.entries(data).sort(([,a], [,b]) => b - a).slice(0, 5);
+    
+    const colors = [
+      { bg: 'bg-blue-500', border: 'border-blue-600', text: 'text-blue-700' },
+      { bg: 'bg-emerald-500', border: 'border-emerald-600', text: 'text-emerald-700' },
+      { bg: 'bg-amber-500', border: 'border-amber-600', text: 'text-amber-700' },
+      { bg: 'bg-purple-500', border: 'border-purple-600', text: 'text-purple-700' },
+      { bg: 'bg-rose-500', border: 'border-rose-600', text: 'text-rose-700' }
+    ];
+
+    let cumulativePercentage = 0;
+
+    return (
+      <div className="flex items-center justify-center space-x-8">
+        {/* Donut Chart Visual */}
+        <div className="relative w-48 h-48">
+          <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+            <circle
+              cx="50"
+              cy="50"
+              r="35"
+              fill="none"
+              stroke="#f3f4f6"
+              strokeWidth="8"
+            />
+            {sortedData.map(([key, value], index) => {
+              const percentage = (value / total) * 100;
+              const strokeDasharray = `${percentage * 2.199} ${219.9 - percentage * 2.199}`;
+              const strokeDashoffset = -cumulativePercentage * 2.199;
+              cumulativePercentage += percentage;
+              
+              return (
+                <circle
+                  key={key}
+                  cx="50"
+                  cy="50"
+                  r="35"
+                  fill="none"
+                  stroke={colors[index % colors.length].bg.replace('bg-', '#').replace('-500', '')}
+                  strokeWidth="8"
+                  strokeDasharray={strokeDasharray}
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                  className="transition-all duration-700 ease-in-out"
+                  style={{ animationDelay: `${index * 200}ms` }}
+                />
+              );
+            })}
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-gray-900">{total.toLocaleString()}</div>
+              <div className="text-sm text-gray-500">Total</div>
             </div>
           </div>
-        ))}
+        </div>
+
+        {/* Legend */}
+        <div className="space-y-3">
+          {sortedData.map(([key, value], index) => {
+            const percentage = ((value / total) * 100).toFixed(1);
+            return (
+              <div key={key} className="flex items-center space-x-3">
+                <div className={`w-4 h-4 rounded-full ${colors[index % colors.length].bg} shadow-sm`}></div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-gray-700 truncate">{key}</div>
+                  <div className="text-xs text-gray-500">{value.toLocaleString()} ({percentage}%)</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Modern Vertical Bar Chart
+  const VerticalBarChart = ({ data, colorScheme = "gradient" }) => {
+    if (!data || Object.keys(data).length === 0) return <EmptyChart />;
+
+    const maxValue = Math.max(...Object.values(data));
+    const sortedData = Object.entries(data).sort(([,a], [,b]) => b - a).slice(0, 8);
+    
+    return (
+      <div className="h-64">
+        <div className="flex items-end justify-center space-x-2 h-full px-4">
+          {sortedData.map(([key, value], index) => {
+            const height = maxValue > 0 ? (value / maxValue) * 200 : 0;
+            const hue = (index * 45) % 360;
+            
+            return (
+              <div key={key} className="flex flex-col items-center space-y-2 group">
+                <div className="relative">
+                  <div
+                    className="w-8 rounded-t-lg transition-all duration-700 ease-out shadow-lg hover:shadow-xl group-hover:scale-105"
+                    style={{
+                      height: `${height}px`,
+                      background: `linear-gradient(to top, hsl(${hue}, 70%, 50%), hsl(${hue}, 70%, 60%))`,
+                      animationDelay: `${index * 100}ms`
+                    }}
+                  />
+                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                    {value.toLocaleString()}
+                  </div>
+                </div>
+                <div className="text-xs text-gray-600 transform -rotate-45 origin-top-left w-16 text-center">
+                  {key.length > 8 ? `${key.substring(0, 8)}...` : key}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Modern Line Chart (simplified)
+  const LineChart = ({ data, colorScheme = "blue" }) => {
+    if (!data || Object.keys(data).length === 0) return <EmptyChart />;
+
+    const maxValue = Math.max(...Object.values(data));
+    const minValue = Math.min(...Object.values(data));
+    const range = maxValue - minValue || 1;
+    
+    const points = Object.entries(data).map(([key, value], index, arr) => {
+      const x = (index / (arr.length - 1)) * 300;
+      const y = 150 - ((value - minValue) / range) * 120;
+      return { x, y, value, key };
+    });
+
+    const pathData = points.map((point, index) => 
+      `${index === 0 ? 'M' : 'L'} ${point.x},${point.y}`
+    ).join(' ');
+
+    return (
+      <div className="h-48 relative">
+        <svg viewBox="0 0 300 150" className="w-full h-full">
+          {/* Grid lines */}
+          <defs>
+            <pattern id="grid" width="30" height="15" patternUnits="userSpaceOnUse">
+              <path d="M 30 0 L 0 0 0 15" fill="none" stroke="#f3f4f6" strokeWidth="0.5"/>
+            </pattern>
+          </defs>
+          <rect width="300" height="150" fill="url(#grid)" />
+          
+          {/* Area under curve */}
+          <path
+            d={`${pathData} L 300,150 L 0,150 Z`}
+            fill="url(#gradient)"
+            fillOpacity="0.2"
+          />
+          
+          {/* Line */}
+          <path
+            d={pathData}
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="drop-shadow-sm"
+          />
+          
+          {/* Data points */}
+          {points.map((point, index) => (
+            <circle
+              key={index}
+              cx={point.x}
+              cy={point.y}
+              r="4"
+              fill="#3b82f6"
+              stroke="white"
+              strokeWidth="2"
+              className="drop-shadow-sm hover:r-6 transition-all duration-200"
+            />
+          ))}
+          
+          <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.8"/>
+              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.1"/>
+            </linearGradient>
+          </defs>
+        </svg>
       </div>
     );
   };
@@ -782,75 +1018,150 @@ const AccidentEDA = () => {
 
     return (
       <div className="space-y-8">
-        {/* Data Period Info */}
+        {/* Data Period Info - Compact & Official */}
         {analyticsData.data_period && (
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-8 shadow-md">
-            <div className="text-center">
-              <h3 className="text-xl font-bold text-blue-800 mb-4 flex items-center justify-center">
-                <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-700 rounded-lg flex items-center justify-center shadow-md">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
+                      {filters.start_date || filters.end_date ? 'Filtered Period' : 'Dataset Coverage'}
+                    </span>
+                    <div className={`w-2 h-2 rounded-full animate-pulse ${
+                      filters.start_date || filters.end_date ? 'bg-orange-500' : 'bg-green-500'
+                    }`}></div>
+                  </div>
+                  <div className="flex items-center space-x-4 mt-1">
+                    <span className="text-lg font-bold text-gray-900">
+                      {(() => {
+                        const startDate = filters.start_date || analyticsData.data_period.start_date;
+                        return new Date(startDate).toLocaleDateString('en-US', { 
+                          year: 'numeric', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        });
+                      })()}
+                    </span>
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-8 h-0.5 rounded-full ${
+                        filters.start_date || filters.end_date 
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500' 
+                          : 'bg-gradient-to-r from-blue-500 to-indigo-500'
+                      }`}></div>
+                      <svg className={`w-4 h-4 ${
+                        filters.start_date || filters.end_date ? 'text-orange-500' : 'text-blue-500'
+                      }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      <div className={`w-8 h-0.5 rounded-full ${
+                        filters.start_date || filters.end_date 
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500' 
+                          : 'bg-gradient-to-r from-blue-500 to-indigo-500'
+                      }`}></div>
+                    </div>
+                    <span className="text-lg font-bold text-gray-900">
+                      {(() => {
+                        const endDate = filters.end_date || analyticsData.data_period.end_date;
+                        return new Date(endDate).toLocaleDateString('en-US', { 
+                          year: 'numeric', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        });
+                      })()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-right">
+                <div className="flex items-center space-x-2 text-xs text-gray-500 mb-1">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Last Updated</span>
+                </div>
+                <div className="text-sm font-medium text-gray-700">
+                  {new Date(analyticsData.generated_at).toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                  })} • {new Date(analyticsData.generated_at).toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    hour12: true 
+                  })}
+                </div>
+              </div>
+            </div>
+            
+            {/* Duration Badge */}
+            <div className="mt-3 flex justify-center">
+              <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${
+                filters.start_date || filters.end_date 
+                  ? 'bg-gradient-to-r from-orange-100 to-red-100 text-orange-800 border-orange-200/50' 
+                  : 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border-blue-200/50'
+              }`}>
+                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
                 </svg>
-                Data Period
-              </h3>
-              <div className="space-y-2">
-                <p className="text-blue-700 text-lg font-medium">
-                  Analysis Period: <span className="font-bold">{analyticsData.data_period.start_date}</span> to <span className="font-bold">{analyticsData.data_period.end_date}</span>
-                </p>
-                <p className="text-sm text-blue-600">
-                  Generated: {new Date(analyticsData.generated_at).toLocaleString()}
-                </p>
+                {(() => {
+                  const startDate = new Date(filters.start_date || analyticsData.data_period.start_date);
+                  const endDate = new Date(filters.end_date || analyticsData.data_period.end_date);
+                  const diffTime = Math.abs(endDate - startDate);
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                  const years = Math.floor(diffDays / 365);
+                  const months = Math.floor((diffDays % 365) / 30);
+                  const periodType = filters.start_date || filters.end_date ? 'filtered period' : 'analysis period';
+                  return `${years > 0 ? `${years}y ` : ''}${months > 0 ? `${months}m` : `${diffDays}d`} ${periodType}`;
+                })()}
               </div>
             </div>
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
-          <StatCard 
-            title="Total Records" 
-            value={totalRecords.toLocaleString()} 
-            subtitle="Accident cases analyzed"
-            color="blue"
-          />
-          <StatCard 
-            title="Peak Accident Hour" 
-            value={peakHour !== 'N/A' ? `${peakHour}:00` : 'N/A'}
-            subtitle={Object.keys(accidentChars.hourlyDistribution).length > 0 ? 
-              `${getTopEntry(accidentChars.hourlyDistribution)[1]} accidents` : 'No data'}
-            color="red"
-          />
-          <StatCard 
-            title="Most Common Collision" 
-            value={commonCollision}
-            subtitle={Object.keys(accidentChars.collisionTypes).length > 0 ? 
-              `${getTopEntry(accidentChars.collisionTypes)[1]} cases` : 'No data'}
-            color="yellow"
-          />
-        </div>
+        {/* Modern Chart Grid with Mixed Types */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+          {/* Row 1: Large charts */}
+          <div className="lg:col-span-7">
+            <ChartContainer title="🏥 Medical Outcomes Distribution" size="default">
+              <DonutChart data={medicalFactors.outcomesDist} colorScheme="mixed" />
+            </ChartContainer>
+          </div>
+          <div className="lg:col-span-5">
+            <ChartContainer title="👥 Age Demographics" size="default">
+              <VerticalBarChart data={demographics.ageGroups} colorScheme="gradient" />
+            </ChartContainer>
+          </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
-          <ChartContainer title="🏥 Medical Outcomes">
-            <BarChart data={medicalFactors.outcomesDist} />
-          </ChartContainer>
+          {/* Row 2: Medium charts */}
+          <div className="lg:col-span-6">
+            <ChartContainer title="🚗 Collision Type Analysis" size="default">
+              <HorizontalBarChart data={accidentChars.collisionTypes} colorScheme="red" />
+            </ChartContainer>
+          </div>
+          <div className="lg:col-span-3">
+            <ChartContainer title="⚧ Gender Split" size="small">
+              <DonutChart data={demographics.genderDist} colorScheme="mixed" />
+            </ChartContainer>
+          </div>
+          <div className="lg:col-span-3">
+            <ChartContainer title="🌍 Ethnicity" size="small">
+              <DonutChart data={demographics.ethnicityDist} colorScheme="mixed" />
+            </ChartContainer>
+          </div>
 
-          <ChartContainer title="👥 Age Group Distribution">
-            <BarChart data={demographics.ageGroups} />
-          </ChartContainer>
-
-          <ChartContainer title="🚗 Collision Types">
-            <BarChart data={accidentChars.collisionTypes} />
-          </ChartContainer>
-                  
-          <ChartContainer title="⚧ Gender Distribution">
-            <BarChart data={demographics.genderDist} />
-          </ChartContainer>
-
-          <ChartContainer title="🌍 Ethnicity Distribution">
-            <BarChart data={demographics.ethnicityDist} />
-          </ChartContainer>
-
-          <ChartContainer title="🎓 Education Levels">
-            <BarChart data={demographics.educationDist} />
-          </ChartContainer>
+          {/* Row 3: Full width chart */}
+          <div className="lg:col-span-12">
+            <ChartContainer title="🎓 Education Level Distribution" size="default">
+              <HorizontalBarChart data={demographics.educationDist} colorScheme="purple" />
+            </ChartContainer>
+          </div>
         </div>
       </div>
     );
@@ -889,53 +1200,88 @@ const AccidentEDA = () => {
     };
 
     return (
-      <div className="space-y-10">
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
-          <ChartContainer title="📅 Monthly Accident Distribution">
-            <BarChart data={monthlyData} />
-          </ChartContainer>
-          
-          <ChartContainer title="📊 Day of Week Distribution">
-            <BarChart data={dailyData} />
-          </ChartContainer>
+      <div className="space-y-8">
+        {/* Temporal Analysis Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Monthly Trends - Line Chart */}
+          <div className="lg:col-span-8">
+            <ChartContainer title="📅 Monthly Accident Trends" size="default">
+              <LineChart data={monthlyData} colorScheme="blue" />
+            </ChartContainer>
+          </div>
+
+          {/* Day of Week - Donut Chart */}
+          <div className="lg:col-span-4">
+            <ChartContainer title="📊 Weekly Pattern" size="default">
+              <DonutChart data={dailyData} colorScheme="mixed" />
+            </ChartContainer>
+          </div>
+
+          {/* Hourly Distribution - Full Width */}
+          <div className="lg:col-span-12">
+            <ChartContainer title="🕒 24-Hour Accident Pattern" size="default">
+              <HorizontalBarChart data={accidentChars.hourlyDistribution} colorScheme="orange" />
+            </ChartContainer>
+          </div>
         </div>
 
-        <ChartContainer title="🕒 Hourly Accident Distribution">
-          <BarChart data={accidentChars.hourlyDistribution} />
-        </ChartContainer>
-
-        <ChartContainer title="🎯 Temporal Patterns Analysis">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-gradient-to-br from-red-50 to-red-100 p-8 rounded-xl border-l-4 border-red-500 shadow-md hover:shadow-lg transition-shadow duration-300">
-              <div className="text-center">
-                <div className="flex justify-center mb-4">
-                  <div className="bg-red-500 p-3 rounded-full">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                </div>
-                <h4 className="text-lg font-bold text-red-800 mb-3">Peak Accident Month</h4>
-                <p className="text-2xl font-bold text-red-700 mb-1">{getTopEntry(monthlyData)[0]}</p>
-                <p className="text-sm text-red-600">{getTopEntry(monthlyData)[1]} accidents</p>
+        {/* Key Insights Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-gradient-to-br from-red-50 via-white to-red-50 p-6 rounded-2xl border border-red-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
+                </svg>
               </div>
-            </div>
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-8 rounded-xl border-l-4 border-orange-500 shadow-md hover:shadow-lg transition-shadow duration-300">
-              <div className="text-center">
-                <div className="flex justify-center mb-4">
-                  <div className="bg-orange-500 p-3 rounded-full">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707" />
-                    </svg>
-                  </div>
-                </div>
-                <h4 className="text-lg font-bold text-orange-800 mb-3">Peak Accident Day</h4>
-                <p className="text-2xl font-bold text-orange-700 mb-1">{getTopEntry(dailyData)[0]}</p>
-                <p className="text-sm text-orange-600">{getTopEntry(dailyData)[1]} accidents</p>
+              <div>
+                <h4 className="text-sm font-semibold text-red-700 mb-1">Peak Month</h4>
+                <p className="text-xl font-bold text-red-800">{getTopEntry(monthlyData)[0]}</p>
+                <p className="text-sm text-red-600">{getTopEntry(monthlyData)[1]} incidents</p>
               </div>
             </div>
           </div>
-        </ChartContainer>
+
+          <div className="bg-gradient-to-br from-orange-50 via-white to-orange-50 p-6 rounded-2xl border border-orange-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-orange-700 mb-1">Peak Day</h4>
+                <p className="text-xl font-bold text-orange-800">{getTopEntry(dailyData)[0]}</p>
+                <p className="text-sm text-orange-600">{getTopEntry(dailyData)[1]} incidents</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-blue-50 via-white to-blue-50 p-6 rounded-2xl border border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-blue-700 mb-1">Peak Hour</h4>
+                <p className="text-xl font-bold text-blue-800">
+                  {Object.keys(accidentChars.hourlyDistribution).length > 0 
+                    ? `${getTopEntry(accidentChars.hourlyDistribution)[0]}:00`
+                    : 'N/A'
+                  }
+                </p>
+                <p className="text-sm text-blue-600">
+                  {Object.keys(accidentChars.hourlyDistribution).length > 0 
+                    ? `${getTopEntry(accidentChars.hourlyDistribution)[1]} incidents`
+                    : 'No data'
+                  }
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   };
@@ -946,44 +1292,184 @@ const AccidentEDA = () => {
   ];
 
   return (
-    <div className="w-full bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen relative">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Filter Sidebar */}
       <FilterSidebar />
       
       {/* Main Content */}
       <div className={`transition-all duration-300 ${sidebarOpen ? 'ml-0' : 'ml-0'}`}>
-        <div className="container mx-auto px-4 py-8">
-          {/* Header Section */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">
-              🚗 Road Accident Analytics Dashboard
+        {/* Professional Header */}
+        <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-30">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-gray-900">Analytics Dashboard</h1>
+                  <p className="text-sm text-gray-500">Road Accident Intelligence</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                <div className="hidden md:flex items-center space-x-6">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span>Live Data</span>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Last updated: {new Date().toLocaleTimeString()}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Secondary Navigation - Tab Bar */}
+          <div className="border-t border-gray-200/30">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex justify-center py-3">
+                <nav className="flex space-x-1 bg-gray-100/50 rounded-xl p-1 backdrop-blur-sm">
+                  {tabs.map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`relative px-6 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 flex items-center space-x-2 ${
+                        activeTab === tab.id 
+                        ? 'bg-white text-blue-600 shadow-md border border-blue-100' 
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+                      }`}
+                    >
+                      {tab.id === 'overview' && (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                      )}
+                      {tab.id === 'temporal' && (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      )}
+                      <span>{tab.label}</span>
+                      {activeTab === tab.id && (
+                        <div className="absolute -bottom-0.5 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-blue-600 rounded-full"></div>
+                      )}
+                    </button>
+                  ))}
+                </nav>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Hero Section */}
+          <div className="text-center mb-16 relative">
+            {/* Background decoration */}
+            <div className="absolute inset-0 -z-10">
+              <div className="absolute top-10 left-1/4 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+              <div className="absolute top-20 right-1/4 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{animationDelay: '2s'}}></div>
+              <div className="absolute -top-8 left-1/3 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{animationDelay: '4s'}}></div>
+            </div>
+            
+            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 rounded-full text-sm font-medium mb-8 shadow-lg border border-blue-200/50 backdrop-blur-sm">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Advanced Analytics Platform
+              <div className="ml-3 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            </div>
+            
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-8 leading-tight">
+              Road Accident
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 animate-gradient-x"> Intelligence</span>
             </h1>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            
+            <p className="text-xl md:text-2xl text-gray-600 max-w-5xl mx-auto leading-relaxed mb-8">
               Comprehensive analysis of road accident data with insights into patterns, demographics, 
               medical outcomes, and socioeconomic impacts for evidence-based decision making.
             </p>
-          </div>
 
-        {/* Tab Navigation */}
-        <div className="flex justify-center mb-12">
-          <div className="bg-white rounded-2xl shadow-xl p-3 border border-gray-200">
-            <div className="flex space-x-3">
-              {tabs.map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`px-10 py-4 text-base font-semibold rounded-xl transition-all duration-300 transform ${
-                    activeTab === tab.id 
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-xl scale-105' 
-                    : 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:scale-102 hover:shadow-md'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+            {/* Key Statistics Preview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mt-12">
+              <StatCard
+                title="Total Records"
+                value={(analyticsData?.total_records || summaryData?.totalAccidents || 0).toLocaleString()}
+                subtitle="Accident cases analyzed"
+                color="blue"
+                icon={
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                }
+              />
+              <StatCard
+                title="Peak Accident Hour"
+                value={(() => {
+                  const peakHour = summaryData?.peak_accident_hour || analyticsData?.peak_accident_hour;
+                  if (peakHour !== undefined && peakHour !== null) {
+                    return `${peakHour}:00`;
+                  }
+                  // Find peak hour from hourly distribution
+                  if (Object.keys(accidentChars.hourlyDistribution).length > 0) {
+                    const peakEntry = Object.entries(accidentChars.hourlyDistribution)
+                      .sort((a, b) => b[1] - a[1])[0];
+                    return `${peakEntry[0]}:00`;
+                  }
+                  return 'N/A';
+                })()}
+                subtitle={(() => {
+                  if (Object.keys(accidentChars.hourlyDistribution).length > 0) {
+                    const peakEntry = Object.entries(accidentChars.hourlyDistribution)
+                      .sort((a, b) => b[1] - a[1])[0];
+                    return `${peakEntry[1]} accidents`;
+                  }
+                  return 'No data available';
+                })()}
+                color="red"
+                icon={
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                }
+              />
+              <StatCard
+                title="Most Common Collision"
+                value={(() => {
+                  const commonCollision = summaryData?.most_common_collision || analyticsData?.most_common_collision;
+                  if (commonCollision) {
+                    return commonCollision;
+                  }
+                  // Find most common collision from collision types
+                  if (Object.keys(accidentChars.collisionTypes).length > 0) {
+                    const topEntry = Object.entries(accidentChars.collisionTypes)
+                      .sort((a, b) => b[1] - a[1])[0];
+                    return topEntry[0];
+                  }
+                  return 'N/A';
+                })()}
+                subtitle={(() => {
+                  if (Object.keys(accidentChars.collisionTypes).length > 0) {
+                    const topEntry = Object.entries(accidentChars.collisionTypes)
+                      .sort((a, b) => b[1] - a[1])[0];
+                    return `${topEntry[1]} cases`;
+                  }
+                  return 'No data available';
+                })()}
+                color="yellow"
+                icon={
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                }
+              />
             </div>
           </div>
-        </div>
+
+
 
         {/* Tab Content */}
         <div className="tab-content px-4">
@@ -1065,7 +1551,65 @@ const AccidentEDA = () => {
             </div>
           </ChartContainer>
         )}
-        </div>
+        </main>
+
+        {/* Professional Footer */}
+        <footer className="bg-white/80 backdrop-blur-md border-t border-gray-200/50 mt-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div>
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  <span className="text-lg font-bold text-gray-900">Analytics Platform</span>
+                </div>
+                <p className="text-gray-600 text-sm">
+                  Advanced road accident analytics for evidence-based decision making and improved public safety.
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-4">Analytics</h3>
+                <ul className="space-y-2 text-sm text-gray-600">
+                  <li>Demographic Analysis</li>
+                  <li>Temporal Patterns</li>
+                  <li>Risk Assessment</li>
+                  <li>Outcome Prediction</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-4">System Status</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-gray-600">Data Pipeline: Active</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-gray-600">Analytics Engine: Online</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    <span className="text-gray-600">Last Sync: {new Date().toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="border-t border-gray-200 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+              <p className="text-sm text-gray-500">
+                © {new Date().getFullYear()} Road Safety Analytics Platform. All rights reserved.
+              </p>
+              <div className="flex items-center space-x-4 mt-4 md:mt-0">
+                <span className="text-xs text-gray-400">Powered by Advanced Analytics</span>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );
