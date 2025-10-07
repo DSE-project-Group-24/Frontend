@@ -789,23 +789,108 @@ const AccidentEDA = () => {
 
     return (
       <div className="space-y-8">
-        {/* Data Period Info */}
+        {/* Data Period Info - Compact & Official */}
         {analyticsData.data_period && (
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mb-8 shadow-md">
-            <div className="text-center">
-              <h3 className="text-xl font-bold text-blue-800 mb-4 flex items-center justify-center">
-                <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white/90 backdrop-blur-md rounded-2xl p-4 mb-6 shadow-lg border border-gray-200/50 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-700 rounded-lg flex items-center justify-center shadow-md">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
+                      {filters.start_date || filters.end_date ? 'Filtered Period' : 'Dataset Coverage'}
+                    </span>
+                    <div className={`w-2 h-2 rounded-full animate-pulse ${
+                      filters.start_date || filters.end_date ? 'bg-orange-500' : 'bg-green-500'
+                    }`}></div>
+                  </div>
+                  <div className="flex items-center space-x-4 mt-1">
+                    <span className="text-lg font-bold text-gray-900">
+                      {(() => {
+                        const startDate = filters.start_date || analyticsData.data_period.start_date;
+                        return new Date(startDate).toLocaleDateString('en-US', { 
+                          year: 'numeric', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        });
+                      })()}
+                    </span>
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-8 h-0.5 rounded-full ${
+                        filters.start_date || filters.end_date 
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500' 
+                          : 'bg-gradient-to-r from-blue-500 to-indigo-500'
+                      }`}></div>
+                      <svg className={`w-4 h-4 ${
+                        filters.start_date || filters.end_date ? 'text-orange-500' : 'text-blue-500'
+                      }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                      <div className={`w-8 h-0.5 rounded-full ${
+                        filters.start_date || filters.end_date 
+                          ? 'bg-gradient-to-r from-orange-500 to-red-500' 
+                          : 'bg-gradient-to-r from-blue-500 to-indigo-500'
+                      }`}></div>
+                    </div>
+                    <span className="text-lg font-bold text-gray-900">
+                      {(() => {
+                        const endDate = filters.end_date || analyticsData.data_period.end_date;
+                        return new Date(endDate).toLocaleDateString('en-US', { 
+                          year: 'numeric', 
+                          month: 'short', 
+                          day: 'numeric' 
+                        });
+                      })()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="text-right">
+                <div className="flex items-center space-x-2 text-xs text-gray-500 mb-1">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span>Last Updated</span>
+                </div>
+                <div className="text-sm font-medium text-gray-700">
+                  {new Date(analyticsData.generated_at).toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                  })} • {new Date(analyticsData.generated_at).toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    hour12: true 
+                  })}
+                </div>
+              </div>
+            </div>
+            
+            {/* Duration Badge */}
+            <div className="mt-3 flex justify-center">
+              <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${
+                filters.start_date || filters.end_date 
+                  ? 'bg-gradient-to-r from-orange-100 to-red-100 text-orange-800 border-orange-200/50' 
+                  : 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border-blue-200/50'
+              }`}>
+                <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
                 </svg>
-                Data Period
-              </h3>
-              <div className="space-y-2">
-                <p className="text-blue-700 text-lg font-medium">
-                  Analysis Period: <span className="font-bold">{analyticsData.data_period.start_date}</span> to <span className="font-bold">{analyticsData.data_period.end_date}</span>
-                </p>
-                <p className="text-sm text-blue-600">
-                  Generated: {new Date(analyticsData.generated_at).toLocaleString()}
-                </p>
+                {(() => {
+                  const startDate = new Date(filters.start_date || analyticsData.data_period.start_date);
+                  const endDate = new Date(filters.end_date || analyticsData.data_period.end_date);
+                  const diffTime = Math.abs(endDate - startDate);
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                  const years = Math.floor(diffDays / 365);
+                  const months = Math.floor((diffDays % 365) / 30);
+                  const periodType = filters.start_date || filters.end_date ? 'filtered period' : 'analysis period';
+                  return `${years > 0 ? `${years}y ` : ''}${months > 0 ? `${months}m` : `${diffDays}d`} ${periodType}`;
+                })()}
               </div>
             </div>
           </div>
