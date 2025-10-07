@@ -803,7 +803,7 @@ const fetchAnalyticsData = async () => {
 // Fetch summary data from backend
 const fetchSummaryData = async () => {
   try {
-    const response = await API.get('/analytics/summary');
+    const response = await API.get('/govDash/summary');
     return response.data; 
   } catch (error) {
     console.error('Error fetching summary data:', error);

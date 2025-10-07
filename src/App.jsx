@@ -53,7 +53,7 @@ function App() {
           {/* Registration Routes */}
           <Route path="/register/nurse" element={<RegisterNurse />} />
           <Route path="/register/doctor" element={<RegisterDoctor />} />
-          <Route path="/register/hospital_administrator" element={<RegisterAdmin />} />
+          <Route path="/register/admin" element={<RegisterAdmin />} />
           <Route path="/register/government" element={<RegisterGovernment />} />
 
           {/* Nurse Routes */}
