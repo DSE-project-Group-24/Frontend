@@ -678,12 +678,50 @@ const AccidentEDA = () => {
     dailyTrends: analyticsData.temporal_trends?.daily_trends || {}
   };
 
-  const StatCard = ({ title, value, subtitle, color = "blue" }) => (
-    <div className={`bg-white p-6 rounded-xl shadow-lg border-l-4 border-${color}-500 hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1`}>
-      <div className="text-center">
-        <h3 className="text-lg font-semibold text-gray-800 mb-2">{title}</h3>
-        <p className={`text-3xl font-bold text-${color}-600 mb-1`}>{value}</p>
-        {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+  const StatCard = ({ title, value, subtitle, color = "blue", icon }) => (
+    <div className="group relative bg-white/80 backdrop-blur-md p-6 rounded-2xl shadow-lg border border-gray-200/50 hover:shadow-2xl hover:border-blue-200/80 transition-all duration-300 transform hover:-translate-y-2 overflow-hidden">
+      {/* Background gradient overlay */}
+      <div className={`absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-5 transition-opacity duration-300 ${
+        color === 'blue' ? 'from-blue-500 to-indigo-500' :
+        color === 'red' ? 'from-red-500 to-pink-500' :
+        color === 'yellow' ? 'from-yellow-500 to-orange-500' :
+        color === 'green' ? 'from-green-500 to-emerald-500' :
+        'from-blue-500 to-indigo-500'
+      }`}></div>
+      
+      <div className="relative">
+        <div className="flex items-start justify-between mb-4">
+          <div className={`p-3 rounded-xl bg-gradient-to-br shadow-lg ${
+            color === 'blue' ? 'from-blue-500 to-indigo-500' :
+            color === 'red' ? 'from-red-500 to-pink-500' :
+            color === 'yellow' ? 'from-yellow-500 to-orange-500' :
+            color === 'green' ? 'from-green-500 to-emerald-500' :
+            'from-blue-500 to-indigo-500'
+          }`}>
+            {icon || (
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            )}
+          </div>
+          <div className="text-right">
+            <h3 className="text-sm font-semibold text-gray-600 mb-1 tracking-wide uppercase">{title}</h3>
+            <p className="text-3xl font-bold text-gray-900 mb-1 group-hover:scale-110 transition-transform duration-300">{value}</p>
+            {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+          </div>
+        </div>
+        
+        {/* Progress indicator */}
+        <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+          <div className={`h-2 rounded-full bg-gradient-to-r transition-all duration-500 ${
+            color === 'blue' ? 'from-blue-500 to-indigo-500' :
+            color === 'red' ? 'from-red-500 to-pink-500' :
+            color === 'yellow' ? 'from-yellow-500 to-orange-500' :
+            color === 'green' ? 'from-green-500 to-emerald-500' :
+            'from-blue-500 to-indigo-500'
+          }`} style={{ width: '85%' }}></div>
+        </div>
+        <p className="text-xs text-gray-400">Updated in real-time</p>
       </div>
     </div>
   );
@@ -772,29 +810,6 @@ const AccidentEDA = () => {
             </div>
           </div>
         )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
-          <StatCard 
-            title="Total Records" 
-            value={totalRecords.toLocaleString()} 
-            subtitle="Accident cases analyzed"
-            color="blue"
-          />
-          <StatCard 
-            title="Peak Accident Hour" 
-            value={peakHour !== 'N/A' ? `${peakHour}:00` : 'N/A'}
-            subtitle={Object.keys(accidentChars.hourlyDistribution).length > 0 ? 
-              `${getTopEntry(accidentChars.hourlyDistribution)[1]} accidents` : 'No data'}
-            color="red"
-          />
-          <StatCard 
-            title="Most Common Collision" 
-            value={commonCollision}
-            subtitle={Object.keys(accidentChars.collisionTypes).length > 0 ? 
-              `${getTopEntry(accidentChars.collisionTypes)[1]} cases` : 'No data'}
-            color="yellow"
-          />
-        </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
           <ChartContainer title="🏥 Medical Outcomes">
@@ -915,44 +930,182 @@ const AccidentEDA = () => {
   ];
 
   return (
-    <div className="w-full bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen relative">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Filter Sidebar */}
       <FilterSidebar />
       
       {/* Main Content */}
       <div className={`transition-all duration-300 ${sidebarOpen ? 'ml-0' : 'ml-0'}`}>
-        <div className="container mx-auto px-4 py-8">
-          {/* Header Section */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">
-              🚗 Road Accident Analytics Dashboard
+        {/* Professional Header */}
+        <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-30">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-gray-900">Analytics Dashboard</h1>
+                  <p className="text-sm text-gray-500">Road Accident Intelligence</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                <div className="hidden md:flex items-center space-x-6">
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span>Live Data</span>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Last updated: {new Date().toLocaleTimeString()}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Hero Section */}
+          <div className="text-center mb-16 relative">
+            {/* Background decoration */}
+            <div className="absolute inset-0 -z-10">
+              <div className="absolute top-10 left-1/4 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+              <div className="absolute top-20 right-1/4 w-72 h-72 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{animationDelay: '2s'}}></div>
+              <div className="absolute -top-8 left-1/3 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{animationDelay: '4s'}}></div>
+            </div>
+            
+            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 rounded-full text-sm font-medium mb-8 shadow-lg border border-blue-200/50 backdrop-blur-sm">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              Advanced Analytics Platform
+              <div className="ml-3 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            </div>
+            
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-8 leading-tight">
+              Road Accident
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 animate-gradient-x"> Intelligence</span>
             </h1>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            
+            <p className="text-xl md:text-2xl text-gray-600 max-w-5xl mx-auto leading-relaxed mb-8">
               Comprehensive analysis of road accident data with insights into patterns, demographics, 
               medical outcomes, and socioeconomic impacts for evidence-based decision making.
             </p>
-          </div>
 
-        {/* Tab Navigation */}
-        <div className="flex justify-center mb-12">
-          <div className="bg-white rounded-2xl shadow-xl p-3 border border-gray-200">
-            <div className="flex space-x-3">
-              {tabs.map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`px-10 py-4 text-base font-semibold rounded-xl transition-all duration-300 transform ${
-                    activeTab === tab.id 
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-xl scale-105' 
-                    : 'bg-gray-50 text-gray-700 hover:bg-gray-100 hover:scale-102 hover:shadow-md'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+            {/* Key Statistics Preview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mt-12">
+              <StatCard
+                title="Total Records"
+                value={(analyticsData?.total_records || summaryData?.totalAccidents || 0).toLocaleString()}
+                subtitle="Accident cases analyzed"
+                color="blue"
+                icon={
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                }
+              />
+              <StatCard
+                title="Peak Accident Hour"
+                value={(() => {
+                  const peakHour = summaryData?.peak_accident_hour || analyticsData?.peak_accident_hour;
+                  if (peakHour !== undefined && peakHour !== null) {
+                    return `${peakHour}:00`;
+                  }
+                  // Find peak hour from hourly distribution
+                  if (Object.keys(accidentChars.hourlyDistribution).length > 0) {
+                    const peakEntry = Object.entries(accidentChars.hourlyDistribution)
+                      .sort((a, b) => b[1] - a[1])[0];
+                    return `${peakEntry[0]}:00`;
+                  }
+                  return 'N/A';
+                })()}
+                subtitle={(() => {
+                  if (Object.keys(accidentChars.hourlyDistribution).length > 0) {
+                    const peakEntry = Object.entries(accidentChars.hourlyDistribution)
+                      .sort((a, b) => b[1] - a[1])[0];
+                    return `${peakEntry[1]} accidents`;
+                  }
+                  return 'No data available';
+                })()}
+                color="red"
+                icon={
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                }
+              />
+              <StatCard
+                title="Most Common Collision"
+                value={(() => {
+                  const commonCollision = summaryData?.most_common_collision || analyticsData?.most_common_collision;
+                  if (commonCollision) {
+                    return commonCollision;
+                  }
+                  // Find most common collision from collision types
+                  if (Object.keys(accidentChars.collisionTypes).length > 0) {
+                    const topEntry = Object.entries(accidentChars.collisionTypes)
+                      .sort((a, b) => b[1] - a[1])[0];
+                    return topEntry[0];
+                  }
+                  return 'N/A';
+                })()}
+                subtitle={(() => {
+                  if (Object.keys(accidentChars.collisionTypes).length > 0) {
+                    const topEntry = Object.entries(accidentChars.collisionTypes)
+                      .sort((a, b) => b[1] - a[1])[0];
+                    return `${topEntry[1]} cases`;
+                  }
+                  return 'No data available';
+                })()}
+                color="yellow"
+                icon={
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                }
+              />
             </div>
           </div>
-        </div>
+
+          {/* Modern Tab Navigation */}
+          <div className="flex justify-center mb-16">
+            <div className="bg-white/70 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/50 p-2">
+              <div className="flex space-x-2">
+                {tabs.map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`relative px-8 py-4 text-base font-semibold rounded-xl transition-all duration-300 overflow-hidden ${
+                      activeTab === tab.id 
+                      ? 'text-white shadow-lg' 
+                      : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100/80'
+                    }`}
+                  >
+                    {activeTab === tab.id && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl"></div>
+                    )}
+                    <span className="relative z-10 flex items-center space-x-2">
+                      {tab.id === 'overview' && (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                      )}
+                      {tab.id === 'temporal' && (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      )}
+                      <span>{tab.label}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
 
         {/* Tab Content */}
         <div className="tab-content px-4">
@@ -1034,7 +1187,65 @@ const AccidentEDA = () => {
             </div>
           </ChartContainer>
         )}
-        </div>
+        </main>
+
+        {/* Professional Footer */}
+        <footer className="bg-white/80 backdrop-blur-md border-t border-gray-200/50 mt-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div>
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  <span className="text-lg font-bold text-gray-900">Analytics Platform</span>
+                </div>
+                <p className="text-gray-600 text-sm">
+                  Advanced road accident analytics for evidence-based decision making and improved public safety.
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-4">Analytics</h3>
+                <ul className="space-y-2 text-sm text-gray-600">
+                  <li>Demographic Analysis</li>
+                  <li>Temporal Patterns</li>
+                  <li>Risk Assessment</li>
+                  <li>Outcome Prediction</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-4">System Status</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-gray-600">Data Pipeline: Active</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-gray-600">Analytics Engine: Online</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    <span className="text-gray-600">Last Sync: {new Date().toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="border-t border-gray-200 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+              <p className="text-sm text-gray-500">
+                © {new Date().getFullYear()} Road Safety Analytics Platform. All rights reserved.
+              </p>
+              <div className="flex items-center space-x-4 mt-4 md:mt-0">
+                <span className="text-xs text-gray-400">Powered by Advanced Analytics</span>
+              </div>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );
