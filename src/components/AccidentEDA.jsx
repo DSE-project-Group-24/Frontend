@@ -814,6 +814,9 @@ const AccidentEDA = () => {
   const DonutChart = ({ data, colorScheme = "mixed" }) => {
     if (!data || Object.keys(data).length === 0) return <EmptyChart />;
 
+    const [hoveredIndex, setHoveredIndex] = useState(null);
+    const [hoveredData, setHoveredData] = useState(null);
+
     const total = Object.values(data).reduce((sum, value) => sum + value, 0);
     const sortedData = Object.entries(data).sort(([,a], [,b]) => b - a).slice(0, 5);
     
@@ -846,6 +849,8 @@ const AccidentEDA = () => {
               const percentage = (value / total) * 100;
               const strokeDasharray = `${percentage * 2.199} ${219.9 - percentage * 2.199}`;
               const strokeDashoffset = -cumulativePercentage * 2.199;
+              const isHovered = hoveredIndex === index;
+              const isOtherHovered = hoveredIndex !== null && hoveredIndex !== index;
               cumulativePercentage += percentage;
               
               return (
@@ -853,44 +858,115 @@ const AccidentEDA = () => {
                   key={key}
                   cx="50"
                   cy="50"
-                  r="35"
+                  r={isHovered ? "37" : "35"}
                   fill="none"
                   stroke={colors[index % colors.length].hex}
-                  strokeWidth="8"
+                  strokeWidth={isHovered ? "10" : "8"}
                   strokeDasharray={strokeDasharray}
                   strokeDashoffset={strokeDashoffset}
                   strokeLinecap="round"
-                  className="transition-all duration-700 ease-in-out hover:stroke-opacity-80"
+                  className="transition-all duration-300 ease-in-out cursor-pointer"
                   style={{ 
                     animationDelay: `${index * 200}ms`,
-                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+                    filter: isHovered 
+                      ? 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' 
+                      : isOtherHovered 
+                        ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.1)) opacity(0.6)'
+                        : 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+                    opacity: isOtherHovered ? 0.4 : 1
+                  }}
+                  onMouseEnter={() => {
+                    setHoveredIndex(index);
+                    setHoveredData({ key, value, percentage: percentage.toFixed(1) });
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredIndex(null);
+                    setHoveredData(null);
                   }}
                 />
               );
             })}
           </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{total.toLocaleString()}</div>
-              <div className="text-sm text-gray-500">Total</div>
+          
+          {/* Center content - dynamic based on hover */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="text-center transition-all duration-300">
+              {hoveredData ? (
+                <>
+                  <div className="text-xl font-bold text-gray-900">{hoveredData.value.toLocaleString()}</div>
+                  <div className="text-sm text-gray-600 truncate max-w-20">{hoveredData.key}</div>
+                  <div className="text-xs text-gray-500">{hoveredData.percentage}%</div>
+                </>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold text-gray-900">{total.toLocaleString()}</div>
+                  <div className="text-sm text-gray-500">Total</div>
+                </>
+              )}
             </div>
           </div>
+
+          {/* Floating tooltip */}
+          {hoveredData && (
+            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg z-10 pointer-events-none">
+              <div className="text-xs font-medium">{hoveredData.key}</div>
+              <div className="text-sm font-bold">{hoveredData.value.toLocaleString()} ({hoveredData.percentage}%)</div>
+              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-800 rotate-45"></div>
+            </div>
+          )}
         </div>
 
-        {/* Legend */}
+        {/* Legend with enhanced hover effects */}
         <div className="space-y-3">
           {sortedData.map(([key, value], index) => {
             const percentage = ((value / total) * 100).toFixed(1);
+            const isHovered = hoveredIndex === index;
+            const isOtherHovered = hoveredIndex !== null && hoveredIndex !== index;
+            
             return (
-              <div key={key} className="flex items-center space-x-3 group hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200">
+              <div 
+                key={key} 
+                className={`flex items-center space-x-3 p-2 rounded-lg transition-all duration-300 cursor-pointer ${
+                  isHovered 
+                    ? 'bg-blue-50 border-2 border-blue-200 shadow-md scale-105' 
+                    : isOtherHovered 
+                      ? 'bg-gray-50 opacity-50' 
+                      : 'hover:bg-gray-50'
+                }`}
+                onMouseEnter={() => {
+                  setHoveredIndex(index);
+                  setHoveredData({ key, value, percentage });
+                }}
+                onMouseLeave={() => {
+                  setHoveredIndex(null);
+                  setHoveredData(null);
+                }}
+              >
                 <div 
-                  className="w-4 h-4 rounded-full shadow-sm border-2 border-white"
+                  className={`rounded-full shadow-sm border-2 border-white transition-all duration-300 ${
+                    isHovered ? 'w-5 h-5' : 'w-4 h-4'
+                  }`}
                   style={{ backgroundColor: colors[index % colors.length].hex }}
                 ></div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-700 truncate">{key}</div>
-                  <div className="text-xs text-gray-500">{value.toLocaleString()} ({percentage}%)</div>
+                  <div className={`text-sm font-medium text-gray-700 truncate transition-all duration-300 ${
+                    isHovered ? 'font-bold' : ''
+                  }`}>
+                    {key}
+                  </div>
+                  <div className={`text-xs text-gray-500 transition-all duration-300 ${
+                    isHovered ? 'text-gray-700 font-semibold' : ''
+                  }`}>
+                    {value.toLocaleString()} ({percentage}%)
+                  </div>
                 </div>
+                {isHovered && (
+                  <div className="text-blue-600">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                )}
               </div>
             );
           })}
