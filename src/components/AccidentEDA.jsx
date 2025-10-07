@@ -438,7 +438,12 @@ const AccidentEDA = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">All Genders</option>
-                  {filterOptions.genders?.map(gender => (
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  {/* Add any additional genders from backend if available */}
+                  {filterOptions.genders?.filter(gender => 
+                    !['Male', 'Female'].includes(gender)
+                  ).map(gender => (
                     <option key={gender} value={gender}>{gender}</option>
                   ))}
                 </select>
@@ -484,56 +489,20 @@ const AccidentEDA = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">All Ethnicities</option>
-                  {filterOptions.ethnicities?.map(ethnicity => (
+                  <option value="Tamil">Tamil</option>
+                  <option value="Sinhalese">Sinhalese</option>
+                  <option value="Muslim">Muslim</option>
+                  <option value="Moor">Moor</option>
+                  {/* Add any additional ethnicities from backend if available */}
+                  {filterOptions.ethnicities?.filter(ethnicity => 
+                    !['Sinhalese', 'Tamil', 'Muslim', 'Moor'].includes(ethnicity)
+                  ).map(ethnicity => (
                     <option key={ethnicity} value={ethnicity}>{ethnicity}</option>
                   ))}
                 </select>
               </div>
 
-              {/* Collision Type Filter */}
-              <div className="filter-group">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">🚗 Collision Type</label>
-                <select
-                  value={filters.collision_type}
-                  onChange={(e) => handleFilterChange('collision_type', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Collision Types</option>
-                  {filterOptions.collision_types?.map(collision => (
-                    <option key={collision} value={collision}>{collision}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Road Category Filter */}
-              <div className="filter-group">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">🛣️ Road Category</label>
-                <select
-                  value={filters.road_category}
-                  onChange={(e) => handleFilterChange('road_category', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Road Categories</option>
-                  {filterOptions.road_categories?.map(road => (
-                    <option key={road} value={road}>{road}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Discharge Outcome Filter */}
-              <div className="filter-group">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">🏥 Discharge Outcome</label>
-                <select
-                  value={filters.discharge_outcome}
-                  onChange={(e) => handleFilterChange('discharge_outcome', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All Outcomes</option>
-                  {filterOptions.discharge_outcomes?.map(outcome => (
-                    <option key={outcome} value={outcome}>{outcome}</option>
-                  ))}
-                </select>
-              </div>
+              
             </div>
 
             {/* Action Buttons */}
