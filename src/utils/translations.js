@@ -395,7 +395,20 @@ const translations = {
     motorbike: "යතුරුපැදිය",
     threeWheeler: "ත්‍රිරෝද",
     heavyVehicle: "බර වාහනය",
-    fallFromVehicle: "වාහනයෙන් වැටීම"
+    fallFromVehicle: "වාහනයෙන් වැටීම",
+    
+    // Footer translations
+    roadAccidentCareSystem: "මාර්ග අනතුරු සත්කාර පද්ධතිය",
+    emergencyCareExcellence: "හදිසි සත්කාර උත්කර්ෂතාව",
+    comprehensiveEmergencyManagement: "රෝහල්, රජයේ ආයතන සහ වෛද්‍ය වෘත්තිකයන් සම්බන්ධ කරමින් වැඩිදියුණු කළ අනතුරු ප්‍රතිචාර සහ රෝගී සත්කාර සම්බන්ධීකරණය සඳහා විස්තීර්ණ හදිසි කළමනාකරණ වේදිකාව.",
+    emergencyHotline: "හදිසි හොට්ලයින්",
+    systemStatus: "පද්ධති තත්ත්වය",
+    allSystemsOperational: "සියලුම පද්ධති ක්‍රියාත්මකයි",
+    lastUpdated: "අවසන් යාවත්කාලීනය",
+    allRightsReserved: "සියලුම හිමිකම් ආරක්ෂිතයි",
+    licensedHealthcarePlatform: "බලපත්‍රිත සෞඛ්‍ය සේවා කළමනාකරණ වේදිකාව - HIPAA යටතේ රෝගී දත්ත ආරක්ෂිතයි",
+    builtBy: "නිර්මාණය කළේ",
+    groupDataScienceEngineering: "24 කණ්ඩායම - දත්ත විද්‍යා ඉංජිනේරු"
   }
 };
 
