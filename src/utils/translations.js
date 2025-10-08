@@ -409,6 +409,145 @@ const translations = {
     licensedHealthcarePlatform: "බලපත්‍රිත සෞඛ්‍ය සේවා කළමනාකරණ වේදිකාව - HIPAA යටතේ රෝගී දත්ත ආරක්ෂිතයි",
     builtBy: "නිර්මාණය කළේ",
     groupDataScienceEngineering: "24 කණ්ඩායම - දත්ත විද්‍යා ඉංජිනේරු"
+  },
+  
+  ta: {
+    // Common
+    loading: "ஏற்றுகிறது...",
+    search: "தேடுக",
+    close: "மூடு",
+    error: "பிழை",
+    success: "வெற்றி",
+    cancel: "ரத்து செய்",
+    confirm: "உறுதிப்படுத்து",
+    save: "சேமி",
+    delete: "நீக்கு",
+    edit: "திருத்து",
+    view: "பார்க்க",
+    back: "பின்னால்",
+    next: "அடுத்து",
+    previous: "முந்தைய",
+    
+    // Login & Auth
+    welcomeBack: "மீண்டும் வருக",
+    signInToContinue: "உங்கள் கணக்கில் தொடர உள்நுழைக",
+    login: "உள்நுழைக",
+    email: "மின்னஞ்சல்",
+    password: "கடவுச்சொல்",
+    selectLanguage: "மொழியைத் தேர்ந்தெடுக்கவும்",
+    english: "English",
+    sinhala: "සිංහල",
+    tamil: "தமிழ்",
+    rememberMe: "என்னை நினைவில் வைத்துக் கொள்ளுங்கள்",
+    forgotPassword: "கடவுச்சொல்லை மறந்துவிட்டீர்களா?",
+    dontHaveAnAccountRegisterHere: "கணக்கு இல்லையா? இங்கே பதிவு செய்யுங்கள்",
+    secureHealthcareManagementSystem: "பாதுகாப்பான சுகாதார மேலாண்மை அமைப்பு",
+    
+    // Navigation
+    dashboard: "டாஷ்போர்டு",
+    patients: "நோயாளிகள்",
+    patientData: "நோயாளி தகவல்",
+    viewPatientData: "நோயாளி தகவலைப் பார்க்கவும்",
+    getPrediction: "முன்கணிப்பு பெறுக",
+    logout: "வெளியேறு",
+    doctorPortal: "மருத்துவர் போர்ட்டல்",
+    roadAccidentCareSystem: "சாலை விபத்து பராமரிப்பு அமைப்பு",
+    online: "ஆன்லைன்",
+    currentlyOnline: "தற்போது ஆன்லைனில்",
+    
+    // Patient Data
+    patientDetails: "நோயாளி விவரங்கள்",
+    fullName: "முழுப் பெயர்",
+    contactNumber: "தொடர்பு எண்",
+    dateOfBirth: "பிறந்த தேதி",
+    age: "வயது",
+    ethnicity: "இனம்",
+    gender: "பாலினம்",
+    address: "முகவரி",
+    lifeStyle: "வாழ்க்கை முறை",
+    education: "கல்வி",
+    occupation: "தொழில்",
+    familyMonthlyIncome: "குடும்ப மாத வருமானம்",
+    bloodGroup: "இரத்த வகை",
+    patientId: "நோயாளி அடையாள எண்",
+    notRecorded: "பதிவு செய்யப்படவில்லை",
+    
+    // Search
+    searchPatient: "நோயாளியைத் தேடுக",
+    enterPatientIdNicOrName: "நோயாளி அடையாள எண், தேசிய அடையாள எண், அல்லது முழுப் பெயரை உள்ளிடவும்",
+    searchByIdNicName: "நீங்கள் நோயாளி அடையாள எண், தேசிய அடையாள எண், அல்லது முழுப் பெயர் மூலம் தேடலாம்",
+    pleaseEnterSearchTerm: "தயவுசெய்து நோயாளி அடையாள எண், தேசிய அடையாள எண், அல்லது முழுப் பெயரை உள்ளிடவும்",
+    noPatientFound: "அந்த நோயாளி அடையாள எண், தேசிய அடையாள எண், அல்லது முழுப் பெயருடன் எந்த நோயாளியும் கிடைக்கவில்லை.",
+    searching: "தேடுகிறது...",
+    
+    // AccidentEDA Page
+    roadAccidentIntelligence: "சாலை விபத்து அறிவுத்திறன் அமைப்பு",
+    advancedAnalyticsPlatform: "மேம்பட்ட பகுப்பாய்வு தளம்",
+    comprehensiveAnalysisDescription: "சான்றுகள் அடிப்படையில் முடிவெடுப்பதற்கான வடிவங்கள், மக்கள்தொகை தரவு, மருத்துவ முடிவுகள் மற்றும் சமூக பொருளாதார தாக்கங்கள் பற்றிய நுண்ணறிவுகளுடன் சாலை விபத்து தரவுகளின் விரிவான பகுப்பாய்வு.",
+    totalRecords: "மொத்த பதிவுகள்",
+    accidentCasesAnalyzed: "பகுப்பாய்வு செய்யப்பட்ட விபத்து வழக்குகள்",
+    peakAccidentHour: "விபத்து உச்ச நேரம்",
+    accidents: "விபத்துகள்",
+    mostCommonCollision: "மிகவும் பொதுவான மோதல்",
+    cases: "வழக்குகள்",
+    noDataAvailable: "தரவு கிடைக்கவில்லை",
+    overview: "மேலோட்டமான பார்வை",
+    temporal: "தற்காலிக",
+    filters: "வடிகட்டிகள்",
+    realTimeAnalytics: "நேரடி நேர பகுப்பாய்வு",
+    keyInsightsSummary: "முக்கிய நுண்ணறிவுகளின் சுருக்கம்",
+    majorFindings: "முக்கிய கண்டுபிடிப்புகள்",
+    vulnerableGroups: "பாதிக்கப்படக்கூடிய குழுக்கள்",
+    ageGroup: "வயது குழு",
+    highestRisk: "அதிக ஆபத்து",
+    ofCases: "வழக்குகளில்",
+    noDemographicData: "தற்போதைய வடிகட்டிகளுக்கு மக்கள்தொகை தரவு கிடைக்கவில்லை",
+    highRiskConditions: "அதிக ஆபத்து நிலைமைகள்",
+    peakTime: "உச்ச நேரம்",
+    hours: "மணிநேரங்கள்",
+    commonCollision: "பொதுவான மோதல்",
+    noAccidentConditionData: "தற்போதைய வடிகட்டிகளுக்கு விபத்து நிலை தரவு கிடைக்கவில்லை",
+    monthlyAccidentTrends: "மாதாந்திர விபத்து போக்குகள்",
+    weeklyPattern: "வாராந்திர முறை",
+    hourAccidentPattern: "24 மணிநேர விபத்து முறை",
+    peakMonth: "உச்ச மாதம்",
+    incidents: "சம்பவங்கள்",
+    peakDay: "உச்ச நாள்",
+    peakHour: "உச்ச நேரம்",
+    lastUpdated: "கடைசியாக புதுப்பிக்கப்பட்டது",
+    
+    // Filters
+    dateRange: "தேதி வரம்பு",
+    startDate: "தொடக்க தேதி",
+    endDate: "முடிவு தேதி",
+    gender: "பாலின அடையாளம்",
+    allGenders: "அனைத்து பாலின அடையாளங்களும்",
+    male: "ஆண்",
+    female: "பெண்",
+    ageRange: "வயது வரம்பு",
+    minimumAge: "குறைந்தபட்ச வயது",
+    maximumAge: "அதிகபட்ச வயது",
+    minAge: "குறைந்தபட்ச வயது",
+    maxAge: "அதிகபட்ச வயது",
+    allEthnicities: "அனைத்து இனங்களும்",
+    tamil: "தமிழ்",
+    sinhalese: "சிங்களம்",
+    muslim: "முஸ்லிம்",
+    moor: "மூர்",
+    applyFilters: "வடிகட்டிகளை பயன்படுத்துக",
+    clearFilters: "வடிகட்டிகளை அழிக்கவும்",
+    applying: "பயன்படுத்துகிறது...",
+    
+    // Footer translations
+    emergencyCareExcellence: "அவசர சிகிச்சை சிறப்பு",
+    comprehensiveEmergencyManagement: "மேம்பட்ட விபத்து பதிலளிப்பு மற்றும் நோயாளி பராமரிப்பு ஒருங்கிணைப்புக்காக மருத்துவமனைகள், அரசு நிறுவனங்கள் மற்றும் மருத்துவ வல்லுநர்களை இணைக்கும் விரிவான அவசர மேலாண்மை தளம்.",
+    emergencyHotline: "அவசர ஹாட்லைன்",
+    systemStatus: "கணினி நிலை",
+    allSystemsOperational: "அனைத்து அமைப்புகளும் செயல்படுகின்றன",
+    allRightsReserved: "அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை",
+    licensedHealthcarePlatform: "உரிமம் பெற்ற சுகாதார மேலாண்மை தளம் - HIPAA கீழ் நோயாளி தரவு பாதுகாக்கப்படுகிறது",
+    builtBy: "உருவாக்கியது",
+    groupDataScienceEngineering: "குழு 24 - தரவு அறிவியல் பொறியியல்"
   }
 };
 
@@ -432,7 +571,8 @@ export const t = (key) => {
 export const getAvailableLanguages = () => {
   return [
     { code: 'en', name: 'English', nativeName: 'English' },
-    { code: 'si', name: 'Sinhala', nativeName: 'සිංහල' }
+    { code: 'si', name: 'Sinhala', nativeName: 'සිංහල' },
+    { code: 'ta', name: 'Tamil', nativeName: 'தமிழ்' }
   ];
 };
 
