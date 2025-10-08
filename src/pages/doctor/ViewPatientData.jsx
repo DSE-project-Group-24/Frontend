@@ -379,7 +379,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
   return (
     <div className="bg-gray-100">
       <DoctorNav setIsAuthenticated={setIsAuthenticated} setRole={setRole} />
-      <div className="container mx-auto p-6 min-h-screen">
+      <div className="container mx-auto p-6 pt-24 min-h-screen">
         <h1 className="text-3xl font-bold text-blue-700 mb-6">
           {t('viewPatientData')}
         </h1>
