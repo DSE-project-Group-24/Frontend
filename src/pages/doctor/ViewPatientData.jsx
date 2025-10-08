@@ -381,20 +381,20 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
       <DoctorNav setIsAuthenticated={setIsAuthenticated} setRole={setRole} />
       <div className="container mx-auto p-6 min-h-screen">
         <h1 className="text-3xl font-bold text-blue-700 mb-6">
-          View Patient Data
+          {t('viewPatientData')}
         </h1>
 
         {/* Search box */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
           <label className="block mb-2 text-gray-700 font-medium">
-            Search Patient:
+            {t('searchPatient')}:
           </label>
           <div className="flex">
             <input
               type="text"
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
-              placeholder="Enter Patient ID, NIC, or Full Name"
+              placeholder={t('enterPatientIdNicOrName')}
               className="flex-1 border border-gray-300 rounded-l px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
@@ -402,11 +402,11 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
               className="bg-blue-600 text-white px-4 py-2 rounded-r hover:bg-blue-700"
               disabled={loading}
             >
-              {loading ? "Searching..." : "Search"}
+              {loading ? t('searching') : t('search')}
             </button>
           </div>
           <p className="text-sm text-gray-500 mt-1">
-            You can search by Patient ID, NIC, or Full Name
+            {t('searchByIdNicName')}
           </p>
           {error && <p className="text-red-500 mt-2">{error}</p>}
         </div>
@@ -414,28 +414,28 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
         {/* Patient info */}
         {filtered && (
           <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 className="text-xl font-semibold mb-4">Patient Details</h2>
+            <h2 className="text-xl font-semibold mb-4">{t('patientDetails')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-              <p><span className="font-medium">Full Name:</span> {filtered["Full Name"]}</p>
-              <p><span className="font-medium">Contact Number:</span> {filtered["Contact Number"]}</p>
-              <p><span className="font-medium">Date of Birth:</span> {filtered["Date of Birth"]} 
+              <p><span className="font-medium">{t('fullName')}:</span> {filtered["Full Name"]}</p>
+              <p><span className="font-medium">{t('contactNumber')}:</span> {filtered["Contact Number"]}</p>
+              <p><span className="font-medium">{t('dateOfBirth')}:</span> {filtered["Date of Birth"]} 
                 {filtered["Date of Birth"] && (
-                  <span> (Age: {Math.floor((new Date() - new Date(filtered["Date of Birth"])) / (1000 * 60 * 60 * 24 * 365.25))})</span>
+                  <span> ({t('age')}: {Math.floor((new Date() - new Date(filtered["Date of Birth"])) / (1000 * 60 * 60 * 24 * 365.25))})</span>
                 )}
               </p>
-              <p><span className="font-medium">Ethnicity:</span> {filtered["Ethnicity"]}</p>
-              <p><span className="font-medium">Gender:</span> {filtered["Gender"]}</p>
-              <p><span className="font-medium">Address:</span> {filtered["Address Street"]}</p>
-              <p><span className="font-medium">Life Style:</span> {filtered["Life Style"]}</p>
-              <p><span className="font-medium">Education:</span> {filtered["Education Qualification"]}</p>
-              <p><span className="font-medium">Occupation:</span> {filtered["Occupation"]}</p>
-              <p><span className="font-medium">Family Monthly Income:</span> {filtered["Family Monthly Income"]}</p>
+              <p><span className="font-medium">{t('ethnicity')}:</span> {filtered["Ethnicity"]}</p>
+              <p><span className="font-medium">{t('gender')}:</span> {filtered["Gender"]}</p>
+              <p><span className="font-medium">{t('address')}:</span> {filtered["Address Street"]}</p>
+              <p><span className="font-medium">{t('lifeStyle')}:</span> {filtered["Life Style"]}</p>
+              <p><span className="font-medium">{t('education')}:</span> {filtered["Education Qualification"]}</p>
+              <p><span className="font-medium">{t('occupation')}:</span> {filtered["Occupation"]}</p>
+              <p><span className="font-medium">{t('familyMonthlyIncome')}:</span> {filtered["Family Monthly Income"]}</p>
               <p>
-                <span className="font-medium">Blood Group:</span>{" "}
-                {filtered["Blood Group"] || "Not Recorded"}
+                <span className="font-medium">{t('bloodGroup')}:</span>{" "}
+                {filtered["Blood Group"] || t('notRecorded')}
               </p>
 
-              <p><span className="font-medium">Patient ID:</span> {filtered["patient_id"]}</p>
+              <p><span className="font-medium">{t('patientId')}:</span> {filtered["patient_id"]}</p>
             </div>
           </div>
         )}
@@ -444,7 +444,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
         {filtered && accidents.length > 0 && (
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold mb-4">
-              Accident Records ({accidents.length})
+              {t('accidentRecords')} ({accidents.length})
             </h2>
             <div className="space-y-3">
               {accidents.map((acc, index) => (
@@ -460,37 +460,37 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                     <h3 className="font-semibold text-blue-700">Accident #{index + 1}</h3>
                     {!acc["Completed"] && (
                       <div className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-sm font-medium">
-                        Incomplete
+                        {t('incomplete')}
                       </div>
                     )}
                   </div>
                   <div className="text-gray-700">
-                    <p><span className="font-medium">Incident Date:</span> {acc["incident at date"]}</p>
-                    <p><span className="font-medium">Time Of Collision:</span> {acc["time of collision"]}</p>
+                    <p><span className="font-medium">{t('incidentDate')}:</span> {acc["incident at date"]}</p>
+                    <p><span className="font-medium">{t('timeOfCollision')}:</span> {acc["time of collision"]}</p>
                     <p>
-                      <span className="font-medium">Completed:</span>{" "}
-                      {acc["Completed"] ? "Yes" : "No"}
+                      <span className="font-medium">{t('completed')}:</span>{" "}
+                      {acc["Completed"] ? t('yes') : t('no')}
                     </p>
                     
                     {/* Prediction Display for Incomplete Accidents */}
                     {!acc["Completed"] && (
                       <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <h4 className="font-semibold text-blue-800 mb-2">ML Transfer Prediction:</h4>
+                        <h4 className="font-semibold text-blue-800 mb-2">{t('mlTransferPrediction')}:</h4>
                         {loadingPredictions[acc.accident_id] ? (
                           <div className="flex items-center gap-2 text-blue-600">
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                            Calculating prediction...
+                            {t('calculatingPrediction')}
                           </div>
                         ) : transferProbabilities[acc.accident_id] ? (
                           <div className="space-y-1">
                             <p className="text-sm">
-                              <span className="font-medium">Transfer Probability:</span>{" "}
+                              <span className="font-medium">{t('transferProbability')}:</span>{" "}
                               <span className="font-bold text-blue-700">
                                 {transferProbabilities[acc.accident_id].probability}
                               </span>
                             </p>
                             <p className="text-sm">
-                              <span className="font-medium">Prediction:</span>{" "}
+                              <span className="font-medium">{t('prediction')}:</span>{" "}
                               <span className="font-semibold">
                                 {transferProbabilities[acc.accident_id].prediction}
                               </span>
@@ -518,12 +518,12 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                             )} */}
                           </div>
                         ) : (
-                          <p className="text-sm text-red-600">Prediction not available</p>
+                          <p className="text-sm text-red-600">{t('predictionNotAvailable')}</p>
                         )}
                       </div>
                     )}
                   </div>
-                  <p className="text-sm text-blue-600 mt-2">Click to view full details →</p>
+                  <p className="text-sm text-blue-600 mt-2">{t('clickToViewFullDetails')}</p>
                 </div>
               ))}
             </div>
@@ -532,8 +532,8 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
 
         {filtered && accidents.length === 0 && (
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Accident Records</h2>
-            <p className="text-gray-700">No accident records for this patient.</p>
+            <h2 className="text-xl font-semibold mb-4">{t('accidentRecords')}</h2>
+            <p className="text-gray-700">{t('noAccidentRecords')}</p>
           </div>
         )}
 
@@ -544,7 +544,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-2xl font-bold text-blue-700">
-                    Accident #{accidents.findIndex(acc => acc.accident_id === selectedAccident.accident_id) + 1} - Full Details
+                    Accident #{accidents.findIndex(acc => acc.accident_id === selectedAccident.accident_id) + 1} - {t('fullDetails')}
                   </h2>
                   <button
                     onClick={() => {
@@ -561,26 +561,26 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                 {!selectedAccident["Completed"] && transferProbabilities[selectedAccident.accident_id] && (
                   <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                     <h3 className="text-lg font-bold text-blue-800 mb-3 flex items-center gap-2">
-                      🧠 ML Transfer Prediction Analysis
+                      🧠 {t('mlTransferPredictionAnalysis')}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="text-center p-3 bg-white rounded-lg shadow-sm">
                         <div className="text-2xl font-bold text-blue-600">
                           {transferProbabilities[selectedAccident.accident_id].probability}
                         </div>
-                        <div className="text-sm text-blue-800 font-medium">Transfer Probability</div>
+                        <div className="text-sm text-blue-800 font-medium">{t('transferProbability')}</div>
                       </div>
                       <div className="text-center p-3 bg-white rounded-lg shadow-sm">
                         <div className="text-xl font-bold text-purple-600">
                           {transferProbabilities[selectedAccident.accident_id].prediction}
                         </div>
-                        <div className="text-sm text-purple-800 font-medium">Prediction Outcome</div>
+                        <div className="text-sm text-purple-800 font-medium">{t('predictionOutcome')}</div>
                       </div>
                       <div className="text-center p-3 bg-white rounded-lg shadow-sm">
                         <div className="text-sm text-green-700">
                           {transferProbabilities[selectedAccident.accident_id].message}
                         </div>
-                        <div className="text-xs text-green-600 font-medium mt-1">Analysis</div>
+                        <div className="text-xs text-green-600 font-medium mt-1">{t('analysis')}</div>
                       </div>
                     </div>
                     
@@ -608,43 +608,43 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-3 text-blue-600">Basic Information</h3>
-                    <p className="mb-2"><span className="font-medium">Incident Date:</span> {selectedAccident["incident at date"]}</p>
-                    <p className="mb-2"><span className="font-medium">Time of Collision:</span> {selectedAccident["time of collision"]}</p>
-                    <p className="mb-2"><span className="font-medium">Severity:</span> {selectedAccident["Severity"]}</p>
+                    <h3 className="font-semibold text-lg mb-3 text-blue-600">{t('basicInformation')}</h3>
+                    <p className="mb-2"><span className="font-medium">{t('incidentDate')}:</span> {selectedAccident["incident at date"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('timeOfCollision')}:</span> {selectedAccident["time of collision"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('severity')}:</span> {selectedAccident["Severity"]}</p>
                   </div>
                   
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-3 text-blue-600">Environment Conditions</h3>
-                    <p className="mb-2"><span className="font-medium">Visibility:</span> {selectedAccident["Visibility"]}</p>
-                    <p className="mb-2"><span className="font-medium">Road Condition:</span> {selectedAccident["Road Condition"]}</p>
-                    <p className="mb-2"><span className="font-medium">Road Type:</span> {selectedAccident["Road Type"]}</p>
-                    <p className="mb-2"><span className="font-medium">Category of Road:</span> {selectedAccident["Category of Road"]}</p>
+                    <h3 className="font-semibold text-lg mb-3 text-blue-600">{t('environmentConditions')}</h3>
+                    <p className="mb-2"><span className="font-medium">{t('visibility')}:</span> {selectedAccident["Visibility"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('roadCondition')}:</span> {selectedAccident["Road Condition"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('roadType')}:</span> {selectedAccident["Road Type"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('categoryOfRoad')}:</span> {selectedAccident["Category of Road"]}</p>
                   </div>
                   
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-3 text-blue-600">Accident Details</h3>
-                    <p className="mb-2"><span className="font-medium">Approximate Speed:</span> {selectedAccident["Approximate speed"]}</p>
-                    <p className="mb-2"><span className="font-medium">Mode of Traveling:</span> {selectedAccident["Mode of traveling during accident"]}</p>
-                    <p className="mb-2"><span className="font-medium">Collision With:</span> {selectedAccident["Collision with"]}</p>
-                    <p className="mb-2"><span className="font-medium">Mode of Transport to Hospital:</span> {selectedAccident["Mode of transport to hospital"]}</p>
-                    <p className="mb-2"><span className="font-medium">Alcohol Consumption:</span> {selectedAccident["Alcohol Consumption"]}</p>
-                    <p className="mb-2"><span className="font-medium">Illicit Drugs:</span> {selectedAccident["Illicit Drugs"]}</p>
-                    <p className="mb-2"><span className="font-medium">Helmet Worn:</span> {selectedAccident["Helmet Worn"]}</p>
+                    <h3 className="font-semibold text-lg mb-3 text-blue-600">{t('accidentDetails')}</h3>
+                    <p className="mb-2"><span className="font-medium">{t('approximateSpeed')}:</span> {selectedAccident["Approximate speed"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('modeOfTraveling')}:</span> {selectedAccident["Mode of traveling during accident"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('collisionWith')}:</span> {selectedAccident["Collision with"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('modeOfTransportToHospital')}:</span> {selectedAccident["Mode of transport to hospital"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('alcoholConsumption')}:</span> {selectedAccident["Alcohol Consumption"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('illicitDrugs')}:</span> {selectedAccident["Illicit Drugs"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('helmetWorn')}:</span> {selectedAccident["Helmet Worn"]}</p>
                   </div>
                   
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-3 text-blue-600">Medical & Financial</h3>
-                    <p className="mb-2"><span className="font-medium">First Aid Given at Scene:</span> {selectedAccident["First aid given at seen"] ? "Yes" : "No"}</p>
-                    <p className="mb-2"><span className="font-medium">Hospital Distance From Home:</span> {selectedAccident["Hospital Distance From Home"]}</p>
-                    <p className="mb-2"><span className="font-medium">Hospital:</span> {selectedAccident["Hospital"]}</p>
-                    <p className="mb-2"><span className="font-medium">Family Current Status:</span> {selectedAccident["Family current status"]}</p>
-                    <p className="mb-2"><span className="font-medium">Bystander Expenditure/Day:</span> {selectedAccident["Bystander expenditure per day"]}</p>
-                    <p className="mb-2"><span className="font-medium">Traveling Expenditure Per Day:</span> {selectedAccident["Traveling Expenditure Per Day"]}</p>
-                    <p className="mb-2"><span className="font-medium">Any Other Hospital Admission Expenditure:</span> {selectedAccident["Any Other Hospital Admission Expenditure"]}</p>
+                    <h3 className="font-semibold text-lg mb-3 text-blue-600">{t('medicalFinancial')}</h3>
+                    <p className="mb-2"><span className="font-medium">{t('firstAidGivenAtScene')}:</span> {selectedAccident["First aid given at seen"] ? t('yes') : t('no')}</p>
+                    <p className="mb-2"><span className="font-medium">{t('hospitalDistanceFromHome')}:</span> {selectedAccident["Hospital Distance From Home"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('hospital')}:</span> {selectedAccident["Hospital"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('familyCurrentStatus')}:</span> {selectedAccident["Family current status"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('bystanderExpenditurePerDay')}:</span> {selectedAccident["Bystander expenditure per day"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('travelingExpenditurePerDay')}:</span> {selectedAccident["Traveling Expenditure Per Day"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('anyOtherHospitalAdmissionExpenditure')}:</span> {selectedAccident["Any Other Hospital Admission Expenditure"]}</p>
                   </div>
 
-                  <p className="mb-2"><span className="font-medium">Completed:</span> {selectedAccident["Completed"] ? "Yes" : "No"}</p>
+                  <p className="mb-2"><span className="font-medium">{t('completed')}:</span> {selectedAccident["Completed"] ? t('yes') : t('no')}</p>
                 </div>
                 
                 <div className="mt-6 flex justify-end">
@@ -655,7 +655,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                     }}
                     className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    Close
+                    {t('close')}
                   </button>
                 </div>
               </div>
