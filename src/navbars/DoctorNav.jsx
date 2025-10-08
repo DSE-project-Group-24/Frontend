@@ -102,14 +102,14 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
 
   return (
     <nav ref={mobileMenuRef} className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 text-white overflow-hidden sticky top-0 z-50 shadow-2xl">
-      {/* Background Pattern (✅ no click blocking now) */}
+      
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -translate-y-32 translate-x-32"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-300 rounded-full translate-y-24 -translate-x-24"></div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-35">
           {/* Logo/Brand */}
           <div className="flex items-center space-x-3">
             <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">

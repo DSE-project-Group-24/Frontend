@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import API from '../utils/api';
-import { t } from '../utils/translations';
+import { t, getCurrentLanguage } from '../utils/translations';
+import { processBackendChartData, processBackendResponse, translateBackendValue, translateDataValue } from '../utils/dataTranslations';
 import LanguageSwitcher from './LanguageSwitcher';
 
 const fetchAnalyticsData = async (filters = {}) => {
@@ -60,12 +61,14 @@ const fetchFilterOptions = async () => {
 const AccidentEDA = () => {
   const [analyticsData, setAnalyticsData] = useState(null);
   const [summaryData, setSummaryData] = useState(null);
+  const [rawAnalyticsData, setRawAnalyticsData] = useState(null); // Store raw data
   const [filterOptions, setFilterOptions] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [applying, setApplying] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState(getCurrentLanguage());
 
   // Backend filter states
   const [filters, setFilters] = useState({
@@ -105,7 +108,11 @@ const AccidentEDA = () => {
         fetchSummaryData(apiFilters)
       ]);
 
-      setAnalyticsData(analytics);
+      // Store raw data and process for translations
+      setRawAnalyticsData(analytics);
+      const processedAnalytics = processBackendChartData(analytics);
+      
+      setAnalyticsData(processedAnalytics);
       setSummaryData(summary);
     } catch (err) {
       console.error('Failed to apply filters:', err);
@@ -314,8 +321,13 @@ const AccidentEDA = () => {
           fetchFilterOptions()
         ]);
         
-        setAnalyticsData(analytics);
-        setSummaryData(summary);
+        // Store raw data and process for translations
+        setRawAnalyticsData(analytics);
+        const processedAnalytics = processBackendChartData(analytics);
+        const processedSummary = summary; // Keep summary as is for now
+        
+        setAnalyticsData(processedAnalytics);
+        setSummaryData(processedSummary);
         setFilterOptions(filterOpts);
       } catch (err) {
         console.error('Failed to load data:', err);
@@ -327,6 +339,17 @@ const AccidentEDA = () => {
 
     loadData();
   }, []);
+
+  // Re-process data when language changes
+  useEffect(() => {
+    const newLanguage = getCurrentLanguage();
+    if (newLanguage !== currentLanguage && rawAnalyticsData) {
+      setCurrentLanguage(newLanguage);
+      // Re-process the raw data with new language
+      const processedAnalytics = processBackendChartData(rawAnalyticsData);
+      setAnalyticsData(processedAnalytics);
+    }
+  }, [currentLanguage, rawAnalyticsData]);
 
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => ({
@@ -528,7 +551,7 @@ const AccidentEDA = () => {
 
             {/* Active Filters Display */}
             <div className="mt-6 pt-4 border-t border-gray-200">
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">Active Filters</h4>
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">{t('activeFilters')}</h4>
               <div className="space-y-1 text-xs">
                 {filters.start_date && (
                   <div className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
@@ -572,7 +595,7 @@ const AccidentEDA = () => {
                 )}
                 {!filters.start_date && !filters.end_date && !filters.gender && !filters.age_min && !filters.age_max && 
                  !filters.ethnicity && !filters.collision_type && !filters.road_category && !filters.discharge_outcome && (
-                  <div className="text-gray-500 italic">No active filters</div>
+                  <div className="text-gray-500 italic">{t('noActiveFilters')}</div>
                 )}
               </div>
             </div>
@@ -586,8 +609,8 @@ const AccidentEDA = () => {
     return (
       <div className="flex flex-col justify-center items-center h-96 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl">
         <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mb-6"></div>
-        <div className="text-xl font-semibold text-gray-700 mb-2">Loading EDA Analysis...</div>
-        <div className="text-sm text-gray-500">Please wait while we fetch your data</div>
+        <div className="text-xl font-semibold text-gray-700 mb-2">{t('loading')}</div>
+        <div className="text-sm text-gray-500">{t('pleaseWaitFetchingData')}</div>
       </div>
     );
   }
@@ -600,7 +623,7 @@ const AccidentEDA = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
           </svg>
         </div>
-        <h3 className="text-2xl font-bold text-red-800 mb-4">Error Loading Data</h3>
+        <h3 className="text-2xl font-bold text-red-800 mb-4">{t('errorLoadingData')}</h3>
         <p className="text-red-700 mb-6">{error}</p>
         <button 
           onClick={() => window.location.reload()} 
@@ -620,8 +643,8 @@ const AccidentEDA = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
           </svg>
         </div>
-        <h3 className="text-2xl font-bold text-yellow-800 mb-4">No Data Available</h3>
-        <p className="text-yellow-700">No analytics data found. Please ensure the backend is running and has data.</p>
+        <h3 className="text-2xl font-bold text-yellow-800 mb-4">{t('noDataAvailable')}</h3>
+        <p className="text-yellow-700">{t('noAnalyticsDataFound')}</p>
       </div>
     );
   }
@@ -767,10 +790,11 @@ const AccidentEDA = () => {
           .slice(0, 6)
           .map(([key, value], index) => {
             const percentage = maxValue > 0 ? (value / maxValue) * 100 : 0;
+            const translatedKey = translateDataValue(key);
             return (
               <div key={key} className="group">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700 truncate max-w-[150px]">{key}</span>
+                  <span className="text-sm font-medium text-gray-700 truncate max-w-[150px]">{translatedKey}</span>
                   <div className="flex items-center space-x-2">
                     <span className="text-sm font-bold text-gray-900">{value.toLocaleString()}</span>
                     <span className="text-xs text-gray-500">({Math.round(percentage)}%)</span>
@@ -803,7 +827,7 @@ const AccidentEDA = () => {
     const [isInteracting, setIsInteracting] = useState(false);
 
     const total = Object.values(data).reduce((sum, value) => sum + value, 0);
-    const sortedData = Object.entries(data).sort(([,a], [,b]) => b - a).slice(0, 5);
+    const sortedData = Object.entries(data).sort(([,a], [,b]) => b - a).slice(0, 5).map(([key, value]) => [translateDataValue(key), value, key]);
     
     const colors = [
       { hex: '#3b82f6', bg: 'bg-blue-500', name: 'Blue' },
@@ -816,12 +840,12 @@ const AccidentEDA = () => {
     // Pre-calculate segments to prevent render issues
     const segments = React.useMemo(() => {
       let cumulativePercentage = 0;
-      return sortedData.map(([key, value], index) => {
+      return sortedData.map(([key, value, originalKey], index) => {
         const percentage = (value / total) * 100;
         const strokeDasharray = `${percentage * 2.199} ${219.9 - percentage * 2.199}`;
         const strokeDashoffset = -cumulativePercentage * 2.199;
         cumulativePercentage += percentage;
-        return { key, value, percentage, strokeDasharray, strokeDashoffset, index };
+        return { key, value, percentage, strokeDasharray, strokeDashoffset, index, originalKey };
       });
     }, [sortedData, total]);
 
@@ -1000,7 +1024,7 @@ const AccidentEDA = () => {
     const [totalValue, setTotalValue] = useState(0);
 
     const maxValue = Math.max(...Object.values(data));
-    const sortedData = Object.entries(data).sort(([,a], [,b]) => b - a).slice(0, 8);
+    const sortedData = Object.entries(data).sort(([,a], [,b]) => b - a).slice(0, 8).map(([key, value]) => [translateDataValue(key), value]);
     const total = sortedData.reduce((sum, [, value]) => sum + value, 0);
     
     React.useEffect(() => {
@@ -1163,7 +1187,8 @@ const AccidentEDA = () => {
     const points = sortedData.map(([key, value], index, arr) => {
       const x = 40 + (index / Math.max(arr.length - 1, 1)) * 220; // Added margins
       const y = 30 + (1 - (value - minValue) / range) * 90; // Added margins
-      return { x, y, value, key, index };
+      const translatedKey = translateDataValue(key);
+      return { x, y, value, key: translatedKey, originalKey: key, index };
     });
 
     const pathData = points.map((point, index) => 
@@ -1515,36 +1540,36 @@ const AccidentEDA = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
           {/* Row 1: Large charts */}
           <div className="lg:col-span-7">
-            <ChartContainer title="🏥 Medical Outcomes Distribution" size="default">
+            <ChartContainer title={`🏥 ${t('medicalOutcomesDistribution')}`} size="default">
               <DonutChart data={medicalFactors.outcomesDist} colorScheme="mixed" />
             </ChartContainer>
           </div>
           <div className="lg:col-span-5">
-            <ChartContainer title="👥 Age Demographics" size="default">
+            <ChartContainer title={`👥 ${t('ageDemographics')}`} size="default">
               <VerticalBarChart data={demographics.ageGroups} colorScheme="gradient" />
             </ChartContainer>
           </div>
 
           {/* Row 2: Medium charts */}
           <div className="lg:col-span-6">
-            <ChartContainer title="🚗 Collision Type Analysis" size="default">
+            <ChartContainer title={`🚗 ${t('collisionTypeAnalysis')}`} size="default">
               <HorizontalBarChart data={accidentChars.collisionTypes} colorScheme="red" />
             </ChartContainer>
           </div>
           <div className="lg:col-span-3">
-            <ChartContainer title="⚧ Gender Split" size="small">
+            <ChartContainer title={`⚧ ${t('genderSplit')}`} size="small">
               <DonutChart data={demographics.genderDist} colorScheme="mixed" />
             </ChartContainer>
           </div>
           <div className="lg:col-span-3">
-            <ChartContainer title="🌍 Ethnicity" size="small">
+            <ChartContainer title={`🌍 ${t('ethnicity')}`} size="small">
               <DonutChart data={demographics.ethnicityDist} colorScheme="mixed" />
             </ChartContainer>
           </div>
 
           {/* Row 3: Full width chart */}
           <div className="lg:col-span-12">
-            <ChartContainer title="🎓 Education Level Distribution" size="default">
+            <ChartContainer title={`🎓 ${t('educationLevelDistribution')}`} size="default">
               <HorizontalBarChart data={demographics.educationDist} colorScheme="purple" />
             </ChartContainer>
           </div>
@@ -1704,7 +1729,7 @@ const AccidentEDA = () => {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707L9 19.414V15a1 1 0 00-.293-.707L2.293 7.707A1 1 0 012 7V4z" />
                   </svg>
-                  <span className="font-semibold">Filters</span>
+                  <span className="font-semibold">{t('filters')}</span>
                 </button>
                 
                 {/* Tab Navigation */}

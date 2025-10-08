@@ -7,7 +7,7 @@ const DashboardDoctor = ({ setIsAuthenticated, setRole }) => {
   return (
     <div className="min-h-screen bg-gray-100">
       <DoctorNav setIsAuthenticated={setIsAuthenticated} setRole={setRole} />
-      <div className="container mx-auto p-6 pt-24">
+      <div className="container mx-auto p-6">
         {/* <h1 className="text-3xl font-bold text-blue-700 mb-6">Doctor Dashboard</h1> */}
         
         {/* <div className="bg-white p-6 rounded-lg shadow-md mb-6">

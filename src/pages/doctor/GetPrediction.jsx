@@ -3,6 +3,7 @@ import { User, Activity, MapPin, DollarSign, Users, Home, Building, Stethoscope,
 import DoctorNav from '../../navbars/DoctorNav';
 import Footer from '../../components/Footer';
 import API from '../../utils/api';
+import { t } from '../../utils/translations';
 
 const GetPrediction = ({ setIsAuthenticated, setRole }) => {
   const [formData, setFormData] = useState({
@@ -30,27 +31,27 @@ const GetPrediction = ({ setIsAuthenticated, setRole }) => {
 
   const formSections = [
     {
-      title: "Personal Information",
+      title: t("personalInformation"),
       icon: <User className="w-6 h-6" />,
       fields: ['age', 'gender', 'ethnicity']
     },
     {
-      title: "Medical History",
+      title: t("medicalHistory"),
       icon: <Activity className="w-6 h-6" />,
       fields: ['alcohol', 'illicit', 'severity']
     },
     {
-      title: "Location & Distance",
+      title: t("locationDistance"),
       icon: <MapPin className="w-6 h-6" />,
       fields: ['distance', 'hospital']
     },
     {
-      title: "Financial Information",
+      title: t("financialInformation"),
       icon: <DollarSign className="w-6 h-6" />,
       fields: ['traveling', 'bystander', 'other_exp']
     },
     {
-      title: "Social Factors",
+      title: t("socialFactors"),
       icon: <Home className="w-6 h-6" />,
       fields: ['lifestyle', 'family']
     }
@@ -58,151 +59,151 @@ const GetPrediction = ({ setIsAuthenticated, setRole }) => {
 
   const fieldConfig = {
     age: {
-      label: "Person Age (as of 2023-01-01)",
+      label: t("personAge"),
       type: "number",
       icon: <User className="w-5 h-5" />
     },
     alcohol: {
-      label: "Alcohol Consumption",
+      label: t("alcoholConsumption"),
       type: "select",
       icon: <Activity className="w-5 h-5" />,
       options: [
-        { value: "", label: "Select an option" },
-        { value: "Yes", label: "Yes" },
-        { value: "No", label: "No" },
-        { value: "Victim not willing to share/ Unable to respond/  Early Discharge", label: "Unable to respond/Early Discharge" }
+        { value: "", label: t("selectAnOption") },
+        { value: "Yes", label: t("yes") },
+        { value: "No", label: t("no") },
+        { value: "Victim not willing to share/ Unable to respond/  Early Discharge", label: t("unableToRespondEarlyDischarge") }
       ]
     },
     illicit: {
-      label: "Illicit Drugs",
+      label: t("illicitDrugs"),
       type: "select",
       icon: <Activity className="w-5 h-5" />,
       options: [
-        { value: "", label: "Select an option" },
-        { value: "Yes", label: "Yes" },
-        { value: "No", label: "No" },
-        { value: "Victim not willing to share/ Unable to respond/  Early Discharge", label: "Unable to respond/Early Discharge" }
+        { value: "", label: t("selectAnOption") },
+        { value: "Yes", label: t("yes") },
+        { value: "No", label: t("no") },
+        { value: "Victim not willing to share/ Unable to respond/  Early Discharge", label: t("unableToRespondEarlyDischarge") }
       ]
     },
     severity: {
-      label: "Severity Level",
+      label: t("severityLevel"),
       type: "select",
       icon: <AlertCircle className="w-5 h-5" />,
       options: [
-        { value: "", label: "Select severity" },
-        { value: "Unknown", label: "Unknown" },
-        { value: "Medium", label: "Medium" },
-        { value: "Serious", label: "Serious" }
+        { value: "", label: t("selectSeverity") },
+        { value: "Unknown", label: t("unknown") },
+        { value: "Medium", label: t("medium") },
+        { value: "Serious", label: t("serious") }
       ]
     },
     gender: {
-      label: "Gender",
+      label: t("gender"),
       type: "select",
       icon: <User className="w-5 h-5" />,
       options: [
-        { value: "", label: "Select gender" },
-        { value: "Male", label: "Male" },
-        { value: "Female", label: "Female" }
+        { value: "", label: t("selectGender") },
+        { value: "Male", label: t("male") },
+        { value: "Female", label: t("female") }
       ]
     },
     distance: {
-      label: "Hospital Distance From Home",
+      label: t("hospitalDistanceFromHome"),
       type: "select",
       icon: <MapPin className="w-5 h-5" />,
       options: [
-        { value: "", label: "Select distance range" },
-        { value: "Victim doesn't have knowledge on distance/ Not willing to share/ Unable to respond/  Early Discharge", label: "Unknown/Unable to respond" },
-        { value: "Less than 5 Km", label: "Less than 5 Km" },
-        { value: "5-10 Km", label: "5-10 Km" },
-        { value: "10-15 Km", label: "10-15 Km" },
-        { value: "15-20 Km", label: "15-20 Km" },
-        { value: "20-25 Km", label: "20-25 Km" },
-        { value: "25-30 Km", label: "25-30 Km" },
-        { value: "30-50 Km", label: "30-50 Km" },
-        { value: "50-100 Km", label: "50-100 Km" },
-        { value: "100-150 Km", label: "100-150 Km" },
-        { value: "150-200 Km", label: "150-200 Km" }
+        { value: "", label: t("selectDistanceRange") },
+        { value: "Victim doesn't have knowledge on distance/ Not willing to share/ Unable to respond/  Early Discharge", label: t("unknownUnableToRespond") },
+        { value: "Less than 5 Km", label: t("lessThan5Km") },
+        { value: "5-10 Km", label: t("km5to10") },
+        { value: "10-15 Km", label: t("km10to15") },
+        { value: "15-20 Km", label: t("km15to20") },
+        { value: "20-25 Km", label: t("km20to25") },
+        { value: "25-30 Km", label: t("km25to30") },
+        { value: "30-50 Km", label: t("km30to50") },
+        { value: "50-100 Km", label: t("km50to100") },
+        { value: "100-150 Km", label: t("km100to150") },
+        { value: "150-200 Km", label: t("km150to200") }
       ]
     },
     traveling: {
-      label: "Traveling Expenditure per day",
+      label: t("travelingExpenditurePerDay"),
       type: "select",
       icon: <DollarSign className="w-5 h-5" />,
       options: [
-        { value: "", label: "Select expenditure range" },
-        { value: "Victim not willing to share/ Unable to respond/  Early Discharge", label: "Unable to respond/Early Discharge" },
-        { value: "0-100", label: "0-100" },
-        { value: "100-200", label: "100-200" },
-        { value: "200-300", label: "200-300" },
-        { value: "300-400", label: "300-400" },
-        { value: "400-500", label: "400-500" },
-        { value: "More than 500", label: "More than 500" }
+        { value: "", label: t("selectExpenditureRange") },
+        { value: "Victim not willing to share/ Unable to respond/  Early Discharge", label: t("unableToRespondEarlyDischarge") },
+        { value: "0-100", label: t("expenditure0to100") },
+        { value: "100-200", label: t("expenditure100to200") },
+        { value: "200-300", label: t("expenditure200to300") },
+        { value: "300-400", label: t("expenditure300to400") },
+        { value: "400-500", label: t("expenditure400to500") },
+        { value: "More than 500", label: t("moreThan500") }
       ]
     },
     bystander: {
-      label: "Bystander Expenditure per day",
+      label: t("bystanderExpenditurePerDay"),
       type: "select",
       icon: <DollarSign className="w-5 h-5" />,
       options: [
-        { value: "", label: "Select expenditure range" },
-        { value: "Not Necessary", label: "Not Necessary" },
-        { value: "0-500", label: "0-500" },
-        { value: "500-1000", label: "500-1000" },
-        { value: "More than 1000", label: "More than 1000" }
+        { value: "", label: t("selectExpenditureRange") },
+        { value: "Not Necessary", label: t("notNecessary") },
+        { value: "0-500", label: t("expenditure0to500") },
+        { value: "500-1000", label: t("expenditure500to1000") },
+        { value: "More than 1000", label: t("moreThan1000") }
       ]
     },
     family: {
-      label: "Family Current Status",
+      label: t("familyCurrentStatus"),
       type: "select",
       icon: <Users className="w-5 h-5" />,
       options: [
-        { value: "", label: "Select family status" },
-        { value: "Victim not willing to share/ Unable to respond/  Early Discharge", label: "Unable to respond/Early Discharge" },
-        { value: "Not Affected", label: "Not Affected" },
-        { value: "Mildly Affected", label: "Mildly Affected" },
-        { value: "Moderately Affected", label: "Moderately Affected" },
-        { value: "Severely Affected", label: "Severely Affected" }
+        { value: "", label: t("selectFamilyStatus") },
+        { value: "Victim not willing to share/ Unable to respond/  Early Discharge", label: t("unableToRespondEarlyDischarge") },
+        { value: "Not Affected", label: t("notAffected") },
+        { value: "Mildly Affected", label: t("mildlyAffected") },
+        { value: "Moderately Affected", label: t("moderatelyAffected") },
+        { value: "Severely Affected", label: t("severelyAffected") }
       ]
     },
     lifestyle: {
-      label: "Lifestyle",
+      label: t("lifeStyle"),
       type: "select",
       icon: <Home className="w-5 h-5" />,
       options: [
-        { value: "", label: "Select living situation" },
-        { value: "Living alone", label: "Living alone" },
-        { value: "Living with care givers", label: "Living with care givers" },
-        { value: "Living with children", label: "Living with children" },
-        { value: "Victim not willing to share/ Unable to respond/  Early Discharge", label: "Unable to respond/Early Discharge" }
+        { value: "", label: t("selectLivingSituation") },
+        { value: "Living alone", label: t("livingAlone") },
+        { value: "Living with care givers", label: t("livingWithCaregivers") },
+        { value: "Living with children", label: t("livingWithChildren") },
+        { value: "Victim not willing to share/ Unable to respond/  Early Discharge", label: t("unableToRespondEarlyDischarge") }
       ]
     },
     other_exp: {
-      label: "Any Other Hospital Admission Expenditure",
+      label: t("anyOtherHospitalAdmissionExpenditure"),
       type: "select",
       icon: <DollarSign className="w-5 h-5" />,
       options: [
-        { value: "", label: "Select option" },
-        { value: "No Other Expenses", label: "No Other Expenses" },
-        { value: "Has Other Expenses", label: "Has Other Expenses" }
+        { value: "", label: t("selectOption") },
+        { value: "No Other Expenses", label: t("noOtherExpenses") },
+        { value: "Has Other Expenses", label: t("hasOtherExpenses") }
       ]
     },
     ethnicity: {
-      label: "Ethnicity",
+      label: t("ethnicity"),
       type: "select",
       icon: <User className="w-5 h-5" />,
       options: [
-        { value: "", label: "Select ethnicity" },
-        { value: "Moor", label: "Moor" },
-        { value: "Sinhalese", label: "Sinhalese" },
-        { value: "Tamil", label: "Tamil" }
+        { value: "", label: t("selectEthnicity") },
+        { value: "Moor", label: t("moor") },
+        { value: "Sinhalese", label: t("sinhalese") },
+        { value: "Tamil", label: t("tamil") }
       ]
     },
     hospital: {
-      label: "Hospital Name",
+      label: t("hospital"),
       type: "select",
       icon: <Building className="w-5 h-5" />,
       options: [
-        { value: "", label: "Select hospital" },
+        { value: "", label: t("selectHospital") },
         ...[
           "BH, Tellipalai(Type A)",
           "BH,Chavakachcheri(TypeB)",
@@ -514,7 +515,7 @@ const GetPrediction = ({ setIsAuthenticated, setRole }) => {
             value={value}
             onChange={handleChange}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-            placeholder="Enter age"
+            placeholder={t("enterAge")}
           />
         ) : (
           <select
@@ -556,16 +557,16 @@ const GetPrediction = ({ setIsAuthenticated, setRole }) => {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Stethoscope className="w-8 h-8 text-blue-600" />
-            <h1 className="text-4xl font-bold text-gray-800">Medical Transfer Prediction</h1>
+            <h1 className="text-4xl font-bold text-gray-800">{t("medicalTransferPrediction")}</h1>
           </div>
-          <p className="text-gray-600 text-lg">Complete the form to get AI-powered transfer probability analysis</p>
+          <p className="text-gray-600 text-lg">{t("completeFormForAnalysis")}</p>
         </div>
 
         {/* Progress Bar */}
         <div className="mb-8 bg-white rounded-lg p-4 shadow-sm">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-700">Form Completion</span>
-            <span className="text-sm font-medium text-blue-600">{completedFields}/{totalFields} fields</span>
+            <span className="text-sm font-medium text-gray-700">{t("formCompletion")}</span>
+            <span className="text-sm font-medium text-blue-600">{completedFields}/{totalFields} {t("fields")}</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
@@ -606,12 +607,12 @@ const GetPrediction = ({ setIsAuthenticated, setRole }) => {
               {isLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Processing Prediction...
+                  {t("processingPrediction")}
                 </>
               ) : (
                 <>
                   <Activity className="w-5 h-5" />
-                  Get Prediction Analysis
+                  {t("getPredictionAnalysis")}
                 </>
               )}
             </button>
@@ -624,19 +625,19 @@ const GetPrediction = ({ setIsAuthenticated, setRole }) => {
             <div className="p-6">
               <div className="flex items-center gap-3 mb-4">
                 <CheckCircle className="w-8 h-8 text-green-500" />
-                <h3 className="text-2xl font-bold text-gray-800">Prediction Results</h3>
+                <h3 className="text-2xl font-bold text-gray-800">{t("predictionResults")}</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <div className="text-blue-800 font-semibold mb-1">Analysis Message</div>
+                  <div className="text-blue-800 font-semibold mb-1">{t("analysisMessage")}</div>
                   <div className="text-blue-900">{result.message}</div>
                 </div>
                 <div className="bg-purple-50 p-4 rounded-lg">
-                  <div className="text-purple-800 font-semibold mb-1">Prediction Outcome</div>
+                  <div className="text-purple-800 font-semibold mb-1">{t("predictionOutcome")}</div>
                   <div className="text-purple-900 font-bold text-xl">{result.prediction}</div>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg">
-                  <div className="text-green-800 font-semibold mb-1">Transfer Probability</div>
+                  <div className="text-green-800 font-semibold mb-1">{t("transferProbability")}</div>
                   <div className="text-green-900 font-bold text-2xl">{result.transfer_probability}</div>
                 </div>
               </div>
@@ -650,7 +651,7 @@ const GetPrediction = ({ setIsAuthenticated, setRole }) => {
             <div className="p-6">
               <div className="flex items-center gap-3 mb-2">
                 <AlertCircle className="w-6 h-6 text-red-500" />
-                <h3 className="text-xl font-bold text-red-800">Error Occurred</h3>
+                <h3 className="text-xl font-bold text-red-800">{t("errorOccurred")}</h3>
               </div>
               <p className="text-red-700 bg-red-50 p-3 rounded">{error}</p>
             </div>
