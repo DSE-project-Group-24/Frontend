@@ -286,6 +286,76 @@ const DateInput = ({ name, value, onChange, disabled }) => (
   />
 );
 
+const RadioChips = ({ name, value, options, onChange, disabled }) => {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((opt) => {
+        const checked = value === opt;
+        const id = `${name}-${opt}`.replace(/\s+/g, "_");
+        return (
+          <label
+            key={opt}
+            htmlFor={id}
+            className={
+              "cursor-pointer px-3 py-1.5 rounded-full border text-sm transition " +
+              (checked
+                ? "bg-blue-600 text-white border-blue-600"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50") +
+              (disabled ? " opacity-60 pointer-events-none" : "")
+            }
+          >
+            <input
+              id={id}
+              type="radio"
+              name={name}
+              value={opt}
+              checked={checked}
+              disabled={disabled}
+              onChange={(e) => onChange(name, e.target.value)}
+              className="sr-only"
+            />
+            {opt}
+          </label>
+        );
+      })}
+    </div>
+  );
+};
+
+// Drop-in replacement that auto-picks radios when options <= 4
+const SmartSelect = ({ name, value, onChange, options, disabled }) => {
+  if ((options?.length || 0) <= 3) {
+    return (
+      <RadioChips
+        name={name}
+        value={value}
+        options={options}
+        onChange={onChange}
+        disabled={disabled}
+      />
+    );
+  }
+  // Fallback: your existing Select
+  return (
+    <select
+      name={name}
+      value={value || ""}
+      onChange={(e) => onChange(name, e.target.value)}
+      disabled={disabled}
+      className={`mt-1 block w-full p-2 border border-gray-300 rounded ${
+        disabled ? "bg-gray-100" : "bg-white"
+      }`}
+    >
+      <option value="">Select…</option>
+      {options.map((o) => (
+        <option key={o} value={o}>
+          {o}
+        </option>
+      ))}
+    </select>
+  );
+};
+
 const Select = ({ name, value, onChange, options, disabled }) => (
   <select
     name={name}
@@ -546,611 +616,720 @@ const AccidentRecordSystem = () => {
 
   // ----- UI -----
   return (
-    <div className="container mx-auto p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
       <NurseNav />
-      <h1 className="text-2xl font-bold mb-6">
-        Accident Record Management System
-      </h1>
+      <div className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-6">
+          Accident Record Management System
+        </h1>
 
-      {message && (
-        <div
-          className={`p-4 mb-4 rounded ${
-            message.toLowerCase().includes("success")
-              ? "bg-green-100 text-green-800"
-              : "bg-yellow-50 text-yellow-800"
-          }`}
-        >
-          {message}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left: Patients (kept) */}
-        <div className="bg-white p-4 rounded shadow">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xl font-semibold">Patients</h2>
+        {message && (
+          <div
+            className={`p-4 mb-4 rounded ${
+              message.toLowerCase().includes("success")
+                ? "bg-green-100 text-green-800"
+                : "bg-yellow-50 text-yellow-800"
+            }`}
+          >
+            {message}
           </div>
+        )}
 
-          {/* Search */}
-          <div className="mb-3">
-            <input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search by name / NIC / phone / DOB"
-              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
-
-          {loadingPatients ? (
-            <p>Loading patients...</p>
-          ) : (
-            <div className="overflow-y-auto max-h-96">
-              {filteredPatients && filteredPatients.length > 0 ? (
-                filteredPatients.map((patient, index) => {
-                  const pid = patient.id ?? patient.patient_id ?? index;
-                  const isSelected =
-                    selectedPatient &&
-                    (selectedPatient.id ?? selectedPatient.patient_id ?? "") ===
-                      (patient.id ?? patient.patient_id ?? "");
-                  return (
-                    <div
-                      key={pid}
-                      className={`p-3 mb-2 rounded cursor-pointer ${
-                        isSelected
-                          ? "bg-blue-100"
-                          : "bg-gray-100 hover:bg-gray-200"
-                      }`}
-                      onClick={() => onSelectPatient(patient)}
-                    >
-                      <div className="font-medium">
-                        {val(patient, "Full Name", "full_name", "name") ||
-                          "No Name"}
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        {val(patient, "Contact Number", "contact_number") ||
-                          "No Contact"}{" "}
-                        •{" "}
-                        {val(patient, "Date of Birth", "date_of_birth") ||
-                          "No DOB"}
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <p className="text-gray-500">No patients found</p>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Right: Actions + Record list / Form */}
-        <div className="flex flex-col gap-4">
-          {/* Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left: Patients (kept) */}
           <div className="bg-white p-4 rounded shadow">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xl font-semibold">Actions</h2>
+              <h2 className="text-xl font-semibold">Patients</h2>
             </div>
-            <div className="text-sm mb-3">
-              Signed in as: <b>{me.name}</b> (role: {me.role})
+
+            {/* Search */}
+            <div className="mb-3">
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search by name / NIC / phone / DOB"
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+              />
             </div>
-            <button
-              onClick={startCreate}
-              disabled={!selectedPatient}
-              className={`px-4 py-2 rounded-lg text-sm ${
-                selectedPatient
-                  ? "bg-blue-600 text-white hover:bg-blue-700"
-                  : "bg-gray-200 text-gray-500"
-              }`}
-            >
-              Create new record
-            </button>
-          </div>
 
-          {/* Existing records */}
-          {selectedPatient && mode === "idle" && (
-            <div className="bg-white p-4 rounded shadow">
-              <h3 className="text-lg font-semibold mb-2">
-                Existing accident records —{" "}
-                {val(selectedPatient, "Full Name", "full_name", "name")}
-              </h3>
-              {loadingRecords ? (
-                <div className="text-sm">Loading…</div>
-              ) : records.length === 0 ? (
-                <div className="text-sm text-gray-500">No records yet</div>
-              ) : (
-                <div className="grid md:grid-cols-2 gap-3">
-                  {records.map((rec) => (
-                    <RecordRow
-                      key={rec.accident_id}
-                      rec={rec}
-                      currentUserId={me.id}
-                      onView={() => startView(rec)}
-                      onEdit={() => startEdit(rec)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Form (create/edit/view) */}
-          {selectedPatient &&
-            (mode === "create" || mode === "edit" || mode === "view") && (
-              <div className="bg-white p-4 rounded shadow">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">
-                    {mode === "create"
-                      ? "Create accident record"
-                      : mode === "edit"
-                      ? "Edit accident record"
-                      : "View record"}
-                  </h3>
-                  <div className="text-sm text-gray-600">
-                    Patient:{" "}
-                    <b>
-                      {val(selectedPatient, "Full Name", "full_name", "name")}
-                    </b>
-                  </div>
-                </div>
-
-                {/* editability banner */}
-                {mode !== "create" && current && !canEdit(current) && (
-                  <div className="text-sm text-amber-700 p-3 rounded-md bg-amber-50 border mt-3">
-                    This record is read-only (either completed or managed by
-                    another nurse).
-                  </div>
-                )}
-
-                {/* Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                  <div>
-                    <Label>Incident date</Label>
-                    <DateInput
-                      name="incident_at_date"
-                      value={model.incident_at_date}
-                      onChange={updateModel}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Time of collision</Label>
-                    <Select
-                      name="time_of_collision"
-                      value={model.time_of_collision}
-                      onChange={updateModel}
-                      options={OPTIONS.time_of_collision}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Mode of traveling during accident</Label>
-                    <Select
-                      name="mode_of_traveling"
-                      value={model.mode_of_traveling}
-                      onChange={updateModel}
-                      options={OPTIONS.mode_of_traveling}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Visibility</Label>
-                    <Select
-                      name="visibility"
-                      value={model.visibility}
-                      onChange={updateModel}
-                      options={OPTIONS.visibility}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Collision force from</Label>
-                    <Select
-                      name="collision_force_from"
-                      value={model.collision_force_from}
-                      onChange={updateModel}
-                      options={OPTIONS.collision_force_from}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Collision with</Label>
-                    <Select
-                      name="collision_with"
-                      value={model.collision_with}
-                      onChange={updateModel}
-                      options={OPTIONS.collision_with}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Road Condition</Label>
-                    <Select
-                      name="road_condition"
-                      value={model.road_condition}
-                      onChange={updateModel}
-                      options={OPTIONS.road_condition}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Road Type</Label>
-                    <Select
-                      name="road_type"
-                      value={model.road_type}
-                      onChange={updateModel}
-                      options={OPTIONS.road_type}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Category of Road</Label>
-                    <Select
-                      name="category_of_road"
-                      value={model.category_of_road}
-                      onChange={updateModel}
-                      options={OPTIONS.category_of_road}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Road signals exist</Label>
-                    <Select
-                      name="road_signals_exist"
-                      value={model.road_signals_exist}
-                      onChange={updateModel}
-                      options={OPTIONS.road_signals_exist}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Approximate speed</Label>
-                    <Select
-                      name="approximate_speed"
-                      value={model.approximate_speed}
-                      onChange={updateModel}
-                      options={OPTIONS.approximate_speed}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Alcohol Consumption</Label>
-                    <Select
-                      name="alcohol_consumption"
-                      value={model.alcohol_consumption}
-                      onChange={updateModel}
-                      options={OPTIONS.alcohol_consumption}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Time between alcohol consumption and accident</Label>
-                    <Select
-                      name="time_between_alcohol"
-                      value={model.time_between_alcohol}
-                      onChange={updateModel}
-                      options={OPTIONS.time_between_alcohol}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Illicit Drugs</Label>
-                    <Select
-                      name="illicit_drugs"
-                      value={model.illicit_drugs}
-                      onChange={updateModel}
-                      options={OPTIONS.illicit_drugs}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Helmet Worn</Label>
-                    <Select
-                      name="helmet_worn"
-                      value={model.helmet_worn}
-                      onChange={updateModel}
-                      options={OPTIONS.helmet_worn}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Engine Capacity</Label>
-                    <Select
-                      name="engine_capacity"
-                      value={model.engine_capacity}
-                      onChange={updateModel}
-                      options={OPTIONS.engine_capacity}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Mode of transport to hospital</Label>
-                    <Select
-                      name="mode_of_transport"
-                      value={model.mode_of_transport}
-                      onChange={updateModel}
-                      options={OPTIONS.mode_of_transport}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Time taken to reach hospital</Label>
-                    <Select
-                      name="time_to_hospital"
-                      value={model.time_to_hospital}
-                      onChange={updateModel}
-                      options={OPTIONS.time_to_hospital}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Bystander expenditure per day</Label>
-                    <Select
-                      name="bystander_expenditure"
-                      value={model.bystander_expenditure}
-                      onChange={updateModel}
-                      options={OPTIONS.bystander_expenditure}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Family monthly income before accident</Label>
-                    <Select
-                      name="income_before_accident"
-                      value={model.income_before_accident}
-                      onChange={updateModel}
-                      options={OPTIONS.income_before_accident}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Family monthly income after accident</Label>
-                    <Select
-                      name="income_after_accident"
-                      value={model.income_after_accident}
-                      onChange={updateModel}
-                      options={OPTIONS.income_after_accident}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <Label>Family current status</Label>
-                    <Select
-                      name="family_status"
-                      value={model.family_status}
-                      onChange={updateModel}
-                      options={OPTIONS.family_status}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Vehicle insured</Label>
-                    <Select
-                      name="vehicle_insured"
-                      value={model.vehicle_insured}
-                      onChange={updateModel}
-                      options={OPTIONS.vehicle_insured}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Passenger type</Label>
-                    <Select
-                      name="passenger_type"
-                      value={model.passenger_type}
-                      onChange={updateModel}
-                      options={OPTIONS.passenger_type}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>First aid given at scene</Label>
-                    <Select
-                      name="first_aid_given"
-                      value={model.first_aid_given}
-                      onChange={updateModel}
-                      options={OPTIONS.first_aid_given}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Discharge Outcome</Label>
-                    <Select
-                      name="discharge_outcome"
-                      value={model.discharge_outcome}
-                      onChange={updateModel}
-                      options={OPTIONS.discharge_outcome}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <Label>Notes (optional)</Label>
-                    <textarea
-                      name="notes"
-                      value={model.notes}
-                      onChange={(e) => updateModel("notes", e.target.value)}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                      className={`mt-1 block w-full p-2 border border-gray-300 rounded h-24 ${
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                          ? "bg-gray-100"
-                          : "bg-white"
-                      }`}
-                    />
-                  </div>
-                </div>
-
-                {/* Completed toggle + actions */}
-                <div className="mt-4 border-t pt-4">
-                  <div className="flex items-center gap-3">
-                    <Checkbox
-                      id="completed"
-                      checked={completed}
-                      onChange={setCompleted}
-                      disabled={
-                        mode === "view" ||
-                        (mode === "edit" && !canEdit(current))
-                      }
-                    />
-                    <Label htmlFor="completed" className="cursor-pointer">
-                      Mark as <b>Completed</b> before saving
-                    </Label>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    Severity is set automatically later (default “U”).
-                  </div>
-
-                  <div className="flex gap-2 mt-4">
-                    <button
-                      onClick={() => {
-                        setMode("idle");
-                        resetForm();
-                      }}
-                      className="px-4 py-2 rounded-lg border bg-gray-100 hover:bg-gray-200 text-sm"
-                    >
-                      Cancel
-                    </button>
-                    {(mode === "create" ||
-                      (mode === "edit" && canEdit(current))) && (
-                      <button
-                        onClick={save}
-                        disabled={saving}
-                        className={`px-4 py-2 rounded-lg text-sm ${
-                          saving
-                            ? "bg-blue-400 text-white"
-                            : "bg-blue-600 text-white hover:bg-blue-700"
+            {loadingPatients ? (
+              <p>Loading patients...</p>
+            ) : (
+              <div className="overflow-y-auto max-h-96">
+                {filteredPatients && filteredPatients.length > 0 ? (
+                  filteredPatients.map((patient, index) => {
+                    const pid = patient.id ?? patient.patient_id ?? index;
+                    const isSelected =
+                      selectedPatient &&
+                      (selectedPatient.id ??
+                        selectedPatient.patient_id ??
+                        "") === (patient.id ?? patient.patient_id ?? "");
+                    return (
+                      <div
+                        key={pid}
+                        className={`p-3 mb-2 rounded cursor-pointer ${
+                          isSelected
+                            ? "bg-blue-100"
+                            : "bg-gray-100 hover:bg-gray-200"
                         }`}
+                        onClick={() => onSelectPatient(patient)}
                       >
-                        {saving ? "Saving…" : "Save"}
-                      </button>
-                    )}
-                  </div>
-                </div>
+                        <div className="font-medium">
+                          {val(patient, "Full Name", "full_name", "name") ||
+                            "No Name"}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {val(patient, "Contact Number", "contact_number") ||
+                            "No Contact"}{" "}
+                          •{" "}
+                          {val(patient, "Date of Birth", "date_of_birth") ||
+                            "No DOB"}
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="text-gray-500">No patients found</p>
+                )}
               </div>
             )}
-        </div>
-      </div>
+          </div>
 
-      <div className="text-xs text-gray-500 mt-6">
-        <ul className="list-disc ml-5">
-          <li>
-            All form fields are optional. <b>Completed</b> must be checked
-            manually to finalize a record.
-          </li>
-          <li>
-            <b>Severity</b> is omitted (DB default “U”).
-          </li>
-          <li>
-            <b>managed_by</b> is enforced by the backend to the current nurse
-            user.
-          </li>
-        </ul>
+          {/* Right: Actions + Record list / Form */}
+          <div className="flex flex-col gap-4">
+            {/* Actions */}
+            <div className="bg-white p-4 rounded shadow">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xl font-semibold">Actions</h2>
+              </div>
+              <div className="text-sm mb-3">
+                Signed in as: <b>{me.name}</b> (role: {me.role})
+              </div>
+              <button
+                onClick={startCreate}
+                disabled={!selectedPatient}
+                className={`px-4 py-2 rounded-lg text-sm ${
+                  selectedPatient
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-gray-200 text-gray-500"
+                }`}
+              >
+                Create new record
+              </button>
+            </div>
+
+            {/* Existing records */}
+            {selectedPatient && mode === "idle" && (
+              <div className="bg-white p-4 rounded shadow">
+                <h3 className="text-lg font-semibold mb-2">
+                  Existing accident records —{" "}
+                  {val(selectedPatient, "Full Name", "full_name", "name")}
+                </h3>
+                {loadingRecords ? (
+                  <div className="text-sm">Loading…</div>
+                ) : records.length === 0 ? (
+                  <div className="text-sm text-gray-500">No records yet</div>
+                ) : (
+                  <div className="grid md:grid-cols-2 gap-3">
+                    {records.map((rec) => (
+                      <RecordRow
+                        key={rec.accident_id}
+                        rec={rec}
+                        currentUserId={me.id}
+                        onView={() => startView(rec)}
+                        onEdit={() => startEdit(rec)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Form (create/edit/view) */}
+            {selectedPatient &&
+              (mode === "create" || mode === "edit" || mode === "view") && (
+                <div className="fixed inset-0 z-50 bg-white/90 backdrop-blur-sm overflow-y-auto">
+                  {/* Header (sticky inside the overlay) */}
+                  <div className="sticky top-0 bg-white/80 backdrop-blur border-b px-6 py-3 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl md:text-2xl font-bold text-gray-800">
+                        {mode === "create"
+                          ? "Create Accident Record"
+                          : mode === "edit"
+                          ? "Edit Accident Record"
+                          : "View Accident Record"}
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        Patient:{" "}
+                        <b>
+                          {val(
+                            selectedPatient,
+                            "Full Name",
+                            "full_name",
+                            "name"
+                          )}
+                        </b>
+                      </p>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setMode("idle");
+                          resetForm();
+                        }}
+                        className="text-gray-600 hover:text-gray-900 text-sm border px-3 py-1.5 rounded-lg"
+                      >
+                        ✕ Close
+                      </button>
+                      {(mode === "create" ||
+                        (mode === "edit" && canEdit(current))) && (
+                        <button
+                          onClick={save}
+                          disabled={saving}
+                          className={`text-sm px-4 py-1.5 rounded-lg ${
+                            saving
+                              ? "bg-blue-400 text-white"
+                              : "bg-blue-600 text-white hover:bg-blue-700"
+                          }`}
+                        >
+                          {saving ? "Saving…" : "Save"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Optional read-only banner */}
+                  {mode !== "create" && current && !canEdit(current) && (
+                    <div className="mx-auto max-w-5xl px-6">
+                      <div className="mt-4 text-sm text-amber-700 p-3 rounded-md bg-amber-50 border">
+                        This record is read-only (either completed or managed by
+                        another nurse).
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Section jump bar */}
+                  <div className="mx-auto max-w-5xl px-6">
+                    <div className="mt-4 flex flex-wrap gap-2 text-sm">
+                      {[
+                        ["incident", "Incident"],
+                        ["collision", "Collision"],
+                        ["road", "Road & Environment"],
+                        ["safety", "Substances & Safety"],
+                        ["transport", "Transport"],
+                        ["socio", "Socio-economic"],
+                        ["outcome", "Outcome & Notes"],
+                      ].map(([id, label]) => (
+                        <a
+                          key={id}
+                          href={`#${id}`}
+                          className="px-3 py-1.5 rounded-lg border bg-gray-50 hover:bg-gray-100"
+                        >
+                          {label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* CONTENT */}
+                  <div className="mx-auto max-w-5xl px-6 py-6 space-y-8">
+                    {/* Incident */}
+                    <section id="incident" className="rounded-xl border">
+                      <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
+                        <h4 className="font-semibold text-gray-800">
+                          Incident
+                        </h4>
+                      </header>
+                      <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label>Incident date</Label>
+                          <DateInput
+                            name="incident_at_date"
+                            value={model.incident_at_date}
+                            onChange={updateModel}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Time of collision</Label>
+                          <SmartSelect
+                            name="time_of_collision"
+                            value={model.time_of_collision}
+                            onChange={updateModel}
+                            options={OPTIONS.time_of_collision}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* Collision */}
+                    <section id="collision" className="rounded-xl border">
+                      <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
+                        <h4 className="font-semibold text-gray-800">
+                          Collision
+                        </h4>
+                      </header>
+                      <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label>Collision force from</Label>
+                          <SmartSelect
+                            name="collision_force_from"
+                            value={model.collision_force_from}
+                            onChange={updateModel}
+                            options={OPTIONS.collision_force_from}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Collision with</Label>
+                          <SmartSelect
+                            name="collision_with"
+                            value={model.collision_with}
+                            onChange={updateModel}
+                            options={OPTIONS.collision_with}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Mode of traveling during accident</Label>
+                          <SmartSelect
+                            name="mode_of_traveling"
+                            value={model.mode_of_traveling}
+                            onChange={updateModel}
+                            options={OPTIONS.mode_of_traveling}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Passenger type</Label>
+                          <SmartSelect
+                            name="passenger_type"
+                            value={model.passenger_type}
+                            onChange={updateModel}
+                            options={OPTIONS.passenger_type}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* Road & Environment */}
+                    <section id="road" className="rounded-xl border">
+                      <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
+                        <h4 className="font-semibold text-gray-800">
+                          Road & Environment
+                        </h4>
+                      </header>
+                      <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label>Road Condition</Label>
+                          <SmartSelect
+                            name="road_condition"
+                            value={model.road_condition}
+                            onChange={updateModel}
+                            options={OPTIONS.road_condition}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Road Type</Label>
+                          <SmartSelect
+                            name="road_type"
+                            value={model.road_type}
+                            onChange={updateModel}
+                            options={OPTIONS.road_type}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Category of Road</Label>
+                          <SmartSelect
+                            name="category_of_road"
+                            value={model.category_of_road}
+                            onChange={updateModel}
+                            options={OPTIONS.category_of_road}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Road signals exist</Label>
+                          <SmartSelect
+                            name="road_signals_exist"
+                            value={model.road_signals_exist}
+                            onChange={updateModel}
+                            options={OPTIONS.road_signals_exist}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Approximate speed</Label>
+                          <SmartSelect
+                            name="approximate_speed"
+                            value={model.approximate_speed}
+                            onChange={updateModel}
+                            options={OPTIONS.approximate_speed}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Visibility</Label>
+                          <SmartSelect
+                            name="visibility"
+                            value={model.visibility}
+                            onChange={updateModel}
+                            options={OPTIONS.visibility}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* Substances & Safety */}
+                    <section id="safety" className="rounded-xl border">
+                      <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
+                        <h4 className="font-semibold text-gray-800">
+                          Substances & Safety
+                        </h4>
+                      </header>
+                      <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label>Alcohol Consumption</Label>
+                          <SmartSelect
+                            name="alcohol_consumption"
+                            value={model.alcohol_consumption}
+                            onChange={updateModel}
+                            options={OPTIONS.alcohol_consumption}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>
+                            Time between alcohol consumption and accident
+                          </Label>
+                          <SmartSelect
+                            name="time_between_alcohol"
+                            value={model.time_between_alcohol}
+                            onChange={updateModel}
+                            options={OPTIONS.time_between_alcohol}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Illicit Drugs</Label>
+                          <SmartSelect
+                            name="illicit_drugs"
+                            value={model.illicit_drugs}
+                            onChange={updateModel}
+                            options={OPTIONS.illicit_drugs}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Helmet Worn</Label>
+                          <SmartSelect
+                            name="helmet_worn"
+                            value={model.helmet_worn}
+                            onChange={updateModel}
+                            options={OPTIONS.helmet_worn}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Engine Capacity</Label>
+                          <SmartSelect
+                            name="engine_capacity"
+                            value={model.engine_capacity}
+                            onChange={updateModel}
+                            options={OPTIONS.engine_capacity}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* Transport */}
+                    <section id="transport" className="rounded-xl border">
+                      <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
+                        <h4 className="font-semibold text-gray-800">
+                          Transport to Hospital
+                        </h4>
+                      </header>
+                      <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label>Mode of transport to hospital</Label>
+                          <SmartSelect
+                            name="mode_of_transport"
+                            value={model.mode_of_transport}
+                            onChange={updateModel}
+                            options={OPTIONS.mode_of_transport}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Time taken to reach hospital</Label>
+                          <SmartSelect
+                            name="time_to_hospital"
+                            value={model.time_to_hospital}
+                            onChange={updateModel}
+                            options={OPTIONS.time_to_hospital}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>First aid given at scene</Label>
+                          <SmartSelect
+                            name="first_aid_given"
+                            value={model.first_aid_given}
+                            onChange={updateModel}
+                            options={OPTIONS.first_aid_given}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* Socio-economic */}
+                    <section id="socio" className="rounded-xl border">
+                      <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
+                        <h4 className="font-semibold text-gray-800">
+                          Socio-economic Impact
+                        </h4>
+                      </header>
+                      <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label>Bystander expenditure per day</Label>
+                          <SmartSelect
+                            name="bystander_expenditure"
+                            value={model.bystander_expenditure}
+                            onChange={updateModel}
+                            options={OPTIONS.bystander_expenditure}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Income before accident</Label>
+                          <SmartSelect
+                            name="income_before_accident"
+                            value={model.income_before_accident}
+                            onChange={updateModel}
+                            options={OPTIONS.income_before_accident}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Income after accident</Label>
+                          <SmartSelect
+                            name="income_after_accident"
+                            value={model.income_after_accident}
+                            onChange={updateModel}
+                            options={OPTIONS.income_after_accident}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Family current status</Label>
+                          <SmartSelect
+                            name="family_status"
+                            value={model.family_status}
+                            onChange={updateModel}
+                            options={OPTIONS.family_status}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Vehicle insured</Label>
+                          <SmartSelect
+                            name="vehicle_insured"
+                            value={model.vehicle_insured}
+                            onChange={updateModel}
+                            options={OPTIONS.vehicle_insured}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* Outcome & Notes */}
+                    <section id="outcome" className="rounded-xl border">
+                      <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
+                        <h4 className="font-semibold text-gray-800">
+                          Outcome & Notes
+                        </h4>
+                      </header>
+                      <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label>Discharge Outcome</Label>
+                          <SmartSelect
+                            name="discharge_outcome"
+                            value={model.discharge_outcome}
+                            onChange={updateModel}
+                            options={OPTIONS.discharge_outcome}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <Label>Notes (optional)</Label>
+                          <textarea
+                            name="notes"
+                            value={model.notes}
+                            onChange={(e) =>
+                              updateModel("notes", e.target.value)
+                            }
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                            className={`mt-1 block w-full p-2 border border-gray-300 rounded h-24 ${
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                                ? "bg-gray-100"
+                                : "bg-white"
+                            }`}
+                          />
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* Completed toggle */}
+                    <section className="rounded-xl border">
+                      <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
+                        <h4 className="font-semibold text-gray-800">
+                          Finalize
+                        </h4>
+                      </header>
+                      <div className="p-4">
+                        <div className="flex items-center gap-3">
+                          <Checkbox
+                            id="completed"
+                            checked={completed}
+                            onChange={setCompleted}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                          <Label htmlFor="completed" className="cursor-pointer">
+                            Mark as <b>Completed</b> to finalize this record (no
+                            further edits allowed)
+                          </Label>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Severity is set automatically later (default “U”).
+                        </div>
+                      </div>
+                    </section>
+
+                    {/* Footer buttons */}
+                    <div className="flex flex-wrap gap-3 justify-end pb-8">
+                      <button
+                        onClick={() => {
+                          setMode("idle");
+                          resetForm();
+                        }}
+                        className="px-4 py-2 rounded-lg border bg-gray-100 hover:bg-gray-200 text-sm"
+                      >
+                        Cancel
+                      </button>
+                      {(mode === "create" ||
+                        (mode === "edit" && canEdit(current))) && (
+                        <button
+                          onClick={save}
+                          disabled={saving}
+                          className={`px-4 py-2 rounded-lg text-sm ${
+                            saving
+                              ? "bg-blue-400 text-white"
+                              : "bg-blue-600 text-white hover:bg-blue-700"
+                          }`}
+                        >
+                          {saving ? "Saving…" : "Save"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+          </div>
+        </div>
       </div>
     </div>
   );
