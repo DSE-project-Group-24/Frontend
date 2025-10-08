@@ -352,16 +352,7 @@ const AccidentEDA = () => {
 
     return (
       <>
-        {/* Sidebar Toggle Button */}
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="fixed top-1/2 left-4 z-40 bg-blue-500 text-white p-3 rounded-r-lg shadow-lg hover:bg-blue-600 transition-all duration-300 transform -translate-y-1/2"
-          style={{ display: sidebarOpen ? 'none' : 'block' }}
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707L9 19.414V15a1 1 0 00-.293-.707L2.293 7.707A1 1 0 012 7V4z" />
-          </svg>
-        </button>
+
 
         {/* Sidebar Overlay */}
         {sidebarOpen && (
@@ -1702,7 +1693,19 @@ const AccidentEDA = () => {
           {/* Secondary Navigation - Tab Bar */}
           <div className="border-t border-gray-200/30 sticky top-16 z-40 bg-white/90 backdrop-blur-md">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex justify-center py-3">
+              <div className="flex justify-between items-center py-3">
+                {/* Filter Button */}
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2.5 rounded-xl shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 flex items-center space-x-2 transform hover:scale-105"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707L9 19.414V15a1 1 0 00-.293-.707L2.293 7.707A1 1 0 012 7V4z" />
+                  </svg>
+                  <span className="font-semibold">Filters</span>
+                </button>
+                
+                {/* Tab Navigation */}
                 <nav className="flex space-x-1 bg-gray-100/50 rounded-xl p-1 backdrop-blur-sm">
                   {tabs.map(tab => (
                     <button
@@ -1731,6 +1734,13 @@ const AccidentEDA = () => {
                     </button>
                   ))}
                 </nav>
+                
+                {/* Stats/Export Area */}
+                <div className="flex items-center space-x-3">
+                  <div className="text-xs text-gray-500">
+                    Real-time Analytics
+                  </div>
+                </div>
               </div>
             </div>
           </div>
