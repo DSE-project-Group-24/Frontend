@@ -144,6 +144,14 @@ const translations = {
     Fri: "Fri",
     Sat: "Sat",
     
+    // Chart terms
+    yearlyTotal: "Yearly Total",
+    ofYearlyTotal: "of yearly total",
+    datasetCoverage: "Dataset Coverage",
+    filteredPeriod: "Filtered Period",
+    analysisPeriod: "Analysis Period",
+    ofTotal: "of total",
+    
     // Prediction Form
     medicalTransferPrediction: "Medical Transfer Prediction",
     completeFormForAnalysis: "Complete the form to get AI-powered transfer probability analysis",
@@ -429,6 +437,14 @@ const translations = {
     Thu: "බ්‍රහ",
     Fri: "සිකු",
     Sat: "සෙන",
+    
+    // Chart terms
+    yearlyTotal: "වාර්ෂික එකතුව",
+    ofYearlyTotal: "වාර්ෂික එකතුවෙන්",
+    datasetCoverage: "දත්ත සමුහ ආවරණය",
+    filteredPeriod: "පෙරන ලද කාලය",
+    analysisPeriod: "විශ්ලේෂණ කාලය",
+    ofTotal: "මුළු එකතුවෙන්",
     
     // Prediction Form
     medicalTransferPrediction: "වෛද්‍ය මාරු කිරීමේ පුරෝකථනය",
@@ -923,7 +939,15 @@ const translations = {
     Wed: "புதன்",
     Thu: "வியா",
     Fri: "வெள்",
-    Sat: "சனி"
+    Sat: "சனி",
+    
+    // Chart terms
+    yearlyTotal: "வருடாந்திர மொத்தம்",
+    ofYearlyTotal: "வருடாந்திர மொத்தத்தில்",
+    datasetCoverage: "தரவுத்தொகுப்பு கவரேஜ்",
+    filteredPeriod: "வடிகட்டிய காலம்",
+    analysisPeriod: "பகுப்பாய்வு காலம்",
+    ofTotal: "மொத்தத்தில்"
   }
 };
 

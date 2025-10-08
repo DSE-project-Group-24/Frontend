@@ -1,7 +1,7 @@
 // Backend data translation utility
 // Maps backend response values to translation keys
 
-import { t } from './translations';
+import { t, getCurrentLanguage } from './translations';
 
 // Medical outcome translations
 export const medicalOutcomeTranslations = {
@@ -230,11 +230,33 @@ export const translateDataValue = (value) => {
     // Clean the value (remove percentages and counts)
     const cleanValue = value.split('(')[0].trim();
     
+    // Debug logging for education values
+    if (cleanValue.includes('Victim') || cleanValue.includes('Unable')) {
+      console.log('=== TRANSLATION DEBUG ===');
+      console.log('Original value:', JSON.stringify(value));
+      console.log('Clean value:', JSON.stringify(cleanValue));
+      console.log('Clean value length:', cleanValue.length);
+      console.log('Available keys:', Object.keys(allTranslations).filter(k => k.includes('Victim') || k.includes('Unable')).map(k => JSON.stringify(k)));
+      console.log('Exact match found:', !!allTranslations[cleanValue]);
+      console.log('Current language:', getCurrentLanguage());
+    }
+    
+    // Try exact match first
     if (allTranslations[cleanValue]) {
       const translatedValue = allTranslations[cleanValue]();
       // Preserve percentage and count information
       const extraInfo = value.split('(')[1];
       return extraInfo ? `${translatedValue} (${extraInfo}` : translatedValue;
+    }
+    
+    // Try partial matching for education values that might have slight variations
+    if (cleanValue.includes('Victim not willing') || cleanValue.includes('Unable to respond')) {
+      const educationKey = 'Victim not willing to share/ Unable to respond/ Early Discharge';
+      if (allTranslations[educationKey]) {
+        const translatedValue = allTranslations[educationKey]();
+        const extraInfo = value.split('(')[1];
+        return extraInfo ? `${translatedValue} (${extraInfo}` : translatedValue;
+      }
     }
     
     return value;

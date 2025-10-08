@@ -1848,13 +1848,13 @@ const AccidentEDA = () => {
                 value={(() => {
                   const commonCollision = summaryData?.most_common_collision || analyticsData?.most_common_collision;
                   if (commonCollision) {
-                    return commonCollision;
+                    return translateDataValue(commonCollision);
                   }
                   // Find most common collision from collision types
                   if (Object.keys(accidentChars.collisionTypes).length > 0) {
                     const topEntry = Object.entries(accidentChars.collisionTypes)
                       .sort((a, b) => b[1] - a[1])[0];
-                    return topEntry[0];
+                    return translateDataValue(topEntry[0]);
                   }
                   return 'N/A';
                 })()}
@@ -1933,7 +1933,7 @@ const AccidentEDA = () => {
                     {Object.keys(accidentChars.collisionTypes).length > 0 && (
                       <li className="flex items-start">
                         <span className="text-red-500 mr-2">🚗</span>
-                        <span><strong>{t('commonCollision')}:</strong> {Object.entries(accidentChars.collisionTypes).sort((a,b) => b[1] - a[1])[0][0]}</span>
+                        <span><strong>{t('commonCollision')}:</strong> {translateDataValue(Object.entries(accidentChars.collisionTypes).sort((a,b) => b[1] - a[1])[0][0])}</span>
                       </li>
                     )}
            
