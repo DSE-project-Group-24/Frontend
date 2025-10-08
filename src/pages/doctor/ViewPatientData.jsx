@@ -21,31 +21,51 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
     setAccidents([]);
     setTransferProbabilities({});
     if (!searchId.trim()) {
-      setError("Please enter a Patient ID");
+      setError("Please enter a Patient ID, NIC, or Full Name");
       return;
     }
     setLoading(true);
     try {
-      // 1️⃣ fetch patients and filter by id
+      // 1️⃣ fetch patients and filter by id, NIC, or name
       const res = await API.get("/patients");
       setPatients(res.data);
       console.log("Fetched patients:", res.data);
-      const match = res.data.find((p) => p.patient_id === searchId.trim());
+      
+      const searchTerm = searchId.trim().toLowerCase();
+      const match = res.data.find((p) => {
+        // Search by Patient ID (exact match, case insensitive)
+        if (p.patient_id && p.patient_id.toLowerCase() === searchTerm) {
+          return true;
+        }
+        
+        // Search by NIC (exact match, case insensitive)
+        if (p.NIC && p.NIC.toLowerCase() === searchTerm) {
+          return true;
+        }
+        
+        // Search by Full Name (partial match, case insensitive)
+        if (p["Full Name"] && p["Full Name"].toLowerCase().includes(searchTerm)) {
+          return true;
+        }
+        
+        return false;
+      });
+      
       if (!match) {
-        setError("No patient found with that ID.");
+        setError("No patient found with that Patient ID, NIC, or Full Name.");
         return;
       }
       setFiltered(match);
 
-      // 2️⃣ fetch accident details for that patient id
-      const accRes = await API.get(`/accidents/patient/${searchId.trim()}`);
+      // 2️⃣ fetch accident details for that patient using the matched patient's ID
+      const accRes = await API.get(`/accidents/patient/${match.patient_id}`);
       setAccidents(accRes.data);
       console.log("Fetched accidents:", accRes.data);
       
       // 3️⃣ Get predictions for incomplete accidents
       const incompleteAccidents = accRes.data.filter(acc => !acc["Completed"]);
       for (const accident of incompleteAccidents) {
-        await getPredictionForAccident(accident, match); // Pass patient data directly
+        await getPredictionForAccident(accident, match); 
       }
     } catch (err) {
       console.error(err);
@@ -366,14 +386,14 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
         {/* Search box */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
           <label className="block mb-2 text-gray-700 font-medium">
-            Enter Patient ID:
+            Search Patient:
           </label>
           <div className="flex">
             <input
               type="text"
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
-              placeholder="Patient ID"
+              placeholder="Enter Patient ID, NIC, or Full Name"
               className="flex-1 border border-gray-300 rounded-l px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
@@ -384,6 +404,9 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
               {loading ? "Searching..." : "Search"}
             </button>
           </div>
+          <p className="text-sm text-gray-500 mt-1">
+            You can search by Patient ID, NIC, or Full Name
+          </p>
           {error && <p className="text-red-500 mt-2">{error}</p>}
         </div>
 
