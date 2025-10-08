@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { User, Activity, MapPin, DollarSign, Users, Home, Building, Stethoscope, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import DoctorNav from '../../navbars/DoctorNav';
 import Footer from '../../components/Footer';
+import API from '../../utils/api';
 
 const GetPrediction = ({ setIsAuthenticated, setRole }) => {
   const [formData, setFormData] = useState({
@@ -472,14 +473,8 @@ const GetPrediction = ({ setIsAuthenticated, setRole }) => {
     }
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/predictions/transferprobability', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
-      const result = await response.json();
+      const response = await API.post('predictions/transferprobability', data);
+      const result = response.data;
       if (result.error) {
         setError(result.error);
         setResult(null);

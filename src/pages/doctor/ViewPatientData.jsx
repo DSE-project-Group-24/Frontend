@@ -67,15 +67,9 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
       const apiData = { ...predictionData };
       delete apiData._missingValues;
       
-      const response = await fetch('http://127.0.0.1:8000/predictions/transferprobability', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(apiData)
-      });
+      const response = await API.post('predictions/transferprobability', apiData);
       
-      const result = await response.json();
+      const result = response.data;
       
       if (result.transfer_probability !== undefined) {
         setTransferProbabilities(prev => ({
