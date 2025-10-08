@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import API from '../utils/api';
 
-// Fetch analytics data from backend with optional filters
 const fetchAnalyticsData = async (filters = {}) => {
   try {
     const params = new URLSearchParams();
@@ -162,7 +161,6 @@ const AccidentEDA = () => {
     const genderDist = {};
     const ethnicityDist = {};
     const educationDist = {};
-    const occupationDist = {};
 
     data.forEach(record => {
       const patientData = record.patient_data;
@@ -205,16 +203,10 @@ const AccidentEDA = () => {
         if (education) {
           educationDist[education] = (educationDist[education] || 0) + 1;
         }
-
-        // Occupation
-        const occupation = patientData.Occupation;
-        if (occupation) {
-          occupationDist[occupation] = (occupationDist[occupation] || 0) + 1;
-        }
       }
     });
 
-    return { age_groups: ageGroups, gender_dist: genderDist, ethnicity_dist: ethnicityDist, education_dist: educationDist, occupation_dist: occupationDist };
+    return { age_groups: ageGroups, gender_dist: genderDist, ethnicity_dist: ethnicityDist, education_dist: educationDist };
   };
 
   const calculateMedicalFactors = (data) => {
@@ -360,16 +352,7 @@ const AccidentEDA = () => {
 
     return (
       <>
-        {/* Sidebar Toggle Button */}
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="fixed top-1/2 left-4 z-40 bg-blue-500 text-white p-3 rounded-r-lg shadow-lg hover:bg-blue-600 transition-all duration-300 transform -translate-y-1/2"
-          style={{ display: sidebarOpen ? 'none' : 'block' }}
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707L9 19.414V15a1 1 0 00-.293-.707L2.293 7.707A1 1 0 012 7V4z" />
-          </svg>
-        </button>
+
 
         {/* Sidebar Overlay */}
         {sidebarOpen && (
@@ -653,8 +636,7 @@ const AccidentEDA = () => {
     ageGroups: analyticsData.demographics?.age_groups || {},
     genderDist: analyticsData.demographics?.gender_dist || {},
     ethnicityDist: analyticsData.demographics?.ethnicity_dist || {},
-    educationDist: analyticsData.demographics?.education_dist || {},
-    occupationDist: analyticsData.demographics?.occupation_dist || {}
+    educationDist: analyticsData.demographics?.education_dist || {}
   };
 
   const medicalFactors = {
@@ -814,24 +796,39 @@ const AccidentEDA = () => {
   const DonutChart = ({ data, colorScheme = "mixed" }) => {
     if (!data || Object.keys(data).length === 0) return <EmptyChart />;
 
+    const [hoveredIndex, setHoveredIndex] = useState(null);
+    const [hoveredData, setHoveredData] = useState(null);
+    const [isInteracting, setIsInteracting] = useState(false);
+
     const total = Object.values(data).reduce((sum, value) => sum + value, 0);
     const sortedData = Object.entries(data).sort(([,a], [,b]) => b - a).slice(0, 5);
     
     const colors = [
-      { bg: 'bg-blue-500', border: 'border-blue-600', text: 'text-blue-700' },
-      { bg: 'bg-emerald-500', border: 'border-emerald-600', text: 'text-emerald-700' },
-      { bg: 'bg-amber-500', border: 'border-amber-600', text: 'text-amber-700' },
-      { bg: 'bg-purple-500', border: 'border-purple-600', text: 'text-purple-700' },
-      { bg: 'bg-rose-500', border: 'border-rose-600', text: 'text-rose-700' }
+      { hex: '#3b82f6', bg: 'bg-blue-500', name: 'Blue' },
+      { hex: '#10b981', bg: 'bg-emerald-500', name: 'Emerald' },
+      { hex: '#f59e0b', bg: 'bg-amber-500', name: 'Amber' },
+      { hex: '#8b5cf6', bg: 'bg-purple-500', name: 'Purple' },
+      { hex: '#ef4444', bg: 'bg-red-500', name: 'Red' }
     ];
 
-    let cumulativePercentage = 0;
+    // Pre-calculate segments to prevent render issues
+    const segments = React.useMemo(() => {
+      let cumulativePercentage = 0;
+      return sortedData.map(([key, value], index) => {
+        const percentage = (value / total) * 100;
+        const strokeDasharray = `${percentage * 2.199} ${219.9 - percentage * 2.199}`;
+        const strokeDashoffset = -cumulativePercentage * 2.199;
+        cumulativePercentage += percentage;
+        return { key, value, percentage, strokeDasharray, strokeDashoffset, index };
+      });
+    }, [sortedData, total]);
 
     return (
       <div className="flex items-center justify-center space-x-8">
         {/* Donut Chart Visual */}
         <div className="relative w-48 h-48">
           <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+            {/* Background circle */}
             <circle
               cx="50"
               cy="50"
@@ -840,49 +837,151 @@ const AccidentEDA = () => {
               stroke="#f3f4f6"
               strokeWidth="8"
             />
-            {sortedData.map(([key, value], index) => {
-              const percentage = (value / total) * 100;
-              const strokeDasharray = `${percentage * 2.199} ${219.9 - percentage * 2.199}`;
-              const strokeDashoffset = -cumulativePercentage * 2.199;
-              cumulativePercentage += percentage;
+            {/* Data segments */}
+            {segments.map((segment) => {
+              const isHovered = hoveredIndex === segment.index;
+              const isOtherHovered = hoveredIndex !== null && hoveredIndex !== segment.index;
               
               return (
-                <circle
-                  key={key}
-                  cx="50"
-                  cy="50"
-                  r="35"
-                  fill="none"
-                  stroke={colors[index % colors.length].bg.replace('bg-', '#').replace('-500', '')}
-                  strokeWidth="8"
-                  strokeDasharray={strokeDasharray}
-                  strokeDashoffset={strokeDashoffset}
-                  strokeLinecap="round"
-                  className="transition-all duration-700 ease-in-out"
-                  style={{ animationDelay: `${index * 200}ms` }}
-                />
+                <g key={segment.key}>
+                  {/* Invisible hover area - larger for better interaction */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="42"
+                    fill="transparent"
+                    stroke="transparent"
+                    strokeWidth="15"
+                    strokeDasharray={segment.strokeDasharray}
+                    strokeDashoffset={segment.strokeDashoffset}
+                    className="cursor-pointer"
+                    onMouseEnter={() => {
+                      setHoveredIndex(segment.index);
+                      setHoveredData({ 
+                        key: segment.key, 
+                        value: segment.value, 
+                        percentage: segment.percentage.toFixed(1) 
+                      });
+                      setIsInteracting(true);
+                    }}
+                    onMouseLeave={() => {
+                      setHoveredIndex(null);
+                      setHoveredData(null);
+                      setIsInteracting(false);
+                    }}
+                  />
+                  
+                  {/* Visible segment */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r={isHovered ? "37" : "35"}
+                    fill="none"
+                    stroke={colors[segment.index % colors.length].hex}
+                    strokeWidth={isHovered ? "10" : "8"}
+                    strokeDasharray={segment.strokeDasharray}
+                    strokeDashoffset={segment.strokeDashoffset}
+                    strokeLinecap="round"
+                    className="transition-all duration-300 ease-in-out pointer-events-none"
+                    style={{ 
+                      animationDelay: `${segment.index * 200}ms`,
+                      filter: isHovered 
+                        ? 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))' 
+                        : isOtherHovered 
+                          ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))'
+                          : 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+                      opacity: isOtherHovered ? 0.4 : 1
+                    }}
+                  />
+                </g>
               );
             })}
           </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{total.toLocaleString()}</div>
-              <div className="text-sm text-gray-500">Total</div>
+          
+          {/* Center content - dynamic based on hover */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="text-center transition-all duration-300">
+              {hoveredData ? (
+                <>
+                  <div className="text-xl font-bold text-gray-900">{hoveredData.value.toLocaleString()}</div>
+                  <div className="text-sm text-gray-600 truncate max-w-20">{hoveredData.key}</div>
+                  <div className="text-xs text-gray-500">{hoveredData.percentage}%</div>
+                </>
+              ) : (
+                <>
+                  <div className="text-2xl font-bold text-gray-900">{total.toLocaleString()}</div>
+                  <div className="text-sm text-gray-500">Total</div>
+                </>
+              )}
             </div>
           </div>
+
+          {/* Floating tooltip */}
+          {hoveredData && (
+            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg z-10 pointer-events-none">
+              <div className="text-xs font-medium">{hoveredData.key}</div>
+              <div className="text-sm font-bold">{hoveredData.value.toLocaleString()} ({hoveredData.percentage}%)</div>
+              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-800 rotate-45"></div>
+            </div>
+          )}
         </div>
 
-        {/* Legend */}
+        {/* Legend with enhanced hover effects */}
         <div className="space-y-3">
-          {sortedData.map(([key, value], index) => {
-            const percentage = ((value / total) * 100).toFixed(1);
+          {segments.map((segment) => {
+            const isHovered = hoveredIndex === segment.index;
+            const isOtherHovered = hoveredIndex !== null && hoveredIndex !== segment.index;
+            
             return (
-              <div key={key} className="flex items-center space-x-3">
-                <div className={`w-4 h-4 rounded-full ${colors[index % colors.length].bg} shadow-sm`}></div>
+              <div 
+                key={segment.key} 
+                className={`flex items-center space-x-3 p-2 rounded-lg transition-all duration-300 cursor-pointer ${
+                  isHovered 
+                    ? 'bg-blue-50 border-2 border-blue-200 shadow-md scale-105' 
+                    : isOtherHovered 
+                      ? 'bg-gray-50 opacity-50' 
+                      : 'hover:bg-gray-50'
+                }`}
+                onMouseEnter={() => {
+                  setHoveredIndex(segment.index);
+                  setHoveredData({ 
+                    key: segment.key, 
+                    value: segment.value, 
+                    percentage: segment.percentage.toFixed(1) 
+                  });
+                  setIsInteracting(true);
+                }}
+                onMouseLeave={() => {
+                  setHoveredIndex(null);
+                  setHoveredData(null);
+                  setIsInteracting(false);
+                }}
+              >
+                <div 
+                  className={`rounded-full shadow-sm border-2 border-white transition-all duration-300 ${
+                    isHovered ? 'w-5 h-5' : 'w-4 h-4'
+                  }`}
+                  style={{ backgroundColor: colors[segment.index % colors.length].hex }}
+                ></div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-700 truncate">{key}</div>
-                  <div className="text-xs text-gray-500">{value.toLocaleString()} ({percentage}%)</div>
+                  <div className={`text-sm font-medium text-gray-700 truncate transition-all duration-300 ${
+                    isHovered ? 'font-bold' : ''
+                  }`}>
+                    {segment.key}
+                  </div>
+                  <div className={`text-xs text-gray-500 transition-all duration-300 ${
+                    isHovered ? 'text-gray-700 font-semibold' : ''
+                  }`}>
+                    {segment.value.toLocaleString()} ({segment.percentage.toFixed(1)}%)
+                  </div>
                 </div>
+                {isHovered && (
+                  <div className="text-blue-600">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -891,114 +990,399 @@ const AccidentEDA = () => {
     );
   };
 
-  // Modern Vertical Bar Chart
+  // Modern Vertical Bar Chart with Dynamic Hover Effects
   const VerticalBarChart = ({ data, colorScheme = "gradient" }) => {
     if (!data || Object.keys(data).length === 0) return <EmptyChart />;
 
+    const [hoveredIndex, setHoveredIndex] = useState(null);
+    const [totalValue, setTotalValue] = useState(0);
+
     const maxValue = Math.max(...Object.values(data));
     const sortedData = Object.entries(data).sort(([,a], [,b]) => b - a).slice(0, 8);
+    const total = sortedData.reduce((sum, [, value]) => sum + value, 0);
+    
+    React.useEffect(() => {
+      setTotalValue(total);
+    }, [total]);
     
     return (
-      <div className="h-64">
-        <div className="flex items-end justify-center space-x-2 h-full px-4">
+      <div className="h-80 relative">
+        {/* Dynamic title with hover info */}
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 text-center mb-4">
+          <div className="transition-all duration-300">
+            {hoveredIndex !== null ? (
+              <div className="bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
+                <div className="text-sm font-semibold text-blue-800">
+                  {sortedData[hoveredIndex][0]}
+                </div>
+                <div className="text-lg font-bold text-blue-900">
+                  {sortedData[hoveredIndex][1].toLocaleString()}
+                </div>
+                <div className="text-xs text-blue-600">
+                  {((sortedData[hoveredIndex][1] / total) * 100).toFixed(1)}% of total
+                </div>
+              </div>
+            ) : (
+              <div className="text-sm text-gray-600">
+                <div className="font-semibold">Total Cases</div>
+                <div className="text-lg font-bold text-gray-800">{total.toLocaleString()}</div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-end justify-center space-x-4 h-full px-4 pb-16 pt-20">
           {sortedData.map(([key, value], index) => {
-            const height = maxValue > 0 ? (value / maxValue) * 200 : 0;
+            const height = maxValue > 0 ? (value / maxValue) * 150 : 0;
             const hue = (index * 45) % 360;
+            const isHovered = hoveredIndex === index;
+            const isOtherHovered = hoveredIndex !== null && hoveredIndex !== index;
+            const percentage = ((value / total) * 100).toFixed(1);
             
             return (
-              <div key={key} className="flex flex-col items-center space-y-2 group">
-                <div className="relative">
+              <div 
+                key={key} 
+                className="flex flex-col items-center cursor-pointer transition-all duration-300"
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                style={{
+                  transform: isHovered ? 'scale(1.05)' : isOtherHovered ? 'scale(0.95)' : 'scale(1)',
+                  opacity: isOtherHovered ? 0.6 : 1
+                }}
+              >
+                <div className="relative mb-3">
+                  {/* Dynamic value label above bar */}
+                  <div className={`absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-semibold whitespace-nowrap transition-all duration-300 ${
+                    isHovered ? 'text-blue-700 font-bold -top-10' : 'text-gray-700'
+                  }`}>
+                    {value.toLocaleString()}
+                    {isHovered && (
+                      <div className="text-xs font-normal text-blue-600 mt-1">
+                        {percentage}%
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Enhanced Bar with animations */}
                   <div
-                    className="w-8 rounded-t-lg transition-all duration-700 ease-out shadow-lg hover:shadow-xl group-hover:scale-105"
+                    className="rounded-t-lg transition-all duration-500 ease-out relative overflow-hidden"
                     style={{
-                      height: `${height}px`,
-                      background: `linear-gradient(to top, hsl(${hue}, 70%, 50%), hsl(${hue}, 70%, 60%))`,
+                      width: isHovered ? '56px' : '48px',
+                      height: `${isHovered ? height + 10 : height}px`,
+                      background: isHovered 
+                        ? `linear-gradient(to top, hsl(${hue}, 85%, 45%), hsl(${hue}, 85%, 65%), hsl(${hue}, 85%, 75%))`
+                        : `linear-gradient(to top, hsl(${hue}, 70%, 50%), hsl(${hue}, 70%, 60%))`,
+                      boxShadow: isHovered 
+                        ? '0 10px 30px rgba(0,0,0,0.2), 0 0 20px rgba(59, 130, 246, 0.3)' 
+                        : '0 4px 15px rgba(0,0,0,0.1)',
                       animationDelay: `${index * 100}ms`
                     }}
-                  />
-                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-                    {value.toLocaleString()}
+                  >
+                    {/* Animated shine effect on hover */}
+                    {isHovered && (
+                      <div 
+                        className="absolute inset-0 bg-gradient-to-t from-transparent via-white to-transparent opacity-20 animate-pulse"
+                        style={{ animation: `shine 2s ease-in-out infinite` }}
+                      />
+                    )}
+                    
+                    {/* Progress fill animation */}
+                    <div 
+                      className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white/20 to-transparent transition-all duration-1000"
+                      style={{ 
+                        height: '100%',
+                        transform: `scaleY(${isHovered ? 1 : 0.8})`,
+                        transformOrigin: 'bottom'
+                      }}
+                    />
                   </div>
+                  
+                  {/* Enhanced floating tooltip */}
+                  {isHovered && (
+                    <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-xl z-20 whitespace-nowrap">
+                      <div className="font-semibold">{key}</div>
+                      <div className="text-blue-300">{value.toLocaleString()} cases</div>
+                      <div className="text-gray-300">{percentage}% of total</div>
+                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                    </div>
+                  )}
                 </div>
-                <div className="text-xs text-gray-600 transform -rotate-45 origin-top-left w-16 text-center">
-                  {key.length > 8 ? `${key.substring(0, 8)}...` : key}
+                
+                {/* Enhanced age range label */}
+                <div className={`text-xs font-medium text-center whitespace-nowrap mt-2 transition-all duration-300 ${
+                  isHovered ? 'text-blue-700 font-bold text-sm' : 'text-gray-700'
+                }`}>
+                  {key}
+                  {isHovered && (
+                    <div className="flex items-center justify-center mt-1">
+                      <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                      </svg>
+                    </div>
+                  )}
                 </div>
               </div>
             );
           })}
         </div>
+
+        {/* Add CSS animation for shine effect */}
+        <style jsx>{`
+          @keyframes shine {
+            0% { transform: translateX(-100%) skewX(-15deg); }
+            100% { transform: translateX(200%) skewX(-15deg); }
+          }
+        `}</style>
       </div>
     );
   };
 
-  // Modern Line Chart (simplified)
+  // Enhanced Monthly Trends Line Chart with Dynamic Movements
   const LineChart = ({ data, colorScheme = "blue" }) => {
     if (!data || Object.keys(data).length === 0) return <EmptyChart />;
+
+    const [hoveredPoint, setHoveredPoint] = useState(null);
+    const [animationPhase, setAnimationPhase] = useState(0);
+    const [isInteracting, setIsInteracting] = useState(false);
 
     const maxValue = Math.max(...Object.values(data));
     const minValue = Math.min(...Object.values(data));
     const range = maxValue - minValue || 1;
+    const total = Object.values(data).reduce((sum, val) => sum + val, 0);
     
-    const points = Object.entries(data).map(([key, value], index, arr) => {
-      const x = (index / (arr.length - 1)) * 300;
-      const y = 150 - ((value - minValue) / range) * 120;
-      return { x, y, value, key };
+    // Ensure months are ordered correctly
+    const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const sortedData = Object.entries(data).sort(([a], [b]) => {
+      const indexA = monthOrder.indexOf(a);
+      const indexB = monthOrder.indexOf(b);
+      return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+    });
+    
+    const points = sortedData.map(([key, value], index, arr) => {
+      const x = 40 + (index / Math.max(arr.length - 1, 1)) * 220; // Added margins
+      const y = 30 + (1 - (value - minValue) / range) * 90; // Added margins
+      return { x, y, value, key, index };
     });
 
     const pathData = points.map((point, index) => 
       `${index === 0 ? 'M' : 'L'} ${point.x},${point.y}`
     ).join(' ');
 
+    // Animation effect - only when not interacting
+    React.useEffect(() => {
+      if (isInteracting) return;
+      
+      const timer = setInterval(() => {
+        setAnimationPhase(prev => (prev + 1) % 100);
+      }, 150);
+      return () => clearInterval(timer);
+    }, [isInteracting]);
+
     return (
-      <div className="h-48 relative">
-        <svg viewBox="0 0 300 150" className="w-full h-full">
-          {/* Grid lines */}
+      <div className="h-64 relative bg-gradient-to-br from-blue-50/30 to-white rounded-xl p-4">
+        {/* Dynamic header with hover info */}
+        <div className="absolute top-2 left-1/2 transform -translate-x-1/2 text-center mb-4 z-10">
+          <div className="transition-all duration-300">
+            {hoveredPoint !== null ? (
+              <div className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg">
+                <div className="text-sm font-semibold">
+                  {points[hoveredPoint].key} 2024
+                </div>
+                <div className="text-lg font-bold">
+                  {points[hoveredPoint].value.toLocaleString()} accidents
+                </div>
+                <div className="text-xs opacity-90">
+                  {((points[hoveredPoint].value / total) * 100).toFixed(1)}% of yearly total
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white/90 backdrop-blur-md px-3 py-1 rounded-lg shadow-md text-sm text-gray-600">
+                Yearly Total: {total.toLocaleString()} accidents
+              </div>
+            )}
+          </div>
+        </div>
+
+        <svg viewBox="0 0 300 150" className="w-full h-full mt-8">
+          {/* Enhanced Grid */}
           <defs>
-            <pattern id="grid" width="30" height="15" patternUnits="userSpaceOnUse">
-              <path d="M 30 0 L 0 0 0 15" fill="none" stroke="#f3f4f6" strokeWidth="0.5"/>
+            <pattern id="monthlyGrid" width="25" height="15" patternUnits="userSpaceOnUse">
+              <path d="M 25 0 L 0 0 0 15" fill="none" stroke="#e5e7eb" strokeWidth="0.5" opacity="0.7"/>
             </pattern>
+            <linearGradient id="monthlyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3"/>
+              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.05"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge> 
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
           </defs>
-          <rect width="300" height="150" fill="url(#grid)" />
           
-          {/* Area under curve */}
+          <rect width="300" height="150" fill="url(#monthlyGrid)" />
+          
+          {/* Animated area under curve */}
           <path
-            d={`${pathData} L 300,150 L 0,150 Z`}
-            fill="url(#gradient)"
-            fillOpacity="0.2"
+            d={`M 40,120 ${pathData.replace('M', 'L')} L 260,120 Z`}
+            fill="url(#monthlyGradient)"
+            className="transition-all duration-1000"
+            style={{
+              animationDelay: '500ms',
+              opacity: hoveredPoint !== null ? 0.6 : 0.3
+            }}
           />
           
-          {/* Line */}
+          {/* Main trend line with stable animation */}
           <path
             d={pathData}
             fill="none"
             stroke="#3b82f6"
-            strokeWidth="3"
+            strokeWidth={hoveredPoint !== null ? "4" : "3"}
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="drop-shadow-sm"
+            filter="url(#glow)"
+            className="transition-all duration-300"
           />
           
-          {/* Data points */}
+          {/* Interactive data points */}
+          {points.map((point, index) => {
+            const isHovered = hoveredPoint === index;
+            const isAdjacent = hoveredPoint !== null && Math.abs(hoveredPoint - index) === 1;
+            
+            return (
+              <g key={index}>
+                {/* Hover area - larger invisible circle for better interaction */}
+                <circle
+                  cx={point.x}
+                  cy={point.y}
+                  r="15"
+                  fill="transparent"
+                  className="cursor-pointer"
+                  onMouseEnter={() => {
+                    setHoveredPoint(index);
+                    setIsInteracting(true);
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredPoint(null);
+                    setIsInteracting(false);
+                  }}
+                />
+                
+                {/* Outer ring animation */}
+                <circle
+                  cx={point.x}
+                  cy={point.y}
+                  r={isHovered ? "12" : "8"}
+                  fill="none"
+                  stroke="#3b82f6"
+                  strokeWidth="1"
+                  opacity={isHovered ? 0.3 : 0}
+                  className="transition-all duration-300 pointer-events-none"
+                  style={{
+                    animation: isHovered ? 'pulse 2s infinite' : 'none'
+                  }}
+                />
+                
+                {/* Main point */}
+                <circle
+                  cx={point.x}
+                  cy={point.y}
+                  r={isHovered ? "6" : isAdjacent ? "5" : "4"}
+                  fill={isHovered ? "#1d4ed8" : "#3b82f6"}
+                  stroke="white"
+                  strokeWidth="2"
+                  className="transition-all duration-300 pointer-events-none"
+                  style={{
+                    filter: isHovered ? 'drop-shadow(0 4px 8px rgba(59, 130, 246, 0.4))' : 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+                    transform: isHovered ? 'scale(1.2)' : 'scale(1)'
+                  }}
+                />
+                
+                {/* Value label on hover */}
+                {isHovered && (
+                  <g>
+                    <rect
+                      x={point.x - 20}
+                      y={point.y - 25}
+                      width="40"
+                      height="15"
+                      fill="#1f2937"
+                      rx="3"
+                      opacity="0.9"
+                    />
+                    <text
+                      x={point.x}
+                      y={point.y - 15}
+                      textAnchor="middle"
+                      fill="white"
+                      fontSize="10"
+                      fontWeight="bold"
+                    >
+                      {point.value}
+                    </text>
+                  </g>
+                )}
+              </g>
+            );
+          })}
+          
+          {/* Month labels */}
           {points.map((point, index) => (
-            <circle
-              key={index}
-              cx={point.x}
-              cy={point.y}
-              r="4"
-              fill="#3b82f6"
-              stroke="white"
-              strokeWidth="2"
-              className="drop-shadow-sm hover:r-6 transition-all duration-200"
-            />
+            <text
+              key={`label-${index}`}
+              x={point.x}
+              y="140"
+              textAnchor="middle"
+              fontSize="10"
+              fontWeight={hoveredPoint === index ? "bold" : "normal"}
+              fill={hoveredPoint === index ? "#1d4ed8" : "#6b7280"}
+              className="transition-all duration-300"
+            >
+              {point.key}
+            </text>
           ))}
           
-          <defs>
-            <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.8"/>
-              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.1"/>
-            </linearGradient>
-          </defs>
+          {/* Y-axis value indicators */}
+          {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
+            const y = 30 + (1 - ratio) * 90;
+            const value = Math.round(minValue + ratio * range);
+            return (
+              <g key={idx}>
+                <line x1="35" y1={y} x2="40" y2={y} stroke="#9ca3af" strokeWidth="1"/>
+                <text x="30" y={y + 3} textAnchor="end" fontSize="8" fill="#6b7280">
+                  {value}
+                </text>
+              </g>
+            );
+          })}
         </svg>
+
+        {/* Floating stats panel */}
+        {hoveredPoint !== null && (
+          <div className="absolute bottom-4 right-4 bg-white shadow-xl rounded-lg p-3 border border-gray-200 z-10">
+            <div className="text-xs text-gray-500 mb-1">Month Details</div>
+            <div className="text-sm font-semibold text-gray-800">
+              {points[hoveredPoint].key} 2024
+            </div>
+            <div className="text-lg font-bold text-blue-600">
+              {points[hoveredPoint].value.toLocaleString()}
+            </div>
+            <div className="text-xs text-gray-500">
+              Rank #{points[hoveredPoint].index + 1} of {points.length}
+            </div>
+          </div>
+        )}
+
+        {/* CSS animations */}
+        <style jsx>{`
+          @keyframes pulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.1; transform: scale(1.1); }
+          }
+        `}</style>
       </div>
     );
   };
@@ -1175,8 +1559,9 @@ const AccidentEDA = () => {
     const dailyData = {};
     
     // Convert numeric month/day keys to readable names
+    // Backend sends months as 1-12, so we need to subtract 1 for array indexing
     Object.entries(temporalTrends.monthlyTrends || {}).forEach(([month, count]) => {
-      const monthIndex = parseInt(month);
+      const monthIndex = parseInt(month) - 1; // Convert 1-12 to 0-11
       if (monthIndex >= 0 && monthIndex < 12) {
         monthlyData[monthNames[monthIndex]] = count;
       } else {
@@ -1299,39 +1684,28 @@ const AccidentEDA = () => {
       {/* Main Content */}
       <div className={`transition-all duration-300 ${sidebarOpen ? 'ml-0' : 'ml-0'}`}>
         {/* Professional Header */}
-        <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-30">
+        <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-16 z-30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900">Analytics Dashboard</h1>
-                  <p className="text-sm text-gray-500">Road Accident Intelligence</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-4">
-                <div className="hidden md:flex items-center space-x-6">
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span>Live Data</span>
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    Last updated: {new Date().toLocaleTimeString()}
-                  </div>
-                </div>
-              </div>
+            <div className="h-4">
             </div>
           </div>
           
           {/* Secondary Navigation - Tab Bar */}
-          <div className="border-t border-gray-200/30">
+          <div className="border-t border-gray-200/30 sticky top-16 z-40 bg-white/90 backdrop-blur-md">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex justify-center py-3">
+              <div className="flex justify-between items-center py-3">
+                {/* Filter Button */}
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2.5 rounded-xl shadow-lg hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 flex items-center space-x-2 transform hover:scale-105"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707L9 19.414V15a1 1 0 00-.293-.707L2.293 7.707A1 1 0 012 7V4z" />
+                  </svg>
+                  <span className="font-semibold">Filters</span>
+                </button>
+                
+                {/* Tab Navigation */}
                 <nav className="flex space-x-1 bg-gray-100/50 rounded-xl p-1 backdrop-blur-sm">
                   {tabs.map(tab => (
                     <button
@@ -1360,6 +1734,13 @@ const AccidentEDA = () => {
                     </button>
                   ))}
                 </nav>
+                
+                {/* Stats/Export Area */}
+                <div className="flex items-center space-x-3">
+                  <div className="text-xs text-gray-500">
+                    Real-time Analytics
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1469,10 +1850,8 @@ const AccidentEDA = () => {
             </div>
           </div>
 
-
-
         {/* Tab Content */}
-        <div className="tab-content px-4">
+        <div className="tab-content py-8 px-4 mt-12">
           {tabs.find(tab => tab.id === activeTab)?.component()}
         </div>
 
@@ -1502,13 +1881,7 @@ const AccidentEDA = () => {
                         <span><strong>Gender:</strong> {Object.entries(demographics.genderDist).sort((a,b) => b[1] - a[1])[0][0]} ({Math.round((Object.entries(demographics.genderDist).sort((a,b) => b[1] - a[1])[0][1] / (analyticsData.total_records || 1)) * 100)}% of cases)</span>
                       </li>
                     )}
-                    {Object.keys(demographics.occupationDist).length > 0 && (
-                      <li className="flex items-start">
-                        <span className="text-blue-500 mr-2">💼</span>
-                        <span><strong>Occupation:</strong> {Object.entries(demographics.occupationDist).sort((a,b) => b[1] - a[1])[0][0]} (most affected)</span>
-                      </li>
-                    )}
-                    {Object.keys(demographics.ageGroups).length === 0 && Object.keys(demographics.genderDist).length === 0 && Object.keys(demographics.occupationDist).length === 0 && (
+                    {Object.keys(demographics.ageGroups).length === 0 && Object.keys(demographics.genderDist).length === 0 && (
                       <li className="text-gray-500 text-center py-4">
                         <div className="bg-gray-100 rounded-lg p-4">
                           <span>📋 No demographic data available for current filters</span>
@@ -1553,63 +1926,7 @@ const AccidentEDA = () => {
         )}
         </main>
 
-        {/* Professional Footer */}
-        <footer className="bg-white/80 backdrop-blur-md border-t border-gray-200/50 mt-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div>
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  </div>
-                  <span className="text-lg font-bold text-gray-900">Analytics Platform</span>
-                </div>
-                <p className="text-gray-600 text-sm">
-                  Advanced road accident analytics for evidence-based decision making and improved public safety.
-                </p>
-              </div>
-              
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-4">Analytics</h3>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li>Demographic Analysis</li>
-                  <li>Temporal Patterns</li>
-                  <li>Risk Assessment</li>
-                  <li>Outcome Prediction</li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-4">System Status</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-gray-600">Data Pipeline: Active</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-gray-600">Analytics Engine: Online</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                    <span className="text-gray-600">Last Sync: {new Date().toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="border-t border-gray-200 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-              <p className="text-sm text-gray-500">
-                © {new Date().getFullYear()} Road Safety Analytics Platform. All rights reserved.
-              </p>
-              <div className="flex items-center space-x-4 mt-4 md:mt-0">
-                <span className="text-xs text-gray-400">Powered by Advanced Analytics</span>
-              </div>
-            </div>
-          </div>
-        </footer>
+        
       </div>
     </div>
   );

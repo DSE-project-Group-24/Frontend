@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import DoctorNav from "../../navbars/DoctorNav";
 import API from "../../utils/api"; // your axios instance
+import Footer from "../../components/Footer";
 
 const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
   const [searchId, setSearchId] = useState("");
@@ -361,9 +362,9 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="bg-gray-100">
       <DoctorNav setIsAuthenticated={setIsAuthenticated} setRole={setRole} />
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-6 min-h-screen">
         <h1 className="text-3xl font-bold text-blue-700 mb-6">
           View Patient Data
         </h1>
@@ -644,6 +645,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 };
