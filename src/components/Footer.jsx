@@ -10,7 +10,7 @@ const Footer = ({
     { label: "Last Updated", value: new Date().toLocaleString(), icon: "clock" }
   ],
   socialLinks = [
-    { platform: "Twitter", url: "https://twitter.com/RoadAccidentCare", handle: "@RoadAccidentCare" },
+    // { platform: "Twitter", url: "https://twitter.com/RoadAccidentCare", handle: "@RoadAccidentCare" },
     { platform: "LinkedIn", url: "https://linkedin.com/company/road-accident-care-system-group24", handle: "road-accident-care-system-group24" },
     { platform: "Email", url: "mailto:contact@roadaccidentcare.org", handle: "contact@roadaccidentcare.org" }
   ],
