@@ -539,7 +539,20 @@ const AccidentRecordSystem = () => {
 
   const startView = (rec) => {
     setCurrent(rec);
-    // map DB record into model fields (best effort)
+
+    // Normalize injuries coming from backend into the model shape we edit
+    const injuries = Array.isArray(rec.injuries)
+      ? rec.injuries.map((it) => ({
+          injury_no: Number(it.injury_no) || 0,
+          site_of_injury: it.site_of_injury || "",
+          type_of_injury: it.type_of_injury || "",
+          side: it.side || "",
+          investigation_done: it.investigation_done || "",
+          severity: it.severity || "", // display-only; backend/ML overwrites on save
+        }))
+      : [];
+
+    // Map DB record into model fields (best effort)
     setModel((m) => ({
       ...m,
       patient_id: rec.patient_id || m.patient_id || "",
@@ -590,7 +603,11 @@ const AccidentRecordSystem = () => {
       discharge_outcome:
         rec["Discharge Outcome"] || rec.discharge_outcome || "",
       notes: rec.notes || "",
+
+      // ✅ include injuries so the section renders
+      injuries,
     }));
+
     setCompleted(!!rec.Completed);
     setMode("view"); // renders read-only based on rules
   };
