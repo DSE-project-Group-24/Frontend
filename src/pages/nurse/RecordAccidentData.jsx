@@ -153,6 +153,33 @@ const OPTIONS = {
   ],
 };
 
+/** Injuries — categorical options */
+const INJURY_SITE_OPTIONS = [
+  // TODO: replace with your real categories
+  "Head",
+  "Neck",
+  "Chest",
+  "Abdomen",
+  "Upper Limb",
+  "Lower Limb",
+  "Other",
+];
+
+const INJURY_TYPE_OPTIONS = [
+  // TODO: replace with your real categories
+  "Fracture",
+  "Laceration",
+  "Contusion",
+  "Burn",
+  "Sprain/Strain",
+  "Other",
+];
+
+const SIDE_OPTIONS = ["Front", "Back", "Left", "Right", "N/A", "Unknown"];
+
+// Severity is auto from ML (display only)
+const SEVERITY_LABEL = "Auto (from ML when saved)";
+
 /** Base (snake_case) fields sent to backend models */
 const EMPTY_MODEL = {
   patient_id: "",
@@ -185,6 +212,9 @@ const EMPTY_MODEL = {
 
   // UX-only
   notes: "",
+
+  // NEW
+  injuries: [],
 };
 
 const StatusBadge = ({ completed }) => (
@@ -579,13 +609,54 @@ const AccidentRecordSystem = () => {
     setModel((m) => ({ ...m, [name]: value }));
   };
 
+  // Create a new blank injury row
+  const makeEmptyInjury = () => ({
+    injury_no: 0, // assigned on save
+    site_of_injury: "",
+    type_of_injury: "",
+    side: "",
+    investigation_done: "",
+    severity: "", // left empty; ML will fill
+  });
+
+  const addInjury = () => {
+    setModel((m) => ({
+      ...m,
+      injuries: [...(m.injuries || []), makeEmptyInjury()],
+    }));
+  };
+
+  const updateInjury = (idx, field, value) => {
+    setModel((m) => {
+      const copy = [...(m.injuries || [])];
+      copy[idx] = { ...copy[idx], [field]: value };
+      return { ...m, injuries: copy };
+    });
+  };
+
+  const removeInjury = (idx) => {
+    setModel((m) => {
+      const copy = [...(m.injuries || [])];
+      copy.splice(idx, 1);
+      return { ...m, injuries: copy };
+    });
+  };
+
   const save = async () => {
     try {
       setSaving(true);
+
+      const numberedInjuries = (model.injuries || []).map((inj, i) => ({
+        ...inj,
+        injury_no: i + 1, // 1-based
+        severity: inj.severity, // keep as-is; backend/ML can overwrite later
+      }));
+
       // Build payload (snake_case). Backend maps to DB columns by alias.
       const payload = {
         ...model,
-        completed: !!completed, // maps to DB "Completed"
+        injuries: numberedInjuries,
+        completed: !!completed,
       };
       console.log("Saving payload", payload);
       if (mode === "create") {
@@ -819,6 +890,7 @@ const AccidentRecordSystem = () => {
                         ["safety", "Substances & Safety"],
                         ["transport", "Transport"],
                         ["socio", "Socio-economic"],
+                        ["injuries", "Injuries"],
                         ["outcome", "Outcome & Notes"],
                       ].map(([id, label]) => (
                         <a
@@ -1224,6 +1296,152 @@ const AccidentRecordSystem = () => {
                             }
                           />
                         </div>
+                      </div>
+                    </section>
+
+                    {/* Injuries */}
+                    <section id="injuries" className="rounded-xl border">
+                      <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl flex items-center justify-between">
+                        <h4 className="font-semibold text-gray-800">
+                          Injuries
+                        </h4>
+                        {mode !== "view" && (
+                          <button
+                            type="button"
+                            onClick={addInjury}
+                            disabled={mode === "edit" && !canEdit(current)}
+                            className={`text-sm px-3 py-1.5 rounded-lg border ${
+                              mode === "edit" && !canEdit(current)
+                                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                : "bg-white hover:bg-gray-50"
+                            }`}
+                          >
+                            + Add injury
+                          </button>
+                        )}
+                      </header>
+
+                      <div className="p-4 space-y-4">
+                        {model.injuries && model.injuries.length > 0 ? (
+                          model.injuries.map((inj, idx) => {
+                            const readOnly =
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current));
+                            return (
+                              <div
+                                key={idx}
+                                className="rounded-lg border p-4 bg-white shadow-sm"
+                              >
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="font-medium text-gray-800">
+                                    Injury #{idx + 1}
+                                  </div>
+                                  {mode !== "view" && (
+                                    <button
+                                      type="button"
+                                      onClick={() => removeInjury(idx)}
+                                      disabled={readOnly}
+                                      className={`text-sm px-3 py-1.5 rounded-lg border ${
+                                        readOnly
+                                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                          : "bg-white hover:bg-gray-50"
+                                      }`}
+                                    >
+                                      Remove
+                                    </button>
+                                  )}
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  {/* Site of injury */}
+                                  <div>
+                                    <Label>Site of injury</Label>
+                                    <SmartSelect
+                                      name={`site_of_injury_${idx}`}
+                                      value={inj.site_of_injury}
+                                      onChange={(_, v) =>
+                                        updateInjury(idx, "site_of_injury", v)
+                                      }
+                                      options={INJURY_SITE_OPTIONS}
+                                      disabled={readOnly}
+                                    />
+                                  </div>
+
+                                  {/* Type of injury */}
+                                  <div>
+                                    <Label>Type of injury</Label>
+                                    <SmartSelect
+                                      name={`type_of_injury_${idx}`}
+                                      value={inj.type_of_injury}
+                                      onChange={(_, v) =>
+                                        updateInjury(idx, "type_of_injury", v)
+                                      }
+                                      options={INJURY_TYPE_OPTIONS}
+                                      disabled={readOnly}
+                                    />
+                                  </div>
+
+                                  {/* Side */}
+                                  <div>
+                                    <Label>Side</Label>
+                                    <SmartSelect
+                                      name={`side_${idx}`}
+                                      value={inj.side}
+                                      onChange={(_, v) =>
+                                        updateInjury(idx, "side", v)
+                                      }
+                                      options={SIDE_OPTIONS}
+                                      disabled={readOnly}
+                                    />
+                                  </div>
+
+                                  {/* Investigation Done */}
+                                  <div>
+                                    <Label>Investigation Done</Label>
+                                    <input
+                                      type="text"
+                                      name={`investigation_done_${idx}`}
+                                      value={inj.investigation_done || ""}
+                                      onChange={(e) =>
+                                        updateInjury(
+                                          idx,
+                                          "investigation_done",
+                                          e.target.value
+                                        )
+                                      }
+                                      disabled={readOnly}
+                                      placeholder="e.g., X-ray, CT, Ultrasound"
+                                      className={`mt-1 block w-full p-2 border border-gray-300 rounded ${
+                                        readOnly ? "bg-gray-100" : "bg-white"
+                                      }`}
+                                    />
+                                  </div>
+
+                                  {/* Severity (ML) */}
+                                  <div className="md:col-span-2">
+                                    <Label>Severity</Label>
+                                    <div className="mt-1 text-sm">
+                                      <span className="inline-flex items-center rounded-full px-3 py-1 border bg-gray-50 text-gray-700">
+                                        {inj.severity
+                                          ? inj.severity
+                                          : SEVERITY_LABEL}
+                                      </span>
+                                      <span className="ml-2 text-xs text-gray-500">
+                                        Auto-populated by ML based on site &
+                                        type.
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <div className="text-sm text-gray-500">
+                            No injuries added yet. Click <b>“Add injury”</b> to
+                            include one or more.
+                          </div>
+                        )}
                       </div>
                     </section>
 
