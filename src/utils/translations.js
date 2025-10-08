@@ -34,6 +34,8 @@ const translations = {
     currentlyOnline: "Currently Online",
     
     // Login & Auth
+    welcomeBack: "Welcome Back",
+    signInToContinue: "Sign in to your account to continue",
     login: "Login",
     email: "Email",
     password: "Password",
@@ -357,6 +359,8 @@ const translations = {
     currentlyOnline: "දැනට සබැඳි",
     
     // Login & Auth
+    welcomeBack: "නැවත සාදරයෙන් පිළිගනිමු",
+    signInToContinue: "ඉදිරියට යාමට ඔබේ ගිණුමට ඇතුල් වන්න",
     login: "ඇතුල් වන්න",
     email: "විද්‍යුත් තැපැල්",
     password: "මුරපදය",
@@ -735,7 +739,7 @@ const translations = {
     
     // Login & Auth
     welcomeBack: "மீண்டும் வருக",
-    signInToContinue: "உங்கள் கணக்கில் தொடர உள்நுழைக",
+    signInToContinue: "தொடர உங்கள் கணக்கில் உள்நுழையுங்கள்",
     login: "உள்நுழைக",
     email: "மின்னஞ்சல்",
     password: "கடவுச்சொல்",
