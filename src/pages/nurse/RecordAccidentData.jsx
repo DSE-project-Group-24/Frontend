@@ -918,6 +918,19 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
+                          <Label>Approximate speed</Label>
+                          <SmartSelect
+                            name="approximate_speed"
+                            value={model.approximate_speed}
+                            onChange={updateModel}
+                            options={OPTIONS.approximate_speed}
+                            disabled={
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current))
+                            }
+                          />
+                        </div>
+                        <div>
                           <Label>Passenger type</Label>
                           <SmartSelect
                             name="passenger_type"
@@ -993,19 +1006,7 @@ const AccidentRecordSystem = () => {
                             }
                           />
                         </div>
-                        <div>
-                          <Label>Approximate speed</Label>
-                          <SmartSelect
-                            name="approximate_speed"
-                            value={model.approximate_speed}
-                            onChange={updateModel}
-                            options={OPTIONS.approximate_speed}
-                            disabled={
-                              mode === "view" ||
-                              (mode === "edit" && !canEdit(current))
-                            }
-                          />
-                        </div>
+
                         <div>
                           <Label>Visibility</Label>
                           <SmartSelect
