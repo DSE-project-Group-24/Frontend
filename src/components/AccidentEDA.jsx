@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import API from '../utils/api';
+import { t } from '../utils/translations';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const fetchAnalyticsData = async (filters = {}) => {
   try {
@@ -373,7 +375,7 @@ const AccidentEDA = () => {
                 <svg className="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707L9 19.414V15a1 1 0 00-.293-.707L2.293 7.707A1 1 0 012 7V4z" />
                 </svg>
-                Filters
+                {t('filters')}
               </h2>
               <button
                 onClick={() => setSidebarOpen(false)}
@@ -389,10 +391,10 @@ const AccidentEDA = () => {
             <div className="space-y-6">
               {/* Date Range Filters */}
               <div className="filter-group">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">📅 Date Range</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">📅 {t('dateRange')}</label>
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs text-gray-600 mb-1">Start Date</label>
+                    <label className="block text-xs text-gray-600 mb-1">{t('startDate')}</label>
                     <input
                       type="date"
                       value={filters.start_date}
@@ -401,7 +403,7 @@ const AccidentEDA = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-600 mb-1">End Date</label>
+                    <label className="block text-xs text-gray-600 mb-1">{t('endDate')}</label>
                     <input
                       type="date"
                       value={filters.end_date}
@@ -414,15 +416,15 @@ const AccidentEDA = () => {
 
               {/* Gender Filter */}
               <div className="filter-group">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">⚧ Gender</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">⚧ {t('gender')}</label>
                 <select
                   value={filters.gender}
                   onChange={(e) => handleFilterChange('gender', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">All Genders</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
+                  <option value="">{t('allGenders')}</option>
+                  <option value="Male">{t('male')}</option>
+                  <option value="Female">{t('female')}</option>
                   {/* Add any additional genders from backend if available */}
                   {filterOptions.genders?.filter(gender => 
                     !['Male', 'Female'].includes(gender)
@@ -434,10 +436,10 @@ const AccidentEDA = () => {
 
               {/* Age Range Filter */}
               <div className="filter-group">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">👥 Age Range</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">👥 {t('ageRange')}</label>
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs text-gray-600 mb-1">Minimum Age</label>
+                    <label className="block text-xs text-gray-600 mb-1">{t('minimumAge')}</label>
                     <input
                       type="number"
                       min="0"
@@ -445,11 +447,11 @@ const AccidentEDA = () => {
                       value={filters.age_min}
                       onChange={(e) => handleFilterChange('age_min', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Min age"
+                      placeholder={t('minAge')}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-600 mb-1">Maximum Age</label>
+                    <label className="block text-xs text-gray-600 mb-1">{t('maximumAge')}</label>
                     <input
                       type="number"
                       min="0"
@@ -457,7 +459,7 @@ const AccidentEDA = () => {
                       value={filters.age_max}
                       onChange={(e) => handleFilterChange('age_max', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Max age"
+                      placeholder={t('maxAge')}
                     />
                   </div>
                 </div>
@@ -465,17 +467,17 @@ const AccidentEDA = () => {
 
               {/* Ethnicity Filter */}
               <div className="filter-group">
-                <label className="block text-sm font-semibold text-gray-700 mb-3">🌍 Ethnicity</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">🌍 {t('ethnicity')}</label>
                 <select
                   value={filters.ethnicity}
                   onChange={(e) => handleFilterChange('ethnicity', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">All Ethnicities</option>
-                  <option value="Tamil">Tamil</option>
-                  <option value="Sinhalese">Sinhalese</option>
-                  <option value="Muslim">Muslim</option>
-                  <option value="Moor">Moor</option>
+                  <option value="">{t('allEthnicities')}</option>
+                  <option value="Tamil">{t('tamil')}</option>
+                  <option value="Sinhalese">{t('sinhalese')}</option>
+                  <option value="Muslim">{t('muslim')}</option>
+                  <option value="Moor">{t('moor')}</option>
                   {/* Add any additional ethnicities from backend if available */}
                   {filterOptions.ethnicities?.filter(ethnicity => 
                     !['Sinhalese', 'Tamil', 'Muslim', 'Moor'].includes(ethnicity)
@@ -501,14 +503,14 @@ const AccidentEDA = () => {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Applying...
+                    {t('applying')}
                   </>
                 ) : (
                   <>
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586a1 1 0 01-.293.707L9 19.414V15a1 1 0 00-.293-.707L2.293 7.707A1 1 0 012 7V4z" />
                     </svg>
-                    Apply Filters
+                    {t('applyFilters')}
                   </>
                 )}
               </button>
@@ -520,7 +522,7 @@ const AccidentEDA = () => {
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
-                Clear All
+                {t('clearFilters')}
               </button>
             </div>
 
@@ -703,7 +705,7 @@ const AccidentEDA = () => {
             'from-blue-500 to-indigo-500'
           }`} style={{ width: '85%' }}></div>
         </div>
-        <p className="text-xs text-gray-400">Updated in real-time</p>
+        <p className="text-xs text-gray-400">{t('realTimeAnalytics')}</p>
       </div>
     </div>
   );
@@ -1468,7 +1470,7 @@ const AccidentEDA = () => {
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span>Last Updated</span>
+                  <span>{t('lastUpdated')}</span>
                 </div>
                 <div className="text-sm font-medium text-gray-700">
                   {new Date(analyticsData.generated_at).toLocaleDateString('en-US', { 
@@ -1590,21 +1592,21 @@ const AccidentEDA = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Monthly Trends - Line Chart */}
           <div className="lg:col-span-8">
-            <ChartContainer title="📅 Monthly Accident Trends" size="default">
+            <ChartContainer title={`📅 ${t('monthlyAccidentTrends')}`} size="default">
               <LineChart data={monthlyData} colorScheme="blue" />
             </ChartContainer>
           </div>
 
           {/* Day of Week - Donut Chart */}
           <div className="lg:col-span-4">
-            <ChartContainer title="📊 Weekly Pattern" size="default">
+            <ChartContainer title={`📊 ${t('weeklyPattern')}`} size="default">
               <DonutChart data={dailyData} colorScheme="mixed" />
             </ChartContainer>
           </div>
 
           {/* Hourly Distribution - Full Width */}
           <div className="lg:col-span-12">
-            <ChartContainer title="🕒 24-Hour Accident Pattern" size="default">
+            <ChartContainer title={`🕒 ${t('hourAccidentPattern')}`} size="default">
               <HorizontalBarChart data={accidentChars.hourlyDistribution} colorScheme="orange" />
             </ChartContainer>
           </div>
@@ -1620,9 +1622,9 @@ const AccidentEDA = () => {
                 </svg>
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-red-700 mb-1">Peak Month</h4>
+                <h4 className="text-sm font-semibold text-red-700 mb-1">{t('peakMonth')}</h4>
                 <p className="text-xl font-bold text-red-800">{getTopEntry(monthlyData)[0]}</p>
-                <p className="text-sm text-red-600">{getTopEntry(monthlyData)[1]} incidents</p>
+                <p className="text-sm text-red-600">{getTopEntry(monthlyData)[1]} {t('incidents')}</p>
               </div>
             </div>
           </div>
@@ -1635,9 +1637,9 @@ const AccidentEDA = () => {
                 </svg>
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-orange-700 mb-1">Peak Day</h4>
+                <h4 className="text-sm font-semibold text-orange-700 mb-1">{t('peakDay')}</h4>
                 <p className="text-xl font-bold text-orange-800">{getTopEntry(dailyData)[0]}</p>
-                <p className="text-sm text-orange-600">{getTopEntry(dailyData)[1]} incidents</p>
+                <p className="text-sm text-orange-600">{getTopEntry(dailyData)[1]} {t('incidents')}</p>
               </div>
             </div>
           </div>
@@ -1650,7 +1652,7 @@ const AccidentEDA = () => {
                 </svg>
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-blue-700 mb-1">Peak Hour</h4>
+                <h4 className="text-sm font-semibold text-blue-700 mb-1">{t('peakHour')}</h4>
                 <p className="text-xl font-bold text-blue-800">
                   {Object.keys(accidentChars.hourlyDistribution).length > 0 
                     ? `${getTopEntry(accidentChars.hourlyDistribution)[0]}:00`
@@ -1659,8 +1661,8 @@ const AccidentEDA = () => {
                 </p>
                 <p className="text-sm text-blue-600">
                   {Object.keys(accidentChars.hourlyDistribution).length > 0 
-                    ? `${getTopEntry(accidentChars.hourlyDistribution)[1]} incidents`
-                    : 'No data'
+                    ? `${getTopEntry(accidentChars.hourlyDistribution)[1]} ${t('incidents')}`
+                    : t('noDataAvailable')
                   }
                 </p>
               </div>
@@ -1672,8 +1674,8 @@ const AccidentEDA = () => {
   };
 
   const tabs = [
-    { id: 'overview', label: 'Overview', component: renderOverview },
-    { id: 'temporal', label: 'Temporal Trends', component: renderTemporalTrends },
+    { id: 'overview', label: t('overview'), component: renderOverview },
+    { id: 'temporal', label: t('temporal'), component: renderTemporalTrends },
   ];
 
   return (
@@ -1738,8 +1740,9 @@ const AccidentEDA = () => {
                 {/* Stats/Export Area */}
                 <div className="flex items-center space-x-3">
                   <div className="text-xs text-gray-500">
-                    Real-time Analytics
+                    {t('realTimeAnalytics')}
                   </div>
+                  <LanguageSwitcher />
                 </div>
               </div>
             </div>
@@ -1760,26 +1763,24 @@ const AccidentEDA = () => {
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
-              Advanced Analytics Platform
+              {t('advancedAnalyticsPlatform')}
               <div className="ml-3 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             </div>
             
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-8 leading-tight">
-              Road Accident
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 animate-gradient-x"> Intelligence</span>
+              {t('roadAccidentIntelligence')}
             </h1>
             
             <p className="text-xl md:text-2xl text-gray-600 max-w-5xl mx-auto leading-relaxed mb-8">
-              Comprehensive analysis of road accident data with insights into patterns, demographics, 
-              medical outcomes, and socioeconomic impacts for evidence-based decision making.
+              {t('comprehensiveAnalysisDescription')}
             </p>
 
             {/* Key Statistics Preview */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto mt-12">
               <StatCard
-                title="Total Records"
+                title={t('totalRecords')}
                 value={(analyticsData?.total_records || summaryData?.totalAccidents || 0).toLocaleString()}
-                subtitle="Accident cases analyzed"
+                subtitle={t('accidentCasesAnalyzed')}
                 color="blue"
                 icon={
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1788,7 +1789,7 @@ const AccidentEDA = () => {
                 }
               />
               <StatCard
-                title="Peak Accident Hour"
+                title={t('peakAccidentHour')}
                 value={(() => {
                   const peakHour = summaryData?.peak_accident_hour || analyticsData?.peak_accident_hour;
                   if (peakHour !== undefined && peakHour !== null) {
@@ -1806,9 +1807,9 @@ const AccidentEDA = () => {
                   if (Object.keys(accidentChars.hourlyDistribution).length > 0) {
                     const peakEntry = Object.entries(accidentChars.hourlyDistribution)
                       .sort((a, b) => b[1] - a[1])[0];
-                    return `${peakEntry[1]} accidents`;
+                    return `${peakEntry[1]} ${t('accidents')}`;
                   }
-                  return 'No data available';
+                  return t('noDataAvailable');
                 })()}
                 color="red"
                 icon={
@@ -1818,7 +1819,7 @@ const AccidentEDA = () => {
                 }
               />
               <StatCard
-                title="Most Common Collision"
+                title={t('mostCommonCollision')}
                 value={(() => {
                   const commonCollision = summaryData?.most_common_collision || analyticsData?.most_common_collision;
                   if (commonCollision) {
@@ -1836,9 +1837,9 @@ const AccidentEDA = () => {
                   if (Object.keys(accidentChars.collisionTypes).length > 0) {
                     const topEntry = Object.entries(accidentChars.collisionTypes)
                       .sort((a, b) => b[1] - a[1])[0];
-                    return `${topEntry[1]} cases`;
+                    return `${topEntry[1]} ${t('cases')}`;
                   }
-                  return 'No data available';
+                  return t('noDataAvailable');
                 })()}
                 color="yellow"
                 icon={
@@ -1857,34 +1858,34 @@ const AccidentEDA = () => {
 
         {/* Summary Section */}
         {activeTab === 'overview' && (
-          <ChartContainer title="🔍 Key Insights Summary">
+          <ChartContainer title={`🔍 ${t('keyInsightsSummary')}`}>
             <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-xl shadow-inner">
-              <h4 className="text-2xl font-bold text-gray-800 mb-8 text-center">📊 Major Findings</h4>
+              <h4 className="text-2xl font-bold text-gray-800 mb-8 text-center">📊 {t('majorFindings')}</h4>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-blue-500">
                   <h5 className="text-xl font-bold text-blue-700 mb-4 flex items-center">
                     <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
-                    Vulnerable Groups
+                    {t('vulnerableGroups')}
                   </h5>
                   <ul className="space-y-3 text-gray-700">
                     {Object.keys(demographics.ageGroups).length > 0 && (
                       <li className="flex items-start">
                         <span className="text-blue-500 mr-2">🎯</span>
-                        <span><strong>Age group:</strong> {Object.entries(demographics.ageGroups).sort((a,b) => b[1] - a[1])[0][0]} years (highest risk)</span>
+                        <span><strong>{t('ageGroup')}:</strong> {Object.entries(demographics.ageGroups).sort((a,b) => b[1] - a[1])[0][0]} years ({t('highestRisk')})</span>
                       </li>
                     )}
                     {Object.keys(demographics.genderDist).length > 0 && (
                       <li className="flex items-start">
                         <span className="text-blue-500 mr-2">⚧</span>
-                        <span><strong>Gender:</strong> {Object.entries(demographics.genderDist).sort((a,b) => b[1] - a[1])[0][0]} ({Math.round((Object.entries(demographics.genderDist).sort((a,b) => b[1] - a[1])[0][1] / (analyticsData.total_records || 1)) * 100)}% of cases)</span>
+                        <span><strong>Gender:</strong> {Object.entries(demographics.genderDist).sort((a,b) => b[1] - a[1])[0][0]} ({Math.round((Object.entries(demographics.genderDist).sort((a,b) => b[1] - a[1])[0][1] / (analyticsData.total_records || 1)) * 100)}% {t('ofCases')})</span>
                       </li>
                     )}
                     {Object.keys(demographics.ageGroups).length === 0 && Object.keys(demographics.genderDist).length === 0 && (
                       <li className="text-gray-500 text-center py-4">
                         <div className="bg-gray-100 rounded-lg p-4">
-                          <span>📋 No demographic data available for current filters</span>
+                          <span>📋 {t('noDemographicData')}</span>
                         </div>
                       </li>
                     )}
@@ -1895,26 +1896,26 @@ const AccidentEDA = () => {
                     <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
-                    High-Risk Conditions
+                    {t('highRiskConditions')}
                   </h5>
                   <ul className="space-y-3 text-gray-700">
                     {Object.keys(accidentChars.hourlyDistribution).length > 0 && (
                       <li className="flex items-start">
                         <span className="text-red-500 mr-2">🕒</span>
-                        <span><strong>Peak time:</strong> {Object.entries(accidentChars.hourlyDistribution).sort((a,b) => b[1] - a[1])[0][0]}:00 hours</span>
+                        <span><strong>{t('peakTime')}:</strong> {Object.entries(accidentChars.hourlyDistribution).sort((a,b) => b[1] - a[1])[0][0]}:00 {t('hours')}</span>
                       </li>
                     )}
                     {Object.keys(accidentChars.collisionTypes).length > 0 && (
                       <li className="flex items-start">
                         <span className="text-red-500 mr-2">🚗</span>
-                        <span><strong>Common collision:</strong> {Object.entries(accidentChars.collisionTypes).sort((a,b) => b[1] - a[1])[0][0]}</span>
+                        <span><strong>{t('commonCollision')}:</strong> {Object.entries(accidentChars.collisionTypes).sort((a,b) => b[1] - a[1])[0][0]}</span>
                       </li>
                     )}
            
                     {Object.keys(accidentChars.hourlyDistribution).length === 0 && Object.keys(accidentChars.collisionTypes).length === 0 && Object.keys(accidentChars.roadCategories).length === 0 && (
                       <li className="text-gray-500 text-center py-4">
                         <div className="bg-gray-100 rounded-lg p-4">
-                          <span>📊 No accident condition data available for current filters</span>
+                          <span>📊 {t('noAccidentConditionData')}</span>
                         </div>
                       </li>
                     )}
