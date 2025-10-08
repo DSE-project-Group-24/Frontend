@@ -217,7 +217,7 @@ const GovernmentNav = ({ setIsAuthenticated, setRole }) => {
   const navItems = [
     {
       path: '/government_personnel/dashboard',
-      label: 'Dashboard',
+      label: 'Hospitals',
       icon: <LayoutDashboard size={20} />,
     },
     {
