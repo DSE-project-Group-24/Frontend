@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { t } from '../utils/translations';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const DoctorNav = ({ setIsAuthenticated, setRole }) => {
   const navigate = useNavigate();
@@ -70,7 +72,7 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
   const navItems = [
     {
       path: '/doctor/dashboard',
-      label: 'Dashboard',
+      label: t('dashboard'),
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
@@ -80,7 +82,7 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
     },
     {
       path: '/doctor/view-patient',
-      label: 'View Patient Data',
+      label: t('viewPatientData'),
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A9 9 0 1118.364 4.56M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -89,7 +91,7 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
     },
     {
       path: '/doctor/get-prediction',
-      label: 'Get Prediction',
+      label: t('getPrediction'),
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -117,8 +119,8 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
               </svg>
             </div>
             <div className="hidden xs:block sm:block">
-              <h1 className="text-lg sm:text-xl font-bold text-white">Road Accident Care System</h1>
-              <p className="text-xs sm:text-sm text-blue-200">Doctor Portal</p>
+              <h1 className="text-lg sm:text-xl font-bold text-white">{t('roadAccidentCareSystem')}</h1>
+              <p className="text-xs sm:text-sm text-blue-200">{t('doctorPortal')}</p>
             </div>
           </div>
 
@@ -142,16 +144,17 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
             </div>
           </div>
 
-          {/* Desktop User Info + Logout */}
+          {/* Desktop User Info + Language + Logout */}
           <div className="hidden md:block">
             <div className="ml-4 flex items-center space-x-4">
+              <LanguageSwitcher />
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
                   <div className="w-3 h-3 bg-green-200 rounded-full animate-pulse"></div>
                 </div>
                 <div className="text-sm">
                   <p className="font-medium text-white">{getDoctorEmail()}</p>
-                  <p className="text-blue-200 text-xs">Online</p>
+                  <p className="text-blue-200 text-xs">{t('online')}</p>
                 </div>
               </div>
               <button
@@ -161,7 +164,7 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                <span>Logout</span>
+                <span>{t('logout')}</span>
               </button>
             </div>
           </div>
@@ -226,7 +229,7 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
                 </div>
                 <div className="ml-3 text-sm">
                   <p className="font-medium text-white">{getDoctorEmail()}</p>
-                  <p className="text-xs text-green-300">Currently Online</p>
+                  <p className="text-xs text-green-300">{t('currentlyOnline')}</p>
                 </div>
               </div>
               <button
@@ -243,7 +246,7 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                <span>Logout</span>
+                <span>{t('logout')}</span>
               </button>
             </div>
           </div>

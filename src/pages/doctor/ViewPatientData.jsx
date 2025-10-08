@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import DoctorNav from "../../navbars/DoctorNav";
 import API from "../../utils/api"; // your axios instance
 import Footer from "../../components/Footer";
+import { t } from "../../utils/translations";
 
 const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
   const [searchId, setSearchId] = useState("");
@@ -21,7 +22,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
     setAccidents([]);
     setTransferProbabilities({});
     if (!searchId.trim()) {
-      setError("Please enter a Patient ID, NIC, or Full Name");
+      setError(t('pleaseEnterSearchTerm'));
       return;
     }
     setLoading(true);
@@ -52,7 +53,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
       });
       
       if (!match) {
-        setError("No patient found with that Patient ID, NIC, or Full Name.");
+        setError(t('noPatientFound'));
         return;
       }
       setFiltered(match);
@@ -69,7 +70,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
       }
     } catch (err) {
       console.error(err);
-      setError("Error fetching data");
+      setError(t('error') + ": " + (err.message || "Unknown error"));
     } finally {
       setLoading(false);
     }
@@ -380,20 +381,20 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
       <DoctorNav setIsAuthenticated={setIsAuthenticated} setRole={setRole} />
       <div className="container mx-auto p-6 min-h-screen">
         <h1 className="text-3xl font-bold text-blue-700 mb-6">
-          View Patient Data
+          {t('viewPatientData')}
         </h1>
 
         {/* Search box */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
           <label className="block mb-2 text-gray-700 font-medium">
-            Search Patient:
+            {t('searchPatient')}:
           </label>
           <div className="flex">
             <input
               type="text"
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
-              placeholder="Enter Patient ID, NIC, or Full Name"
+              placeholder={t('enterPatientIdNicOrName')}
               className="flex-1 border border-gray-300 rounded-l px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <button
@@ -401,11 +402,11 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
               className="bg-blue-600 text-white px-4 py-2 rounded-r hover:bg-blue-700"
               disabled={loading}
             >
-              {loading ? "Searching..." : "Search"}
+              {loading ? t('searching') : t('search')}
             </button>
           </div>
           <p className="text-sm text-gray-500 mt-1">
-            You can search by Patient ID, NIC, or Full Name
+            {t('searchByIdNicName')}
           </p>
           {error && <p className="text-red-500 mt-2">{error}</p>}
         </div>
@@ -413,28 +414,28 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
         {/* Patient info */}
         {filtered && (
           <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 className="text-xl font-semibold mb-4">Patient Details</h2>
+            <h2 className="text-xl font-semibold mb-4">{t('patientDetails')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-              <p><span className="font-medium">Full Name:</span> {filtered["Full Name"]}</p>
-              <p><span className="font-medium">Contact Number:</span> {filtered["Contact Number"]}</p>
-              <p><span className="font-medium">Date of Birth:</span> {filtered["Date of Birth"]} 
+              <p><span className="font-medium">{t('fullName')}:</span> {filtered["Full Name"]}</p>
+              <p><span className="font-medium">{t('contactNumber')}:</span> {filtered["Contact Number"]}</p>
+              <p><span className="font-medium">{t('dateOfBirth')}:</span> {filtered["Date of Birth"]} 
                 {filtered["Date of Birth"] && (
-                  <span> (Age: {Math.floor((new Date() - new Date(filtered["Date of Birth"])) / (1000 * 60 * 60 * 24 * 365.25))})</span>
+                  <span> ({t('age')}: {Math.floor((new Date() - new Date(filtered["Date of Birth"])) / (1000 * 60 * 60 * 24 * 365.25))})</span>
                 )}
               </p>
-              <p><span className="font-medium">Ethnicity:</span> {filtered["Ethnicity"]}</p>
-              <p><span className="font-medium">Gender:</span> {filtered["Gender"]}</p>
-              <p><span className="font-medium">Address:</span> {filtered["Address Street"]}</p>
-              <p><span className="font-medium">Life Style:</span> {filtered["Life Style"]}</p>
-              <p><span className="font-medium">Education:</span> {filtered["Education Qualification"]}</p>
-              <p><span className="font-medium">Occupation:</span> {filtered["Occupation"]}</p>
-              <p><span className="font-medium">Family Monthly Income:</span> {filtered["Family Monthly Income"]}</p>
+              <p><span className="font-medium">{t('ethnicity')}:</span> {filtered["Ethnicity"]}</p>
+              <p><span className="font-medium">{t('gender')}:</span> {filtered["Gender"]}</p>
+              <p><span className="font-medium">{t('address')}:</span> {filtered["Address Street"]}</p>
+              <p><span className="font-medium">{t('lifeStyle')}:</span> {filtered["Life Style"]}</p>
+              <p><span className="font-medium">{t('education')}:</span> {filtered["Education Qualification"]}</p>
+              <p><span className="font-medium">{t('occupation')}:</span> {filtered["Occupation"]}</p>
+              <p><span className="font-medium">{t('familyMonthlyIncome')}:</span> {filtered["Family Monthly Income"]}</p>
               <p>
-                <span className="font-medium">Blood Group:</span>{" "}
-                {filtered["Blood Group"] || "Not Recorded"}
+                <span className="font-medium">{t('bloodGroup')}:</span>{" "}
+                {filtered["Blood Group"] || t('notRecorded')}
               </p>
 
-              <p><span className="font-medium">Patient ID:</span> {filtered["patient_id"]}</p>
+              <p><span className="font-medium">{t('patientId')}:</span> {filtered["patient_id"]}</p>
             </div>
           </div>
         )}
