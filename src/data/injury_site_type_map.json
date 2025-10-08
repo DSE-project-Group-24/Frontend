@@ -1,0 +1,117 @@
+{
+  "abdomen": [
+    "abration",
+    "bowel injury",
+    "contusion",
+    "kidney injury",
+    "laceration",
+    "spleen injury"
+  ],
+  "cervical": ["fracture", "spinal cord injury"],
+  "chest injury": [
+    "abration",
+    "contusion",
+    "laceration",
+    "lung injury",
+    "nerve lesion",
+    "pericardial effusion",
+    "pneumothorax"
+  ],
+  "chest rib": ["fracture"],
+  "clavicle": ["dislocation"],
+  "elbow region": [
+    "abration",
+    "contusion",
+    "dislocation",
+    "laceration",
+    "ligament injury"
+  ],
+  "eye injury": ["contusion"],
+  "facial injury": ["abration", "contusion", "fracture", "laceration"],
+  "femur": ["amputation", "fracture", "laceration"],
+  "foot": [
+    "abration",
+    "amputation",
+    "contusion",
+    "laceration",
+    "ligament injury",
+    "nerve lesion"
+  ],
+  "foot metacarpals": ["fracture"],
+  "foot metatarsals": ["fracture"],
+  "foot phalanges": ["fracture"],
+  "foot tarsals": ["fracture"],
+  "forearm": [
+    "abration",
+    "amputation",
+    "contusion",
+    "laceration",
+    "ligament injury",
+    "nerve lesion"
+  ],
+  "forearm radius": ["fracture"],
+  "forearm ulna": ["fracture"],
+  "forehead": ["abration", "contusion"],
+  "hand": [
+    "abration",
+    "amputation",
+    "contusion",
+    "laceration",
+    "ligament injury",
+    "nerve lesion"
+  ],
+  "hand metacarpals": ["fracture"],
+  "hand phalanges": ["fracture"],
+  "head injury": ["abration", "contusion", "ich", "laceration", "sdh"],
+  "humerus head": ["fracture"],
+  "humerus region": [
+    "abration",
+    "amputation",
+    "fracture",
+    "laceration",
+    "ligament injury",
+    "nerve lesion"
+  ],
+  "knee": [
+    "abration",
+    "contusion",
+    "laceration",
+    "ligament injury",
+    "nerve lesion"
+  ],
+  "knee patella": ["fracture"],
+  "leg": [
+    "abration",
+    "amputation",
+    "contusion",
+    "laceration",
+    "ligament injury",
+    "nerve lesion"
+  ],
+  "leg fibula ": ["fracture"],
+  "leg tibia": ["fracture"],
+  "lumbar": ["fracture", "spinal cord injury"],
+  "pelvis": [
+    "abration",
+    "contusion",
+    "dislocation",
+    "laceration",
+    "ligament injury"
+  ],
+  "pelvis ilium": ["fracture"],
+  "pelvis ramous": ["fracture"],
+  "sacrum": ["fracture", "nerve lesion", "spinal cord injury"],
+  "shoulder clavicle": ["fracture"],
+  "shoulder injury": ["abration", "contusion", "dislocation", "laceration"],
+  "thigh": [
+    "abration",
+    "amputation",
+    "contusion",
+    "laceration",
+    "ligament injury",
+    "nerve lesion"
+  ],
+  "thigh femur": ["amputation", "fracture"],
+  "thigh nof": ["fracture"],
+  "thoracic": ["fracture", "spinal cord injury"]
+}

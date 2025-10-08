@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import API from "../../utils/api";
+import injuryMap from "../../data/injury_site_type_map.json";
 import NurseNav from "../../navbars/NurseNav";
 
 /**
@@ -154,26 +155,8 @@ const OPTIONS = {
 };
 
 /** Injuries — categorical options */
-const INJURY_SITE_OPTIONS = [
-  // TODO: replace with your real categories
-  "Head",
-  "Neck",
-  "Chest",
-  "Abdomen",
-  "Upper Limb",
-  "Lower Limb",
-  "Other",
-];
 
-const INJURY_TYPE_OPTIONS = [
-  // TODO: replace with your real categories
-  "Fracture",
-  "Laceration",
-  "Contusion",
-  "Burn",
-  "Sprain/Strain",
-  "Other",
-];
+const INJURY_SITE_OPTIONS = Object.keys(injuryMap).sort();
 
 const SIDE_OPTIONS = ["Front", "Back", "Left", "Right", "N/A", "Unknown"];
 
@@ -539,20 +522,6 @@ const AccidentRecordSystem = () => {
 
   const startView = (rec) => {
     setCurrent(rec);
-
-    // Normalize injuries coming from backend into the model shape we edit
-    const injuries = Array.isArray(rec.injuries)
-      ? rec.injuries.map((it) => ({
-          injury_no: Number(it.injury_no) || 0,
-          site_of_injury: it.site_of_injury || "",
-          type_of_injury: it.type_of_injury || "",
-          side: it.side || "",
-          investigation_done: it.investigation_done || "",
-          severity: it.severity || "", // display-only; backend/ML overwrites on save
-        }))
-      : [];
-
-    // Map DB record into model fields (best effort)
     setModel((m) => ({
       ...m,
       patient_id: rec.patient_id || m.patient_id || "",
@@ -603,13 +572,19 @@ const AccidentRecordSystem = () => {
       discharge_outcome:
         rec["Discharge Outcome"] || rec.discharge_outcome || "",
       notes: rec.notes || "",
-
-      // ✅ include injuries so the section renders
-      injuries,
+      injuries: Array.isArray(rec.injuries)
+        ? rec.injuries.map((it) => ({
+            injury_no: it.injury_no ?? 0,
+            site_of_injury: it.site_of_injury || "",
+            type_of_injury: it.type_of_injury || "",
+            side: it.side || "",
+            investigation_done: it.investigation_done || "",
+            severity: it.severity || "",
+          }))
+        : [],
     }));
-
     setCompleted(!!rec.Completed);
-    setMode("view"); // renders read-only based on rules
+    setMode("view");
   };
 
   const startEdit = (rec) => {
@@ -647,6 +622,21 @@ const AccidentRecordSystem = () => {
     setModel((m) => {
       const copy = [...(m.injuries || [])];
       copy[idx] = { ...copy[idx], [field]: value };
+      return { ...m, injuries: copy };
+    });
+  };
+
+  // When site changes, clear/validate type
+  const updateInjurySite = (idx, newSite) => {
+    setModel((m) => {
+      const copy = [...(m.injuries || [])];
+      const allowed = injuryMap?.[newSite] || [];
+      const currentType = copy[idx]?.type_of_injury || "";
+      copy[idx] = {
+        ...copy[idx],
+        site_of_injury: newSite,
+        type_of_injury: allowed.includes(currentType) ? currentType : "",
+      };
       return { ...m, injuries: copy };
     });
   };
@@ -1344,6 +1334,16 @@ const AccidentRecordSystem = () => {
                             const readOnly =
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current));
+                            const typesForSite = (
+                              injuryMap?.[inj.site_of_injury] || []
+                            )
+                              .slice()
+                              .sort();
+                            const disableType =
+                              readOnly ||
+                              !inj.site_of_injury ||
+                              typesForSite.length === 0;
+
                             return (
                               <div
                                 key={idx}
@@ -1377,14 +1377,14 @@ const AccidentRecordSystem = () => {
                                       name={`site_of_injury_${idx}`}
                                       value={inj.site_of_injury}
                                       onChange={(_, v) =>
-                                        updateInjury(idx, "site_of_injury", v)
+                                        updateInjurySite(idx, v)
                                       }
                                       options={INJURY_SITE_OPTIONS}
                                       disabled={readOnly}
                                     />
                                   </div>
 
-                                  {/* Type of injury */}
+                                  {/* Type of injury (depends on site) */}
                                   <div>
                                     <Label>Type of injury</Label>
                                     <SmartSelect
@@ -1393,8 +1393,8 @@ const AccidentRecordSystem = () => {
                                       onChange={(_, v) =>
                                         updateInjury(idx, "type_of_injury", v)
                                       }
-                                      options={INJURY_TYPE_OPTIONS}
-                                      disabled={readOnly}
+                                      options={typesForSite}
+                                      disabled={disableType}
                                     />
                                   </div>
 
@@ -1427,7 +1427,7 @@ const AccidentRecordSystem = () => {
                                         )
                                       }
                                       disabled={readOnly}
-                                      placeholder="e.g., X-ray, CT, Ultrasound"
+                                      placeholder="Leave blank if none"
                                       className={`mt-1 block w-full p-2 border border-gray-300 rounded ${
                                         readOnly ? "bg-gray-100" : "bg-white"
                                       }`}
