@@ -1050,7 +1050,7 @@ const AccidentEDA = () => {
               </div>
             ) : (
               <div className="text-sm text-gray-600">
-                <div className="font-semibold">Total Cases</div>
+                <div className="font-semibold">{t('totalCases')}</div>
                 <div className="text-lg font-bold text-gray-800">{total.toLocaleString()}</div>
               </div>
             )}
@@ -1127,8 +1127,8 @@ const AccidentEDA = () => {
                   {isHovered && (
                     <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-xl z-20 whitespace-nowrap">
                       <div className="font-semibold">{key}</div>
-                      <div className="text-blue-300">{value.toLocaleString()} cases</div>
-                      <div className="text-gray-300">{percentage}% of total</div>
+                      <div className="text-blue-300">{value.toLocaleString()} {t('cases')}</div>
+                      <div className="text-gray-300">{percentage}% {t('ofTotal')}</div>
                       <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
                     </div>
                   )}
@@ -1219,12 +1219,12 @@ const AccidentEDA = () => {
                   {points[hoveredPoint].value.toLocaleString()} accidents
                 </div>
                 <div className="text-xs opacity-90">
-                  {((points[hoveredPoint].value / total) * 100).toFixed(1)}% of yearly total
+                  {((points[hoveredPoint].value / total) * 100).toFixed(1)}% {t('ofYearlyTotal')}
                 </div>
               </div>
             ) : (
               <div className="bg-white/90 backdrop-blur-md px-3 py-1 rounded-lg shadow-md text-sm text-gray-600">
-                Yearly Total: {total.toLocaleString()} accidents
+                {t('yearlyTotal')}: {total.toLocaleString()} {t('accidents')}
               </div>
             )}
           </div>
@@ -1442,7 +1442,7 @@ const AccidentEDA = () => {
                 <div>
                   <div className="flex items-center space-x-2">
                     <span className="text-sm font-semibold text-gray-600 uppercase tracking-wide">
-                      {filters.start_date || filters.end_date ? 'Filtered Period' : 'Dataset Coverage'}
+                      {filters.start_date || filters.end_date ? t('filteredPeriod') : t('datasetCoverage')}
                     </span>
                     <div className={`w-2 h-2 rounded-full animate-pulse ${
                       filters.start_date || filters.end_date ? 'bg-orange-500' : 'bg-green-500'
@@ -1498,11 +1498,11 @@ const AccidentEDA = () => {
                   <span>{t('lastUpdated')}</span>
                 </div>
                 <div className="text-sm font-medium text-gray-700">
-                  {new Date(analyticsData.generated_at).toLocaleDateString('en-US', { 
+                  {new Date(analyticsData.generated_at).toLocaleDateString(getCurrentLanguage() === 'si' ? 'si-LK' : getCurrentLanguage() === 'ta' ? 'ta-LK' : 'en-US', { 
                     month: 'short', 
                     day: 'numeric', 
                     year: 'numeric' 
-                  })} • {new Date(analyticsData.generated_at).toLocaleTimeString('en-US', { 
+                  })} • {new Date(analyticsData.generated_at).toLocaleTimeString(getCurrentLanguage() === 'si' ? 'si-LK' : getCurrentLanguage() === 'ta' ? 'ta-LK' : 'en-US', { 
                     hour: '2-digit', 
                     minute: '2-digit',
                     hour12: true 
@@ -1528,8 +1528,8 @@ const AccidentEDA = () => {
                   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                   const years = Math.floor(diffDays / 365);
                   const months = Math.floor((diffDays % 365) / 30);
-                  const periodType = filters.start_date || filters.end_date ? 'filtered period' : 'analysis period';
-                  return `${years > 0 ? `${years}y ` : ''}${months > 0 ? `${months}m` : `${diffDays}d`} ${periodType}`;
+                  const periodType = filters.start_date || filters.end_date ? t('filteredPeriod') : t('analysisPeriod');
+                  return `${years > 0 ? `${years}y ` : ''}${months > 0 ? `${months}m` : `${diffDays}d`} ${periodType.toLowerCase()}`;
                 })()}
               </div>
             </div>

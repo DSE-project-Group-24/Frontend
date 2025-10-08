@@ -59,6 +59,8 @@ export const educationLevelTranslations = {
 // General analytics translations
 export const analyticsTranslations = {
   'Live': () => t('live'),
+  'Total Cases': () => t('totalCases'),
+  'Total': () => t('total'),
   'years': () => t('years'),
   'highest risk': () => t('highestRisk'),
   'of cases': () => t('ofCases'),
@@ -211,30 +213,35 @@ export const processBackendChartData = (rawData) => {
 
 // New function to handle raw data values directly (for your use case)
 export const translateDataValue = (value) => {
-  if (!value || typeof value !== 'string') return value;
-  
-  // Try to translate the value using all available categories
-  const allTranslations = {
-    ...medicalOutcomeTranslations,
-    ...ageGroupTranslations,
-    ...collisionTypeTranslations,
-    ...genderTranslations,
-    ...ethnicityTranslations,
-    ...educationLevelTranslations,
-    ...analyticsTranslations,
-  };
-  
-  // Clean the value (remove percentages and counts)
-  const cleanValue = value.split('(')[0].trim();
-  
-  if (allTranslations[cleanValue]) {
-    const translatedValue = allTranslations[cleanValue]();
-    // Preserve percentage and count information
-    const extraInfo = value.split('(')[1];
-    return extraInfo ? `${translatedValue} (${extraInfo}` : translatedValue;
+  try {
+    if (!value || typeof value !== 'string') return value;
+    
+    // Try to translate the value using all available categories
+    const allTranslations = {
+      ...medicalOutcomeTranslations,
+      ...ageGroupTranslations,
+      ...collisionTypeTranslations,
+      ...genderTranslations,
+      ...ethnicityTranslations,
+      ...educationLevelTranslations,
+      ...analyticsTranslations,
+    };
+    
+    // Clean the value (remove percentages and counts)
+    const cleanValue = value.split('(')[0].trim();
+    
+    if (allTranslations[cleanValue]) {
+      const translatedValue = allTranslations[cleanValue]();
+      // Preserve percentage and count information
+      const extraInfo = value.split('(')[1];
+      return extraInfo ? `${translatedValue} (${extraInfo}` : translatedValue;
+    }
+    
+    return value;
+  } catch (error) {
+    console.warn('Translation error for value:', value, error);
+    return value;
   }
-  
-  return value;
 };
 
 // Function to translate chart data arrays

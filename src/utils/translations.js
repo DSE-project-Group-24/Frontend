@@ -637,7 +637,7 @@ const translations = {
     roadAccidentCareSystem: "මාර්ග අනතුරු සත්කාර පද්ධතිය",
     emergencyCareExcellence: "හදිසි සත්කාර උත්කර්ෂතාව",
     comprehensiveEmergencyManagement: "රෝහල්, රජයේ ආයතන සහ වෛද්‍ය වෘත්තිකයන් සම්බන්ධ කරමින් වැඩිදියුණු කළ අනතුරු ප්‍රතිචාර සහ රෝගී සත්කාර සම්බන්ධීකරණය සඳහා විස්තීර්ණ හදිසි කළමනාකරණ වේදිකාව.",
-    emergencyHotline: "හදිසි හොට්ලයින්",
+    emergencyHotline: "හදිසි දුරකථන අංකය",
     systemStatus: "පද්ධති තත්ත්වය",
     allSystemsOperational: "සියලුම පද්ධති ක්‍රියාත්මකයි",
     lastUpdated: "අවසන් යාවත්කාලීනය",
