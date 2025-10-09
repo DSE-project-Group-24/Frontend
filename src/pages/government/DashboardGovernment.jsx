@@ -1,24 +1,25 @@
-// // // import React from 'react';
-// // // import GovernmentNav from '../../navbars/GovernmentNav';
-// // // import AccidentEDA_Gov from '../../components/AccidentEDA_Gov';
+// import React from 'react';
+// import GovernmentNav from '../../navbars/GovernmentNav';
+// import AccidentEDA_Gov from '../../components/AccidentEDA_Gov';
 
-// // // const DashboardGovernment = ({ setIsAuthenticated, setRole }) => {
-// // //   return (
-// // //     <div className="min-h-screen bg-gray-100">
-// // //       <GovernmentNav setIsAuthenticated={setIsAuthenticated} setRole={setRole} />
-// // //       <div className="container mx-auto p-6">
-// // //         {/* <AccidentEDA_Gov /> */}
-// // //       </div>
-// // //     </div>
-// // //   );
-// // // };
+// const DashboardGovernment = ({ setIsAuthenticated, setRole }) => {
+//   return (
+//     <div className="min-h-screen bg-gray-100">
+//       <GovernmentNav setIsAuthenticated={setIsAuthenticated} setRole={setRole} />
+//       <div className="container mx-auto p-6">
+//         <AccidentEDA_Gov />
+//       </div>
+//     </div>
+//   );
+// };
 
-// // // export default DashboardGovernment;
+// export default DashboardGovernment;
 
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Phone, Building2, Filter, X, Hospital, Activity, Users, TrendingUp } from 'lucide-react';
 import GovernmentNav from '../../navbars/GovernmentNav';
 import HospitalsMap from '../../components/HospitalsMap';
+import AccidentEDA_Gov from '../../components/AccidentEDA_Gov';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -415,6 +416,7 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Geographic Distribution</h2>
           <HospitalsMap selectedHospital={selectedHospital} allHospitals={allHospitals} />
         </div>
+      
       </div>
     </div>
   );

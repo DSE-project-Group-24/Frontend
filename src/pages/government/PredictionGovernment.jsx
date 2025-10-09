@@ -1082,6 +1082,7 @@ import { Calendar, TrendingUp, TrendingDown, AlertTriangle, Clock, Filter, Activ
 import axios from 'axios';
 import GovernmentNav from '../../navbars/GovernmentNav';
 
+
 const API = axios.create({
   baseURL: "http://127.0.0.1:8000/",
 });
@@ -2066,6 +2067,7 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
           </div>
         </div>
       </div>
+     
     </div>
   );
 };

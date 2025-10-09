@@ -18,6 +18,8 @@ import AddStaff from './pages/admin/AddStaff';
 import DashboardGovernment from './pages/government/DashboardGovernment';
 import PredictionGovernment from './pages/government/PredictionGovernment';
 import ReportsGovernment from './pages/government/ReportsGovernment';
+import Guide from './pages/government/Guide';
+import RecentAccident from './pages/government/RecentAccident';
 
 function App() {
   // Initialize state from localStorage to maintain auth state on refresh
@@ -159,6 +161,22 @@ function App() {
                 <Navigate to="/" />
             } 
           /> 
+          <Route 
+            path="/government_personnel/guide" 
+            element={
+              isAuthenticated && role === 'government_personnel' ? 
+                <Guide setIsAuthenticated={setIsAuthenticated} setRole={setRole} /> : 
+                <Navigate to="/" />
+            } 
+          /> 
+          <Route 
+            path="/government_personnel/recent-accidents" 
+            element={
+              isAuthenticated && role === 'government_personnel' ? 
+                <RecentAccident setIsAuthenticated={setIsAuthenticated} setRole={setRole} /> : 
+                <Navigate to="/" />
+            } 
+          />
         </Routes>
       </div>
     </Router>
