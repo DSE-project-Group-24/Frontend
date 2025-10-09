@@ -163,10 +163,20 @@ const SIDE_OPTIONS = ["Front", "Back", "Left", "Right", "N/A", "Unknown"];
 // Severity is auto from ML (display only)
 const SEVERITY_LABEL = "Auto (from ML when saved)";
 
+/** Treatments — categorical options (placeholder; replace with your list) */
+const TREATMENT_TYPE_OPTIONS = [
+  "Medication",
+  "Surgery",
+  "Plaster/Immobilization",
+  "Physiotherapy",
+  "Observation",
+  "Other",
+];
+
 /** Base (snake_case) fields sent to backend models */
 const EMPTY_MODEL = {
   patient_id: "",
-  incident_at_date: "",
+  incident_at_date: new Date().toISOString().split("T")[0], // yyyy-mm-dd
   time_of_collision: "",
   mode_of_traveling: "",
   visibility: "",
@@ -198,6 +208,7 @@ const EMPTY_MODEL = {
 
   // NEW
   injuries: [],
+  treatments: [], // <-- added
 };
 
 const StatusBadge = ({ completed }) => (
@@ -409,6 +420,7 @@ const val = (obj, ...keys) => {
 
 const AccidentRecordSystem = () => {
   const me = useAuth();
+  const currentHospitalId = window.localStorage.getItem("hospital_id") || null;
 
   // ---- Patient search (kept from your working code) ----
   const [patients, setPatients] = useState([]);
@@ -582,6 +594,18 @@ const AccidentRecordSystem = () => {
             severity: it.severity || "",
           }))
         : [],
+      // NEW: bring treatments in if present
+      treatments: Array.isArray(rec.treatments)
+        ? rec.treatments.map((t) => ({
+            treatment_no: t.treatment_no ?? 0,
+            treatment_type: t.treatment_type || "",
+            description: t.description || "",
+            hospital_id: t.hospital_id ?? null,
+            ward_number: t.ward_number || "",
+            number_of_days_stay: t.number_of_days_stay || "",
+            reason: t.reason || "",
+          }))
+        : [],
     }));
     setCompleted(!!rec.Completed);
     setMode("view");
@@ -649,6 +673,40 @@ const AccidentRecordSystem = () => {
     });
   };
 
+  // ---- Treatments helpers (NEW) ----
+  const makeEmptyTreatment = () => ({
+    treatment_no: 0, // assigned on save
+    treatment_type: "",
+    description: "",
+    hospital_id: currentHospitalId || null, // set on creation
+    ward_number: "",
+    number_of_days_stay: "",
+    reason: "",
+  });
+
+  const addTreatment = () => {
+    setModel((m) => ({
+      ...m,
+      treatments: [...(m.treatments || []), makeEmptyTreatment()],
+    }));
+  };
+
+  const updateTreatment = (idx, field, value) => {
+    setModel((m) => {
+      const copy = [...(m.treatments || [])];
+      copy[idx] = { ...copy[idx], [field]: value };
+      return { ...m, treatments: copy };
+    });
+  };
+
+  const removeTreatment = (idx) => {
+    setModel((m) => {
+      const copy = [...(m.treatments || [])];
+      copy.splice(idx, 1);
+      return { ...m, treatments: copy };
+    });
+  };
+
   const save = async () => {
     try {
       setSaving(true);
@@ -659,10 +717,19 @@ const AccidentRecordSystem = () => {
         severity: inj.severity, // keep as-is; backend/ML can overwrite later
       }));
 
+      // Treatments: keep original hospital_id; default to current for new ones
+      const numberedTreatments = (model.treatments || []).map((t, i) => ({
+        ...t,
+        treatment_no:
+          t.treatment_no && t.treatment_no > 0 ? t.treatment_no : i + 1,
+        hospital_id: t.hospital_id || currentHospitalId || null,
+      }));
+      console.log("Numbered treatments", numberedTreatments);
       // Build payload (snake_case). Backend maps to DB columns by alias.
       const payload = {
         ...model,
         injuries: numberedInjuries,
+        treatments: numberedTreatments, // NEW
         completed: !!completed,
       };
       console.log("Saving payload", payload);
@@ -898,6 +965,7 @@ const AccidentRecordSystem = () => {
                         ["transport", "Transport"],
                         ["socio", "Socio-economic"],
                         ["injuries", "Injuries"],
+                        ["treatments", "Treatments"], // NEW
                         ["outcome", "Outcome & Notes"],
                       ].map(([id, label]) => (
                         <a
@@ -1457,6 +1525,206 @@ const AccidentRecordSystem = () => {
                           <div className="text-sm text-gray-500">
                             No injuries added yet. Click <b>“Add injury”</b> to
                             include one or more.
+                          </div>
+                        )}
+                      </div>
+                    </section>
+
+                    {/* Treatments (NEW) */}
+                    <section id="treatments" className="rounded-xl border">
+                      <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl flex items-center justify-between">
+                        <h4 className="font-semibold text-gray-800">
+                          Treatments
+                        </h4>
+                        {mode !== "view" && (
+                          <button
+                            type="button"
+                            onClick={addTreatment}
+                            disabled={mode === "edit" && !canEdit(current)}
+                            className={`text-sm px-3 py-1.5 rounded-lg border ${
+                              mode === "edit" && !canEdit(current)
+                                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                : "bg-white hover:bg-gray-50"
+                            }`}
+                          >
+                            + Add treatment
+                          </button>
+                        )}
+                      </header>
+
+                      <div className="p-4 space-y-4">
+                        {model.treatments && model.treatments.length > 0 ? (
+                          model.treatments.map((t, idx) => {
+                            const recordReadOnly =
+                              mode === "view" ||
+                              (mode === "edit" && !canEdit(current));
+                            const createdHospital = t.hospital_id || null;
+                            const foreignHospital =
+                              createdHospital &&
+                              currentHospitalId &&
+                              String(createdHospital) !==
+                                String(currentHospitalId);
+
+                            const readOnly = recordReadOnly || foreignHospital;
+
+                            return (
+                              <div
+                                key={idx}
+                                className="rounded-lg border p-4 bg-white shadow-sm"
+                              >
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="font-medium text-gray-800">
+                                    Treatment #{idx + 1}
+                                    {foreignHospital && (
+                                      <span className="ml-2 text-xs inline-flex items-center px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                                        Read-only (other hospital)
+                                      </span>
+                                    )}
+                                  </div>
+                                  {mode !== "view" && !foreignHospital && (
+                                    <button
+                                      type="button"
+                                      onClick={() => removeTreatment(idx)}
+                                      disabled={readOnly}
+                                      className={`text-sm px-3 py-1.5 rounded-lg border ${
+                                        readOnly
+                                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                          : "bg-white hover:bg-gray-50"
+                                      }`}
+                                    >
+                                      Remove
+                                    </button>
+                                  )}
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div>
+                                    <Label>Treatment type</Label>
+                                    <SmartSelect
+                                      name={`treatment_type_${idx}`}
+                                      value={t.treatment_type}
+                                      onChange={(_, v) =>
+                                        updateTreatment(
+                                          idx,
+                                          "treatment_type",
+                                          v
+                                        )
+                                      }
+                                      options={TREATMENT_TYPE_OPTIONS}
+                                      disabled={readOnly}
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <Label>Ward number</Label>
+                                    <input
+                                      type="text"
+                                      name={`ward_number_${idx}`}
+                                      value={t.ward_number || ""}
+                                      onChange={(e) =>
+                                        updateTreatment(
+                                          idx,
+                                          "ward_number",
+                                          e.target.value
+                                        )
+                                      }
+                                      disabled={readOnly}
+                                      placeholder="e.g., 06B"
+                                      className={`mt-1 block w-full p-2 border border-gray-300 rounded ${
+                                        readOnly ? "bg-gray-100" : "bg-white"
+                                      }`}
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <Label>Number of days stayed</Label>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      name={`number_of_days_stay_${idx}`}
+                                      value={t.number_of_days_stay || ""}
+                                      onChange={(e) =>
+                                        updateTreatment(
+                                          idx,
+                                          "number_of_days_stay",
+                                          e.target.value
+                                        )
+                                      }
+                                      disabled={readOnly}
+                                      placeholder="e.g., 3"
+                                      className={`mt-1 block w-full p-2 border border-gray-300 rounded ${
+                                        readOnly ? "bg-gray-100" : "bg-white"
+                                      }`}
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <Label>Reason (optional)</Label>
+                                    <input
+                                      type="text"
+                                      name={`reason_${idx}`}
+                                      value={t.reason || ""}
+                                      onChange={(e) =>
+                                        updateTreatment(
+                                          idx,
+                                          "reason",
+                                          e.target.value
+                                        )
+                                      }
+                                      disabled={readOnly}
+                                      placeholder="e.g., observation due to …"
+                                      className={`mt-1 block w-full p-2 border border-gray-300 rounded ${
+                                        readOnly ? "bg-gray-100" : "bg-white"
+                                      }`}
+                                    />
+                                  </div>
+
+                                  <div className="md:col-span-2">
+                                    <Label>Description</Label>
+                                    <textarea
+                                      name={`description_${idx}`}
+                                      value={t.description || ""}
+                                      onChange={(e) =>
+                                        updateTreatment(
+                                          idx,
+                                          "description",
+                                          e.target.value
+                                        )
+                                      }
+                                      disabled={readOnly}
+                                      placeholder="Short summary of the treatment performed"
+                                      className={`mt-1 block w-full p-2 border border-gray-300 rounded h-24 ${
+                                        readOnly ? "bg-gray-100" : "bg-white"
+                                      }`}
+                                    />
+                                  </div>
+
+                                  <div className="md:col-span-2">
+                                    <Label>
+                                      Hospital (assigned on creation)
+                                    </Label>
+                                    <div className="mt-1 text-sm">
+                                      <span className="inline-flex items-center rounded-full px-3 py-1 border bg-gray-50 text-gray-700">
+                                        {t.hospital_id ||
+                                          (currentHospitalId != null
+                                            ? "Your hospital"
+                                            : "Error")}
+                                      </span>
+                                      <span className="ml-2 text-xs text-gray-500">
+                                        This value is kept as-is once saved.
+                                        Treatments from other hospitals are
+                                        read-only.
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <div className="text-sm text-gray-500">
+                            No treatments added yet. Click{" "}
+                            <b>“Add treatment”</b> to include one or more.
                           </div>
                         )}
                       </div>
