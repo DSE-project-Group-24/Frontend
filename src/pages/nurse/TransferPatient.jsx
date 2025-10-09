@@ -121,7 +121,7 @@ export default function TransferPatients() {
     (async () => {
       try {
         setLoadingHospitals(true);
-        const r = await API.get("/hospitals");
+        const r = await API.get("/hospital/hospital_list");
         setHospitals(
           (r.data || []).sort((a, b) =>
             (a.name || "").localeCompare(b.name || "")
@@ -159,7 +159,7 @@ export default function TransferPatients() {
     try {
       setSubmitting(true);
       setMessage({ type: "", text: "" });
-      await API.post("/transfers", {
+      await API.post("/transfers/", {
         accident_id: selectedAccident.accident_id,
         to_hospital: toHospital,
       });
