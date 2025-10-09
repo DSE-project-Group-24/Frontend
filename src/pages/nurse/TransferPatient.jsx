@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import NurseNav from "../../navbars/NurseNav";
 import API from "../../utils/api";
 
-/** Small helpers */
 const val = (obj, ...keys) => {
   for (const k of keys)
     if (obj && obj[k] !== undefined && obj[k] !== null) return obj[k];
@@ -34,9 +33,9 @@ const Card = ({ title, right, children }) => (
 );
 
 export default function TransferPatients() {
-  // ---- auth & hospital from localStorage (no backend calls) ----
+  // --- Auth from localStorage ---
   const me = {
-    user_id: window.localStorage.getItem("user_id") || "",
+    id: window.localStorage.getItem("user_id") || "",
     name: window.localStorage.getItem("name") || "",
     role: window.localStorage.getItem("role") || "nurse",
   };
@@ -45,7 +44,7 @@ export default function TransferPatients() {
     name: window.localStorage.getItem("hospital_name") || "",
   };
 
-  // ---- patients (same approach as Accident page) ----
+  // --- Patients ---
   const [patients, setPatients] = useState([]);
   const [loadingPatients, setLoadingPatients] = useState(false);
   const [q, setQ] = useState("");
@@ -89,7 +88,7 @@ export default function TransferPatients() {
 
   const [selectedPatient, setSelectedPatient] = useState(null);
 
-  // ---- accidents for selected patient (reuse your existing API) ----
+  // --- Accident Records ---
   const [accidents, setAccidents] = useState([]);
   const [loadingAccidents, setLoadingAccidents] = useState(false);
 
@@ -115,14 +114,13 @@ export default function TransferPatients() {
     })();
   }, [selectedPatient]);
 
-  // ---- hospitals list (for destination selection) ----
+  // --- Hospitals for destination ---
   const [hospitals, setHospitals] = useState([]);
   const [loadingHospitals, setLoadingHospitals] = useState(false);
   useEffect(() => {
     (async () => {
       try {
         setLoadingHospitals(true);
-        // Expect: GET /hospitals → [{ hospital_id, name }]
         const r = await API.get("/hospitals");
         setHospitals(
           (r.data || []).sort((a, b) =>
@@ -137,9 +135,9 @@ export default function TransferPatients() {
     })();
   }, []);
 
-  // ---- transfer state ----
+  // --- Transfer State ---
   const [selectedAccident, setSelectedAccident] = useState(null);
-  const [toHospital, setToHospital] = useState(""); // hospital_id
+  const [toHospital, setToHospital] = useState("");
   const [message, setMessage] = useState({ type: "", text: "" });
   const [submitting, setSubmitting] = useState(false);
 
@@ -154,13 +152,13 @@ export default function TransferPatients() {
     !!toHospital &&
     !!myHospital.hospital_id &&
     toHospital !== myHospital.hospital_id &&
-    !selectedAccident?.Completed;
+    !selectedAccident?.Completed &&
+    selectedAccident?.managed_by === me.id;
 
   const doTransfer = async () => {
     try {
       setSubmitting(true);
       setMessage({ type: "", text: "" });
-      // Keep payload minimal; server sets from_hospital and defers approval fields
       await API.post("/transfers", {
         accident_id: selectedAccident.accident_id,
         to_hospital: toHospital,
@@ -169,18 +167,6 @@ export default function TransferPatients() {
         type: "success",
         text: "Transfer request created. Awaiting approval by destination admin.",
       });
-      // refresh accidents for visibility (optional)
-      if (selectedPatient) {
-        const pid =
-          selectedPatient.id ??
-          selectedPatient.patient_id ??
-          selectedPatient.user_id ??
-          null;
-        if (pid) {
-          const r = await API.get(`/accidents/patient/${pid}`);
-          setAccidents(r.data || []);
-        }
-      }
       setToHospital("");
     } catch (e) {
       const err =
@@ -202,8 +188,8 @@ export default function TransferPatients() {
             Transfer Patients
           </h2>
           <p className="text-sm text-gray-600">
-            Select a patient, choose one of their accident records, then pick
-            the destination hospital to request a transfer.
+            You can only request a transfer for accident records managed by you
+            and not yet completed.
           </p>
         </div>
 
@@ -220,13 +206,13 @@ export default function TransferPatients() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* LEFT: Patients */}
+          {/* Patients List */}
           <Card
             title="Patients"
             right={
               <div className="text-xs text-gray-600">
                 Your hospital:{" "}
-                <b>{myHospital.name || myHospital.hospital_id || "—"}</b>
+                <b>{myHospital.name || myHospital.hospital_id}</b>
               </div>
             }
           >
@@ -278,7 +264,7 @@ export default function TransferPatients() {
             )}
           </Card>
 
-          {/* RIGHT: Accidents & Transfer */}
+          {/* Accidents & Transfer */}
           <div className="flex flex-col gap-6">
             <Card title="Accident Records">
               {!selectedPatient ? (
@@ -302,69 +288,58 @@ export default function TransferPatients() {
                     const dateStr = isNaN(created.getTime())
                       ? "—"
                       : created.toLocaleString();
-                    const isChosen =
-                      selectedAccident?.accident_id === rec.accident_id;
+
+                    const ownedByMe = rec.managed_by === me.id;
+                    const canTransferRecord = ownedByMe && !rec.Completed;
+
                     return (
-                      <button
+                      <div
                         key={rec.accident_id}
-                        onClick={() => setSelectedAccident(rec)}
-                        className={`w-full text-left p-3 rounded-lg border ${
-                          isChosen
-                            ? "bg-blue-100 border-blue-200"
-                            : "bg-gray-50 hover:bg-gray-100"
+                        className={`p-3 rounded-lg border ${
+                          canTransferRecord
+                            ? "bg-gray-50 hover:bg-blue-50 cursor-pointer"
+                            : "bg-gray-100 opacity-60 cursor-not-allowed"
                         }`}
+                        onClick={() => {
+                          if (canTransferRecord) setSelectedAccident(rec);
+                        }}
+                        title={
+                          canTransferRecord
+                            ? "Click to select for transfer"
+                            : ownedByMe
+                            ? "Completed record cannot be transferred"
+                            : "You do not manage this record"
+                        }
                       >
                         <div className="flex items-center justify-between">
-                          <div className="font-medium">
-                            {dateStr}
-                            <span className="ml-2 text-xs text-gray-500">
-                              (managed by:{" "}
-                              {rec.managed_by_name || rec.managed_by || "—"})
-                            </span>
+                          <div>
+                            <div className="font-medium text-gray-800">
+                              {dateStr}
+                            </div>
+                            <div className="text-xs text-gray-600">
+                              Managed by:{" "}
+                              {rec.managed_by_name || rec.managed_by}
+                            </div>
                           </div>
                           <StatusBadge completed={!!rec.Completed} />
                         </div>
-                        <div className="text-xs text-gray-600 mt-1">
-                          Time of collision:{" "}
-                          {rec["time of collision"] ||
-                            rec.time_of_collision ||
-                            "—"}
-                        </div>
-                      </button>
+                      </div>
                     );
                   })}
                 </div>
               )}
             </Card>
 
-            <Card
-              title="Create Transfer Request"
-              right={
-                <button
-                  onClick={() => {
-                    setSelectedAccident(null);
-                    setToHospital("");
-                    setMessage({ type: "", text: "" });
-                  }}
-                  className="text-xs px-3 py-1.5 rounded-lg border bg-white hover:bg-gray-50"
-                >
-                  Reset
-                </button>
-              }
-            >
+            {/* Transfer Creation */}
+            <Card title="Create Transfer Request">
               {!selectedAccident ? (
                 <div className="text-sm text-gray-500">
-                  Choose an accident record first.
+                  Choose a valid record first.
                 </div>
               ) : (
                 <>
                   <div className="text-sm text-gray-700 mb-3">
-                    Selected accident: <b>{selectedAccident.accident_id}</b>{" "}
-                    {selectedAccident.Completed && (
-                      <span className="ml-2 text-red-600">
-                        (Completed — transfer disabled)
-                      </span>
-                    )}
+                    Selected accident: <b>{selectedAccident.accident_id}</b>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -374,7 +349,7 @@ export default function TransferPatients() {
                       </label>
                       <input
                         disabled
-                        value={myHospital.name || myHospital.hospital_id || "—"}
+                        value={myHospital.name || myHospital.hospital_id}
                         className="mt-1 block w-full p-2 border border-gray-300 rounded bg-gray-100"
                       />
                     </div>
@@ -406,10 +381,8 @@ export default function TransferPatients() {
                   </div>
 
                   <div className="text-xs text-gray-500 mt-3">
-                    A transfer request will be created without{" "}
-                    <b>approved_by</b> and{" "}
-                    <b>transfer time to second hospital</b>. The destination
-                    admin will review it.
+                    You can only transfer records you manage. Approved fields
+                    are filled later by the destination admin.
                   </div>
 
                   <div className="mt-4 flex justify-end">
