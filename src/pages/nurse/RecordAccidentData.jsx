@@ -601,6 +601,7 @@ const AccidentRecordSystem = () => {
             treatment_type: t.treatment_type || "",
             description: t.description || "",
             hospital_id: t.hospital_id ?? null,
+            hospital_name: t.hospital_name || "", // for display only
             ward_number: t.ward_number || "",
             number_of_days_stay: t.number_of_days_stay || "",
             reason: t.reason || "",
@@ -718,12 +719,21 @@ const AccidentRecordSystem = () => {
       }));
 
       // Treatments: keep original hospital_id; default to current for new ones
-      const numberedTreatments = (model.treatments || []).map((t, i) => ({
-        ...t,
-        treatment_no:
-          t.treatment_no && t.treatment_no > 0 ? t.treatment_no : i + 1,
-        hospital_id: t.hospital_id || currentHospitalId || null,
-      }));
+      const numberedTreatments = (model.treatments || []).map((t, i) => {
+        const clean = { ...t };
+        delete clean.hospital_name; // 👈 remove this frontend-only field
+
+        if (clean.number_of_days_stay == "") {
+          clean.number_of_days_stay = -1;
+        }
+
+        clean.treatment_no =
+          t.treatment_no && t.treatment_no > 0 ? t.treatment_no : i + 1;
+        clean.hospital_id = t.hospital_id || currentHospitalId || null;
+
+        return clean;
+      });
+      print;
       console.log("Numbered treatments", numberedTreatments);
       // Build payload (snake_case). Backend maps to DB columns by alias.
       const payload = {
@@ -1705,10 +1715,9 @@ const AccidentRecordSystem = () => {
                                     </Label>
                                     <div className="mt-1 text-sm">
                                       <span className="inline-flex items-center rounded-full px-3 py-1 border bg-gray-50 text-gray-700">
-                                        {t.hospital_id ||
-                                          (currentHospitalId != null
-                                            ? "Your hospital"
-                                            : "Error")}
+                                        {(t.hospital_id == currentHospitalId
+                                          ? "Your Hospital"
+                                          : t.hospital_name) || "Error"}
                                       </span>
                                       <span className="ml-2 text-xs text-gray-500">
                                         This value is kept as-is once saved.
