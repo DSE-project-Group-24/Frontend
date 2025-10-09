@@ -1,0 +1,436 @@
+import React, { useEffect, useMemo, useState } from "react";
+import NurseNav from "../../navbars/NurseNav";
+import API from "../../utils/api";
+
+/** Small helpers */
+const val = (obj, ...keys) => {
+  for (const k of keys)
+    if (obj && obj[k] !== undefined && obj[k] !== null) return obj[k];
+  return "";
+};
+
+const StatusBadge = ({ completed }) => (
+  <span
+    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${
+      completed
+        ? "bg-green-50 text-green-700 border-green-200"
+        : "bg-yellow-50 text-yellow-800 border-yellow-200"
+    }`}
+  >
+    {completed ? "Completed" : "Not Completed"}
+  </span>
+);
+
+const Card = ({ title, right, children }) => (
+  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    {(title || right) && (
+      <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 px-5 py-3 border-b border-gray-100">
+        <h3 className="text-base font-semibold text-gray-800">{title}</h3>
+        {right}
+      </div>
+    )}
+    <div className="p-5">{children}</div>
+  </div>
+);
+
+export default function TransferPatients() {
+  // ---- auth & hospital from localStorage (no backend calls) ----
+  const me = {
+    user_id: window.localStorage.getItem("user_id") || "",
+    name: window.localStorage.getItem("name") || "",
+    role: window.localStorage.getItem("role") || "nurse",
+  };
+  const myHospital = {
+    hospital_id: window.localStorage.getItem("hospital_id") || "",
+    name: window.localStorage.getItem("hospital_name") || "",
+  };
+
+  // ---- patients (same approach as Accident page) ----
+  const [patients, setPatients] = useState([]);
+  const [loadingPatients, setLoadingPatients] = useState(false);
+  const [q, setQ] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoadingPatients(true);
+        const r = await API.get("/patients");
+        setPatients(r.data || []);
+      } catch (e) {
+        console.error("Failed to fetch patients", e);
+      } finally {
+        setLoadingPatients(false);
+      }
+    })();
+  }, []);
+
+  const filteredPatients = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    if (!needle) return patients;
+    return patients.filter((p) => {
+      const name = (
+        val(p, "Full Name", "full_name", "name") || ""
+      ).toLowerCase();
+      const nic = (val(p, "NIC", "nic") || "").toLowerCase();
+      const phone = (
+        val(p, "Contact Number", "contact_number") || ""
+      ).toLowerCase();
+      const dob = (
+        val(p, "Date of Birth", "date_of_birth") || ""
+      ).toLowerCase();
+      return (
+        name.includes(needle) ||
+        nic.includes(needle) ||
+        phone.includes(needle) ||
+        dob.includes(needle)
+      );
+    });
+  }, [q, patients]);
+
+  const [selectedPatient, setSelectedPatient] = useState(null);
+
+  // ---- accidents for selected patient (reuse your existing API) ----
+  const [accidents, setAccidents] = useState([]);
+  const [loadingAccidents, setLoadingAccidents] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      if (!selectedPatient) return;
+      const pid =
+        selectedPatient.id ??
+        selectedPatient.patient_id ??
+        selectedPatient.user_id ??
+        null;
+      if (!pid) return;
+      try {
+        setLoadingAccidents(true);
+        const r = await API.get(`/accidents/patient/${pid}`);
+        setAccidents(r.data || []);
+      } catch (e) {
+        console.error("Failed to fetch accidents", e);
+        setAccidents([]);
+      } finally {
+        setLoadingAccidents(false);
+      }
+    })();
+  }, [selectedPatient]);
+
+  // ---- hospitals list (for destination selection) ----
+  const [hospitals, setHospitals] = useState([]);
+  const [loadingHospitals, setLoadingHospitals] = useState(false);
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoadingHospitals(true);
+        // Expect: GET /hospitals → [{ hospital_id, name }]
+        const r = await API.get("/hospitals");
+        setHospitals(
+          (r.data || []).sort((a, b) =>
+            (a.name || "").localeCompare(b.name || "")
+          )
+        );
+      } catch (e) {
+        console.error("Failed to load hospitals", e);
+      } finally {
+        setLoadingHospitals(false);
+      }
+    })();
+  }, []);
+
+  // ---- transfer state ----
+  const [selectedAccident, setSelectedAccident] = useState(null);
+  const [toHospital, setToHospital] = useState(""); // hospital_id
+  const [message, setMessage] = useState({ type: "", text: "" });
+  const [submitting, setSubmitting] = useState(false);
+
+  const resetTransfer = () => {
+    setSelectedAccident(null);
+    setToHospital("");
+    setMessage({ type: "", text: "" });
+  };
+
+  const canTransfer =
+    !!selectedAccident &&
+    !!toHospital &&
+    !!myHospital.hospital_id &&
+    toHospital !== myHospital.hospital_id &&
+    !selectedAccident?.Completed;
+
+  const doTransfer = async () => {
+    try {
+      setSubmitting(true);
+      setMessage({ type: "", text: "" });
+      // Keep payload minimal; server sets from_hospital and defers approval fields
+      await API.post("/transfers", {
+        accident_id: selectedAccident.accident_id,
+        to_hospital: toHospital,
+      });
+      setMessage({
+        type: "success",
+        text: "Transfer request created. Awaiting approval by destination admin.",
+      });
+      // refresh accidents for visibility (optional)
+      if (selectedPatient) {
+        const pid =
+          selectedPatient.id ??
+          selectedPatient.patient_id ??
+          selectedPatient.user_id ??
+          null;
+        if (pid) {
+          const r = await API.get(`/accidents/patient/${pid}`);
+          setAccidents(r.data || []);
+        }
+      }
+      setToHospital("");
+    } catch (e) {
+      const err =
+        e?.response?.data?.detail ||
+        e?.response?.data?.message ||
+        "Failed to create transfer.";
+      setMessage({ type: "error", text: String(err) });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+      <NurseNav />
+      <div className="max-w-6xl mx-auto p-4">
+        <div className="mb-5">
+          <h2 className="text-2xl font-bold text-gray-800">
+            Transfer Patients
+          </h2>
+          <p className="text-sm text-gray-600">
+            Select a patient, choose one of their accident records, then pick
+            the destination hospital to request a transfer.
+          </p>
+        </div>
+
+        {message.text && (
+          <div
+            className={`mb-4 p-3 rounded-md border ${
+              message.type === "success"
+                ? "bg-green-50 text-green-700 border-green-200"
+                : "bg-red-50 text-red-700 border-red-200"
+            }`}
+          >
+            {message.text}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* LEFT: Patients */}
+          <Card
+            title="Patients"
+            right={
+              <div className="text-xs text-gray-600">
+                Your hospital:{" "}
+                <b>{myHospital.name || myHospital.hospital_id || "—"}</b>
+              </div>
+            }
+          >
+            <div className="mb-3">
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search by name / NIC / phone / DOB"
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            {loadingPatients ? (
+              <div className="text-sm text-gray-500">Loading patients…</div>
+            ) : filteredPatients.length === 0 ? (
+              <div className="text-sm text-gray-500">No patients found.</div>
+            ) : (
+              <div className="max-h-96 overflow-y-auto space-y-2">
+                {filteredPatients.map((p, idx) => {
+                  const pid = p.id ?? p.patient_id ?? idx;
+                  const isSelected =
+                    selectedPatient &&
+                    (selectedPatient.id ?? selectedPatient.patient_id ?? "") ===
+                      (p.id ?? p.patient_id ?? "");
+                  return (
+                    <button
+                      key={pid}
+                      onClick={() => {
+                        setSelectedPatient(p);
+                        resetTransfer();
+                      }}
+                      className={`w-full text-left p-3 rounded-lg border ${
+                        isSelected
+                          ? "bg-blue-100 border-blue-200"
+                          : "bg-gray-50 hover:bg-gray-100"
+                      }`}
+                    >
+                      <div className="font-medium">
+                        {val(p, "Full Name", "full_name", "name") || "No name"}
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        {val(p, "Contact Number", "contact_number") ||
+                          "No Contact"}{" "}
+                        • {val(p, "Date of Birth", "date_of_birth") || "No DOB"}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </Card>
+
+          {/* RIGHT: Accidents & Transfer */}
+          <div className="flex flex-col gap-6">
+            <Card title="Accident Records">
+              {!selectedPatient ? (
+                <div className="text-sm text-gray-500">
+                  Select a patient to view records.
+                </div>
+              ) : loadingAccidents ? (
+                <div className="text-sm text-gray-500">
+                  Loading accident records…
+                </div>
+              ) : accidents.length === 0 ? (
+                <div className="text-sm text-gray-500">
+                  No accident records for this patient.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {accidents.map((rec) => {
+                    const created = new Date(
+                      rec.created_on || rec.createdAt || rec.created_at
+                    );
+                    const dateStr = isNaN(created.getTime())
+                      ? "—"
+                      : created.toLocaleString();
+                    const isChosen =
+                      selectedAccident?.accident_id === rec.accident_id;
+                    return (
+                      <button
+                        key={rec.accident_id}
+                        onClick={() => setSelectedAccident(rec)}
+                        className={`w-full text-left p-3 rounded-lg border ${
+                          isChosen
+                            ? "bg-blue-100 border-blue-200"
+                            : "bg-gray-50 hover:bg-gray-100"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="font-medium">
+                            {dateStr}
+                            <span className="ml-2 text-xs text-gray-500">
+                              (managed by:{" "}
+                              {rec.managed_by_name || rec.managed_by || "—"})
+                            </span>
+                          </div>
+                          <StatusBadge completed={!!rec.Completed} />
+                        </div>
+                        <div className="text-xs text-gray-600 mt-1">
+                          Time of collision:{" "}
+                          {rec["time of collision"] ||
+                            rec.time_of_collision ||
+                            "—"}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </Card>
+
+            <Card
+              title="Create Transfer Request"
+              right={
+                <button
+                  onClick={() => {
+                    setSelectedAccident(null);
+                    setToHospital("");
+                    setMessage({ type: "", text: "" });
+                  }}
+                  className="text-xs px-3 py-1.5 rounded-lg border bg-white hover:bg-gray-50"
+                >
+                  Reset
+                </button>
+              }
+            >
+              {!selectedAccident ? (
+                <div className="text-sm text-gray-500">
+                  Choose an accident record first.
+                </div>
+              ) : (
+                <>
+                  <div className="text-sm text-gray-700 mb-3">
+                    Selected accident: <b>{selectedAccident.accident_id}</b>{" "}
+                    {selectedAccident.Completed && (
+                      <span className="ml-2 text-red-600">
+                        (Completed — transfer disabled)
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        From hospital
+                      </label>
+                      <input
+                        disabled
+                        value={myHospital.name || myHospital.hospital_id || "—"}
+                        className="mt-1 block w-full p-2 border border-gray-300 rounded bg-gray-100"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        To hospital
+                      </label>
+                      <select
+                        value={toHospital}
+                        onChange={(e) => setToHospital(e.target.value)}
+                        className="mt-1 block w-full p-2 border border-gray-300 rounded bg-white"
+                        disabled={loadingHospitals}
+                      >
+                        <option value="">Select hospital…</option>
+                        {hospitals.map((h) => (
+                          <option key={h.hospital_id} value={h.hospital_id}>
+                            {h.name || h.hospital_id}
+                          </option>
+                        ))}
+                      </select>
+                      {toHospital && toHospital === myHospital.hospital_id && (
+                        <div className="text-xs text-red-600 mt-1">
+                          Destination must be different from your current
+                          hospital.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-gray-500 mt-3">
+                    A transfer request will be created without{" "}
+                    <b>approved_by</b> and{" "}
+                    <b>transfer time to second hospital</b>. The destination
+                    admin will review it.
+                  </div>
+
+                  <div className="mt-4 flex justify-end">
+                    <button
+                      onClick={doTransfer}
+                      disabled={!canTransfer || submitting}
+                      className={`px-4 py-2 rounded-lg text-sm ${
+                        !canTransfer || submitting
+                          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                          : "bg-blue-600 text-white hover:bg-blue-700"
+                      }`}
+                    >
+                      {submitting ? "Submitting…" : "Request transfer"}
+                    </button>
+                  </div>
+                </>
+              )}
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
