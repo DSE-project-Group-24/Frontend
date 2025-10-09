@@ -116,7 +116,7 @@ const NurseNav = ({ setIsAuthenticated, setRole }) => {
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="2"
-            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            d="M3 8l9-5 9 5v11a2 2 0 01-2 2h-3m-4 0h-3a2 2 0 01-2-2V8m7 8l4 4m0 0l-4-4m4 4V4"
           />
         </svg>
       ),
