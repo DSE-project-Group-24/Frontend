@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Info, Search, Filter, TrendingUp, Users, FileText, Settings } from "lucide-react";
 import GovernmentNav from "../../navbars/GovernmentNav";
+import Footer from "../../components/Footer";
 import API from "../../utils/api";
 import { t } from "../../utils/translations";
 
@@ -654,6 +655,8 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
           </div>
         </div>
       </div>
+      
+      <Footer />
     </div>
   );
 };

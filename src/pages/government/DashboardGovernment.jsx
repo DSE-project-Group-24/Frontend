@@ -18,6 +18,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Phone, Building2, Filter, X, Hospital, Activity, Users, TrendingUp } from 'lucide-react';
 import GovernmentNav from '../../navbars/GovernmentNav';
+import Footer from '../../components/Footer';
 import HospitalsMap from '../../components/HospitalsMap';
 import AccidentEDA_Gov from '../../components/AccidentEDA_Gov';
 import { t } from '../../utils/translations';
@@ -419,6 +420,8 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
         </div>
       
       </div>
+      
+      <Footer />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import API from "../../utils/api";
 import GovernmentNav from './../../navbars/GovernmentNav';
+import Footer from '../../components/Footer';
 import { LayoutDashboard, TrendingUp, FileText, BookOpen } from 'lucide-react';
 import { t } from "../../utils/translations";
 
@@ -193,6 +194,8 @@ const Guide = ({ setIsAuthenticated, setRole }) => {
           </p>
         </div>
       </div>
+      
+      <Footer />
     </div>
   );
 };

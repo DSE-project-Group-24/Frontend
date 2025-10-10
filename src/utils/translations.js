@@ -81,6 +81,10 @@ const translations = {
     clickToViewFullDetails: "Click to view full details →",
     noAccidentRecords: "No accident records for this patient.",
     fullDetails: "Full Details",
+
+    //footer
+    emergencyCareExcellence: "Emergency Care Excellence",
+    comprehensiveEmergencyManagement: "Comprehensive Emergency Management",
     
     // Predictions
     mlTransferPrediction: "ML Transfer Prediction",

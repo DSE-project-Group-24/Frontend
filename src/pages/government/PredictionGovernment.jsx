@@ -4,6 +4,7 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, L
 import { Calendar, TrendingUp, TrendingDown, AlertTriangle, Clock, Filter, Activity, BarChart3 } from 'lucide-react';
 import axios from 'axios';
 import GovernmentNav from '../../navbars/GovernmentNav';
+import Footer from '../../components/Footer';
 import { t } from '../../utils/translations';
 
 
@@ -988,7 +989,8 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
           </div>
         </div>
       </div>
-     
+      
+      <Footer />
     </div>
   );
 };
