@@ -372,7 +372,7 @@ const SmartSelect = ({ name, value, onChange, options, disabled }) => {
         disabled ? "bg-gray-100" : "bg-white"
       }`}
     >
-      <option value="">Select…</option>
+      <option value="">{t('select')}</option>
       {options.map((o) => (
         <option key={o} value={o}>
           {o}
@@ -392,7 +392,7 @@ const Select = ({ name, value, onChange, options, disabled }) => (
       disabled ? "bg-gray-100" : "bg-white"
     }`}
   >
-    <option value="">Select…</option>
+    <option value="">{t('select')}</option>
     {options.map((o) => (
       <option key={o} value={o}>
         {o}
@@ -917,7 +917,7 @@ const AccidentRecordSystem = () => {
                           : t('viewAccidentRecord')}
                       </h3>
                       <p className="text-sm text-gray-500">
-                        Patient:{" "}
+                        {t('patient')}:{" "}
                         <b>
                           {val(
                             selectedPatient,
@@ -937,7 +937,7 @@ const AccidentRecordSystem = () => {
                         }}
                         className="text-gray-600 hover:text-gray-900 text-sm border px-3 py-1.5 rounded-lg"
                       >
-                        ✕ Close
+                        ✕ {t('close')}
                       </button>
                       {(mode === "create" ||
                         (mode === "edit" && canEdit(current))) && (
@@ -950,7 +950,7 @@ const AccidentRecordSystem = () => {
                               : "bg-blue-600 text-white hover:bg-blue-700"
                           }`}
                         >
-                          {saving ? "Saving…" : "Save"}
+                          {saving ? t('saving') : t('save')}
                         </button>
                       )}
                     </div>
@@ -960,8 +960,7 @@ const AccidentRecordSystem = () => {
                   {mode !== "create" && current && !canEdit(current) && (
                     <div className="mx-auto max-w-5xl px-6">
                       <div className="mt-4 text-sm text-amber-700 p-3 rounded-md bg-amber-50 border">
-                        This record is read-only (either completed or managed by
-                        another nurse).
+                        {t('readOnlyRecord')}
                       </div>
                     </div>
                   )}
@@ -970,15 +969,15 @@ const AccidentRecordSystem = () => {
                   <div className="mx-auto max-w-5xl px-6">
                     <div className="mt-4 flex flex-wrap gap-2 text-sm">
                       {[
-                        ["incident", "Incident"],
-                        ["collision", "Collision"],
-                        ["road", "Road & Environment"],
-                        ["safety", "Substances & Safety"],
-                        ["transport", "Transport"],
-                        ["socio", "Socio-economic"],
-                        ["injuries", "Injuries"],
-                        ["treatments", "Treatments"], // NEW
-                        ["outcome", "Outcome & Notes"],
+                        ["incident", t('incident')],
+                        ["collision", t('collision')],
+                        ["road", t('roadEnvironment')],
+                        ["safety", t('substancesSafety')],
+                        ["transport", t('transport')],
+                        ["socio", t('socioeconomic')],
+                        ["injuries", t('injuries')],
+                        ["treatments", t('treatments')],
+                        ["outcome", t('outcomeNotes')],
                       ].map(([id, label]) => (
                         <a
                           key={id}
@@ -997,12 +996,12 @@ const AccidentRecordSystem = () => {
                     <section id="incident" className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
                         <h4 className="font-semibold text-gray-800">
-                          Incident
+                          {t('incident')}
                         </h4>
                       </header>
                       <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label>Incident date</Label>
+                          <Label>{t('incidentDate')}</Label>
                           <DateInput
                             name="incident_at_date"
                             value={model.incident_at_date}
@@ -1014,7 +1013,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>Time of collision</Label>
+                          <Label>{t('timeOfCollision')}</Label>
                           <SmartSelect
                             name="time_of_collision"
                             value={model.time_of_collision}
@@ -1033,12 +1032,12 @@ const AccidentRecordSystem = () => {
                     <section id="collision" className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
                         <h4 className="font-semibold text-gray-800">
-                          Collision
+                          {t('collision')}
                         </h4>
                       </header>
                       <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label>Collision force from</Label>
+                          <Label>{t('collisionForceFrom')}</Label>
                           <SmartSelect
                             name="collision_force_from"
                             value={model.collision_force_from}
@@ -1051,7 +1050,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>Collision with</Label>
+                          <Label>{t('collisionWith')}</Label>
                           <SmartSelect
                             name="collision_with"
                             value={model.collision_with}
@@ -1064,7 +1063,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>Mode of traveling during accident</Label>
+                          <Label>{t('modeOfTraveling')}</Label>
                           <SmartSelect
                             name="mode_of_traveling"
                             value={model.mode_of_traveling}
@@ -1109,7 +1108,7 @@ const AccidentRecordSystem = () => {
                     <section id="road" className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
                         <h4 className="font-semibold text-gray-800">
-                          Road & Environment
+                          {t('roadEnvironment')}
                         </h4>
                       </header>
                       <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1390,7 +1389,7 @@ const AccidentRecordSystem = () => {
                     <section id="injuries" className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl flex items-center justify-between">
                         <h4 className="font-semibold text-gray-800">
-                          Injuries
+                          {t('injuries')}
                         </h4>
                         {mode !== "view" && (
                           <button
@@ -1403,7 +1402,7 @@ const AccidentRecordSystem = () => {
                                 : "bg-white hover:bg-gray-50"
                             }`}
                           >
-                            + Add injury
+                            + {t('addInjury')}
                           </button>
                         )}
                       </header>
@@ -1507,7 +1506,7 @@ const AccidentRecordSystem = () => {
                                         )
                                       }
                                       disabled={readOnly}
-                                      placeholder="Leave blank if none"
+                                      placeholder={t('leaveBlankIfNone')}
                                       className={`mt-1 block w-full p-2 border border-gray-300 rounded ${
                                         readOnly ? "bg-gray-100" : "bg-white"
                                       }`}
@@ -1546,7 +1545,7 @@ const AccidentRecordSystem = () => {
                     <section id="treatments" className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl flex items-center justify-between">
                         <h4 className="font-semibold text-gray-800">
-                          Treatments
+                          {t('treatments')}
                         </h4>
                         {mode !== "view" && (
                           <button
@@ -1559,7 +1558,7 @@ const AccidentRecordSystem = () => {
                                 : "bg-white hover:bg-gray-50"
                             }`}
                           >
-                            + Add treatment
+                            + {t('addTreatment')}
                           </button>
                         )}
                       </header>
@@ -1823,7 +1822,7 @@ const AccidentRecordSystem = () => {
                         }}
                         className="px-4 py-2 rounded-lg border bg-gray-100 hover:bg-gray-200 text-sm"
                       >
-                        Cancel
+                        {t('cancel')}
                       </button>
                       {(mode === "create" ||
                         (mode === "edit" && canEdit(current))) && (
@@ -1836,7 +1835,7 @@ const AccidentRecordSystem = () => {
                               : "bg-blue-600 text-white hover:bg-blue-700"
                           }`}
                         >
-                          {saving ? "Saving…" : "Save"}
+                          {saving ? t('saving') : t('save')}
                         </button>
                       )}
                     </div>
