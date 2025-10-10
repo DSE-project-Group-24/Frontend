@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import API from "../../utils/api";
 import injuryMap from "../../data/injury_site_type_map.json";
 import NurseNav from "../../navbars/NurseNav";
+import Footer from "../../components/Footer";
 
 /**
  * Assumptions
@@ -1844,6 +1845,8 @@ const AccidentRecordSystem = () => {
           </div>
         </div>
       </div>
+      
+      <Footer />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 // src/pages/nurse/RecordPatientData.jsx
 import React, { useMemo, useState } from "react";
 import NurseNav from "../../navbars/NurseNav";
+import Footer from "../../components/Footer";
 import API from "../../utils/api";
 
 // --- Categories (unchanged) ---
@@ -466,6 +467,8 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
           </div>
         </form>
       </div>
+      
+      <Footer />
     </div>
   );
 }

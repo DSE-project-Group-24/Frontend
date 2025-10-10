@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import NurseNav from "../../navbars/NurseNav";
+import Footer from "../../components/Footer";
 import API from "../../utils/api";
 
 // --- Category options (unchanged from your spec) ---
@@ -660,6 +661,8 @@ export default function NurseDashboard() {
         onClose={() => setEditing({ open: false, patient: null })}
         onSaved={onRowSaved}
       />
+      
+      <Footer />
     </div>
   );
 }
