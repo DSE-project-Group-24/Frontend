@@ -51,6 +51,11 @@ const Login = ({ setIsAuthenticated, setRole }) => {
       localStorage.setItem("user_id", data.user_id);
       localStorage.setItem("name", data.name);
 
+      if (data.role != "government_personnel") {
+        localStorage.setItem("hospital_id", data.hospital_id);
+        localStorage.setItem("hospital_name", data.hospital_name);
+      }
+
       // Update state
       setIsAuthenticated(true);
       setRole(data.role);
