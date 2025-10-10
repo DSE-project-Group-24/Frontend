@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import NurseNav from "../../navbars/NurseNav";
-import Footer from "../../components/Footer";
 import API from "../../utils/api";
+import Footer from "../../components/Footer";
+import { t } from "../../utils/translations";
 
 // --- Category options (unchanged from your spec) ---
 const EDUCATION = [
@@ -188,7 +189,7 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
       <div className="absolute right-0 top-0 h-full w-full max-w-xl bg-white shadow-xl p-6 overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-800">Edit Patient</h2>
+          <h2 className="text-xl font-semibold text-gray-800">{t('editPatient')}</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -518,13 +519,13 @@ export default function NurseDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
       <NurseNav />
-      <div className="max-w-7xl mx-auto px-4 py-6 flex-1">
+      <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="mb-4 sticky top-0 bg-transparent z-10">
-          <h1 className="text-2xl font-bold text-gray-800">Nurse Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-800">{t('nurseDashboard')}</h1>
           <p className="text-sm text-gray-600">
-            Manage and edit patient records
+            {t('patientManagement')}
           </p>
         </div>
 
@@ -617,7 +618,7 @@ export default function NurseDashboard() {
                               setEditing({ open: true, patient: p })
                             }
                           >
-                            Edit
+                            {t('edit')}
                           </button>
                         </td>
                       </tr>
@@ -661,7 +662,6 @@ export default function NurseDashboard() {
         onClose={() => setEditing({ open: false, patient: null })}
         onSaved={onRowSaved}
       />
-      
       <Footer />
     </div>
   );

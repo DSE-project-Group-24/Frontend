@@ -3,6 +3,7 @@ import API from "../../utils/api";
 import injuryMap from "../../data/injury_site_type_map.json";
 import NurseNav from "../../navbars/NurseNav";
 import Footer from "../../components/Footer";
+import { t } from "../../utils/translations";
 
 /**
  * Assumptions
