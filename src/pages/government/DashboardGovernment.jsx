@@ -190,26 +190,26 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
             icon={Hospital} 
             label={t('totalHospitals')} 
             value={stats.total} 
-            change="+3.2%"
+            change={t('totalHospitalsChange')}
             color="blue"
           />
           <StatCard 
             icon={Building2} 
-            label="General Hospitals" 
+            label={t('generalHospitals')} 
             value={stats.general}
             color="green"
           />
           <StatCard 
             icon={MapPin} 
-            label="Districts Covered" 
+            label={t('districtsCovered')} 
             value={stats.districts}
             color="purple"
           />
           <StatCard 
             icon={Activity} 
-            label="Active Facilities" 
+            label={t('activeFacilities')} 
             value={stats.active} 
-            change="+1.5%"
+            change={t('changeFromLastMonth')}
             color="orange"
           />
         </div>

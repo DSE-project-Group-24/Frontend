@@ -116,6 +116,13 @@ const translations = {
     configureAnalysis: "Configure Analysis",
     setupFiltersParametersMessage: "Set up your filters and parameters to discover meaningful patterns in medical data",
     analysisSettings: "Analysis Settings",
+
+    // Dashboard Statistics
+    generalHospitals: "General Hospitals",
+    districtsCovered: "Districts Covered",
+    activeFacilities: "Active Facilities",
+    changeFromLastMonth: "+1.5% from last month",
+    totalHospitalsChange: "+3.2% from last month",
     
     // Accident Field Labels
     severity: "Severity",
@@ -942,6 +949,13 @@ const translations = {
     configureAnalysis: "විශ්ලේෂණය වින්‍යාසය",
     setupFiltersParametersMessage: "වෛද්‍ය දත්තවල අර්ථවත් රටා සොයා ගැනීමට ඔබේ පෙරහන් සහ පරාමිති සකසන්න",
     analysisSettings: "විශ්ලේෂණ සැකසුම්",
+
+    // Dashboard Statistics
+    generalHospitals: "සාමාන්‍ය රෝහල්",
+    districtsCovered: "ආවරණය වන දිස්ත්‍රික්ක",
+    activeFacilities: "ක්‍රියාකාරී පහසුකම්",
+    changeFromLastMonth: "පසුගිය මාසයට සාපේක්ෂව +1.5%",
+    totalHospitalsChange: "පසුගිය මාසයට සාපේක්ෂව +3.2%",
   },
   
   ta: {
@@ -1385,6 +1399,13 @@ const translations = {
     configureAnalysis: "பகுப்பாய்வை உள்ளமை",
     setupFiltersParametersMessage: "மருத்துவ தரவில் அர்த்தமுள்ள வடிவங்களைக் கண்டறிய உங்கள் வடிப்பான்கள் மற்றும் அளவுருக்களை அமைக்கவும்",
     analysisSettings: "பகுப்பாய்வு அமைப்புகள்",
+
+    // Dashboard Statistics
+    generalHospitals: "பொது மருத்துவமனைகள்",
+    districtsCovered: "மாவட்டங்கள் உள்ளடக்கப்பட்டுள்ளன",
+    activeFacilities: "செயலில் உள்ள வசதிகள்",
+    changeFromLastMonth: "கடந்த மாதத்திலிருந்து +1.5%",
+    totalHospitalsChange: "கடந்த மாதத்திலிருந்து +3.2%",
   }
 };
 
