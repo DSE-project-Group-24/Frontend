@@ -18,8 +18,10 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Phone, Building2, Filter, X, Hospital, Activity, Users, TrendingUp } from 'lucide-react';
 import GovernmentNav from '../../navbars/GovernmentNav';
+import Footer from '../../components/Footer';
 import HospitalsMap from '../../components/HospitalsMap';
 import AccidentEDA_Gov from '../../components/AccidentEDA_Gov';
+import { t } from '../../utils/translations';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -42,8 +44,8 @@ class ErrorBoundary extends React.Component {
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
           <div className="text-center">
             <div className="text-red-600 text-6xl mb-4">⚠️</div>
-            <h2 className="text-2xl font-semibold text-gray-800 mb-2">Something went wrong</h2>
-            <p className="text-gray-600">Please refresh the page or contact support</p>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-2">{t('somethingWentWrong')}</h2>
+            <p className="text-gray-600">{t('pleaseRefreshPage')}</p>
           </div>
         </div>
       );
@@ -63,7 +65,7 @@ const StatCard = ({ icon: Icon, label, value, change, color = "blue" }) => (
           <div className="flex items-center gap-1 text-sm">
             <TrendingUp className="w-4 h-4 text-green-600" />
             <span className="text-green-600 font-medium">{change}</span>
-            <span className="text-gray-500">vs last month</span>
+            <span className="text-gray-500">{t('vsLastMonth')}</span>
           </div>
         )}
       </div>
@@ -165,7 +167,7 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
         <div className="flex items-center justify-center h-[calc(100vh-80px)]">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-xl text-gray-600">Loading hospital data...</p>
+            <p className="text-xl text-gray-600">{t('loading')}...</p>
           </div>
         </div>
       </div>
@@ -179,7 +181,7 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
       <div className="container mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Hospital Management Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('hospitalManagement')} {t('dashboard')}</h1>
           <p className="text-gray-600">Monitor and manage hospitals across Northern Province</p>
         </div>
 
@@ -187,28 +189,28 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <StatCard 
             icon={Hospital} 
-            label="Total Hospitals" 
+            label={t('totalHospitals')} 
             value={stats.total} 
-            change="+3.2%"
+            change={t('totalHospitalsChange')}
             color="blue"
           />
           <StatCard 
             icon={Building2} 
-            label="General Hospitals" 
+            label={t('generalHospitals')} 
             value={stats.general}
             color="green"
           />
           <StatCard 
             icon={MapPin} 
-            label="Districts Covered" 
+            label={t('districtsCovered')} 
             value={stats.districts}
             color="purple"
           />
           <StatCard 
             icon={Activity} 
-            label="Active Facilities" 
+            label={t('activeFacilities')} 
             value={stats.active} 
-            change="+1.5%"
+            change={t('changeFromLastMonth')}
             color="orange"
           />
         </div>
@@ -216,7 +218,7 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
         {/* Search and Filter Section */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Search & Filter Hospitals</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('hospitalSearch')}</h2>
             <button
               onClick={() => setShowFilters(!showFilters)}
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
@@ -231,7 +233,7 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search hospital by name..."
+              placeholder={t('searchHospitals')}
               value={searchTerm}
               onChange={handleInputChange}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -292,13 +294,13 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
           {showFilters && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Hospital Type</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('type')}</label>
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="all">All Types</option>
+                  <option value="all">{t('allTypes')}</option>
                   {uniqueTypes.map(type => (
                     <option key={type} value={type}>{type}</option>
                   ))}
@@ -306,13 +308,13 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Region</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('region')}</label>
                 <select
                   value={filterRegion}
                   onChange={(e) => setFilterRegion(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="all">All Regions</option>
+                  <option value="all">{t('allRegions')}</option>
                   {uniqueRegions.map(region => (
                     <option key={region} value={region}>{region}</option>
                   ))}
@@ -324,7 +326,7 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
                   onClick={clearFilters}
                   className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 >
-                  Clear All Filters
+                  {t('clearAllFilters')}
                 </button>
               </div>
             </div>
@@ -335,7 +337,7 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
         {selectedHospital && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
             <div className="flex items-start justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Hospital Details</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t('hospitalDetails')}</h2>
               <button
                 onClick={() => {
                   setSelectedHospital(null);
@@ -353,7 +355,7 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
                   <Hospital className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Hospital Name</p>
+                  <p className="text-sm text-gray-600 mb-1">{t('hospitalName')}</p>
                   <p className="font-semibold text-gray-900">{selectedHospital?.name || 'N/A'}</p>
                 </div>
               </div>
@@ -363,7 +365,7 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
                   <Building2 className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Type</p>
+                  <p className="text-sm text-gray-600 mb-1">{t('type')}</p>
                   <p className="font-semibold text-gray-900">{selectedHospital?.Type || selectedHospital?.type || 'N/A'}</p>
                 </div>
               </div>
@@ -373,7 +375,7 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
                   <MapPin className="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Region</p>
+                  <p className="text-sm text-gray-600 mb-1">{t('region')}</p>
                   <p className="font-semibold text-gray-900">{selectedHospital?.Region || selectedHospital?.region || 'N/A'}</p>
                 </div>
               </div>
@@ -383,7 +385,7 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
                   <MapPin className="w-5 h-5 text-orange-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Address</p>
+                  <p className="text-sm text-gray-600 mb-1">{t('address')}</p>
                   <p className="font-semibold text-gray-900">{selectedHospital?.address || 'N/A'}</p>
                 </div>
               </div>
@@ -393,7 +395,7 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
                   <MapPin className="w-5 h-5 text-pink-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">City</p>
+                  <p className="text-sm text-gray-600 mb-1">{t('city')}</p>
                   <p className="font-semibold text-gray-900">{selectedHospital?.city || 'N/A'}</p>
                 </div>
               </div>
@@ -403,7 +405,7 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
                   <Phone className="w-5 h-5 text-indigo-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Contact</p>
+                  <p className="text-sm text-gray-600 mb-1">{t('contact')}</p>
                   <p className="font-semibold text-gray-900">{selectedHospital?.contact_number || selectedHospital?.contact || 'N/A'}</p>
                 </div>
               </div>
@@ -413,11 +415,13 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
 
         {/* Map Display */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Geographic Distribution</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('geographicDistribution')}</h2>
           <HospitalsMap selectedHospital={selectedHospital} allHospitals={allHospitals} />
         </div>
       
       </div>
+      
+      <Footer />
     </div>
   );
 };

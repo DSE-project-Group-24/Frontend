@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import backgroundImage from "../assets/background.jpg";
 import API from "../utils/api";
+import { t, getCurrentLanguage, setLanguage, getAvailableLanguages } from "../utils/translations";
 
 // Login API function
 const loginUser = async (email, password) => {
@@ -18,7 +19,22 @@ const Login = ({ setIsAuthenticated, setRole }) => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState(getCurrentLanguage());
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Set initial language
+    setLanguage(selectedLanguage);
+  }, [selectedLanguage]);
+
+  const handleLanguageChange = (langCode) => {
+    setSelectedLanguage(langCode);
+    setLanguage(langCode);
+    // Force re-render by setting a small delay
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
+  };
 
   const handleLogin = async () => {
     setIsLoading(true);
@@ -74,10 +90,29 @@ const Login = ({ setIsAuthenticated, setRole }) => {
           <div className="mx-auto h-16 w-16 bg-white rounded-full flex items-center justify-center shadow-lg mb-4">
             <span className="text-2xl">⚕️</span>
           </div>
-          <h2 className="text-3xl font-bold text-white mb-2">Welcome Back</h2>
+          <h2 className="text-3xl font-bold text-white mb-2">{t('login')}</h2>
           <p className="text-blue-100 text-sm">
-            Sign in to the Healthcare Portal
+            {t('roadAccidentCareSystem')}
           </p>
+          
+          {/* Language Selection */}
+          <div className="mt-4 flex justify-center">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-2 flex gap-2">
+              {getAvailableLanguages().map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => handleLanguageChange(lang.code)}
+                  className={`px-3 py-1 rounded text-sm font-medium transition-all duration-200 ${
+                    selectedLanguage === lang.code
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-white hover:bg-white/20'
+                  }`}
+                >
+                  {lang.nativeName}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
@@ -87,7 +122,7 @@ const Login = ({ setIsAuthenticated, setRole }) => {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Email
+                {t('email')}
               </label>
               <div className="relative">
                 <input
@@ -96,7 +131,7 @@ const Login = ({ setIsAuthenticated, setRole }) => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Enter your email"
+                  placeholder={t('email')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
                   disabled={isLoading}
                 />
@@ -123,7 +158,7 @@ const Login = ({ setIsAuthenticated, setRole }) => {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Password
+                {t('password')}
               </label>
               <div className="relative">
                 <input
@@ -132,7 +167,7 @@ const Login = ({ setIsAuthenticated, setRole }) => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Enter your password"
+                  placeholder={t('password')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
                   disabled={isLoading}
                 />
@@ -202,10 +237,10 @@ const Login = ({ setIsAuthenticated, setRole }) => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Signing in...
+                  {t('loading')}...
                 </>
               ) : (
-                "Sign In"
+                t('login')
               )}
             </button>
 
@@ -214,7 +249,7 @@ const Login = ({ setIsAuthenticated, setRole }) => {
                 to="/register"
                 className="text-sm text-gray-600 hover:text-gray-800 transition-colors duration-200"
               >
-                Don't have an account? Register here
+                 {t('dontHaveAnAccountRegisterHere')}
               </Link>
             </div>
           </div>
@@ -222,7 +257,7 @@ const Login = ({ setIsAuthenticated, setRole }) => {
 
         <div className="text-center">
           <p className="text-blue-100 text-xs">
-            Secure healthcare management system
+            {t('secureHealthcareManagementSystem')}
           </p>
         </div>
       </div>

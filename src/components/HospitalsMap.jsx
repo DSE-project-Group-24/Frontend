@@ -98,6 +98,7 @@
 import React from "react";
 import { MapContainer, TileLayer, CircleMarker, Tooltip } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { t } from "../utils/translations";
 
 const hospitals = [
   { name: "DGH – Vavuniya", lat: 8.7542, lng: 80.4971 },
@@ -182,7 +183,7 @@ const HospitalsMap = () => {
             radius={6}
           >
             <Tooltip direction="top" offset={[0, -5]} opacity={1} permanent>
-              {hospital.name}
+              {t(hospital.name)}
             </Tooltip>
           </CircleMarker>
         ))}

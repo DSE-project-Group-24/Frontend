@@ -1,19 +1,70 @@
-import { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, TrendingUp, FileText, LogOut, Menu, X, ChevronDown, Bell, Settings, User, BookOpen, AlertTriangle } from 'lucide-react';
+import LanguageSwitcher from '../components/LanguageSwitcher';
+import { t } from '../utils/translations';
 
 const GovernmentNav = ({ setIsAuthenticated, setRole }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const mobileMenuRef = useRef(null);
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    const handleEscapeKey = (event) => {
+      if (event.key === 'Escape') {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      // Use a slight delay to avoid immediate closing when menu button is clicked
+      setTimeout(() => {
+        document.addEventListener('click', handleClickOutside);
+        document.addEventListener('keydown', handleEscapeKey);
+      }, 100);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isMobileMenuOpen]);
+
+  // Get government personnel email from localStorage or token
+  const getGovernmentEmail = () => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      try {
+        // Decode JWT token to get user info
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return payload.email || payload.username || "government@northprov.lk";
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    }
+    // Fallback - check if email is stored separately
+    return localStorage.getItem("user_email") || "government@northprov.lk";
+  };
 
   const handleLogout = () => {
+    // Clear all authentication data from localStorage
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("role");
+
+    // Update authentication state
     setIsAuthenticated(false);
     setRole(null);
+
+    // Navigate to home/login page
     navigate('/');
   };
 
@@ -22,456 +73,205 @@ const GovernmentNav = ({ setIsAuthenticated, setRole }) => {
   const navItems = [
     {
       path: '/government_personnel/dashboard',
-      label: 'Hospitals',
-      icon: <LayoutDashboard size={20} />,
+      label: t('hospitals'),
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+      ),
     },
     {
       path: '/government_personnel/prediction',
-      label: 'Analytics',
-      icon: <TrendingUp size={20} />,
+      label: t('analytics'),
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      ),
     },
     {
       path: '/government_personnel/reports',
-      label: 'Reports',
-      icon: <FileText size={20} />,
+      label: t('reports'),
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      ),
     },
     {
       path: '/government_personnel/recent-accidents',
-      label: 'Recent Accidents',
-      icon: <AlertTriangle size={20} />,
+      label: t('recentAccidents'),
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      ),
     },
     {
       path: '/government_personnel/guide',
-      label: 'Guide',
-      icon: <BookOpen size={20} />,
+      label: t('guide'),
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      ),
     },
   ];
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo Section */}
-          <div className="flex items-center space-x-8">
-            <Link to="/government_personnel/dashboard" className="flex items-center space-x-3 group">
-              <div className="relative">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center transform group-hover:scale-105 transition-transform shadow-lg">
-                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2L2 7h20L12 2zM2 7v7c0 5 10 8 10 8s10-3 10-8V7H2z" />
-                  </svg>
-                </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-              </div>
-              <div className="hidden sm:block">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  MedRecord
-                </h1>
-                <p className="text-xs text-gray-500 font-medium">Government Portal</p>
-              </div>
-            </Link>
+    <nav ref={mobileMenuRef} className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 text-white overflow-hidden sticky top-0 z-50 shadow-2xl">
+      
+      <div className="absolute inset-0 opacity-10 pointer-events-none">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -translate-y-32 translate-x-32"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-300 rounded-full translate-y-24 -translate-x-24"></div>
+      </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-1">
+      <div className="relative z-10 w-full px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-35 min-h-[80px]">
+          {/* Logo/Brand */}
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+              <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2L2 7h20L12 2zM2 7v7c0 5 10 8 10 8s10-3 10-8V7H2z" />
+              </svg>
+            </div>
+            <div className="hidden xs:block sm:block">
+              <h1 className="text-lg sm:text-xl font-bold text-white">{t('roadAccidentCareSystem')}</h1>
+              <p className="text-xs sm:text-sm text-blue-200">{t('governmentPortal')}</p>
+            </div>
+          </div>
+  
+
+          {/* Desktop Nav */}
+          <div className="hidden md:block">
+            <div className="ml-10 flex items-center space-x-2">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 group ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
                     isActiveRoute(item.path)
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      ? 'bg-white/20 text-white shadow-sm backdrop-blur-sm'
+                      : 'text-blue-100 hover:bg-white/10 hover:text-white'
                   }`}
                 >
-                  <span className={`transition-colors ${isActiveRoute(item.path) ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`}>
-                    {item.icon}
-                  </span>
+                  {item.icon}
                   <span>{item.label}</span>
-                  {isActiveRoute(item.path) && (
-                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full"></span>
-                  )}
                 </Link>
               ))}
             </div>
           </div>
 
-          {/* Right Section - Desktop */}
-          <div className="hidden md:flex items-center space-x-3">
-            {/* Notifications */}
-            <button className="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
-              <Bell size={20} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
-
-            {/* Settings */}
-            <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
-              <Settings size={20} />
-            </button>
-
-            {/* Profile Dropdown */}
-            <div className="relative">
+          {/* Desktop User Info + Language + Logout */}
+          <div className="hidden md:block">
+            <div className="ml-4 flex items-center space-x-4">
+              <LanguageSwitcher />
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+                  <div className="w-3 h-3 bg-emerald-200 rounded-full animate-pulse"></div>
+                </div>
+                <div className="text-sm">
+                  <p className="font-medium text-white">{getGovernmentEmail()}</p>
+                  <p className="text-blue-200 text-xs">{t('online')}</p>
+                </div>
+              </div>
               <button
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-all"
+                onClick={handleLogout}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-slate-900 transition-all duration-200 flex items-center space-x-2 shadow-sm"
               >
-                <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-md">
-                  <User size={18} className="text-white" />
-                </div>
-                <div className="text-left hidden lg:block">
-                  <p className="text-sm font-semibold text-gray-700">Government</p>
-                  <p className="text-xs text-gray-500">Administrator</p>
-                </div>
-                <ChevronDown 
-                  size={16} 
-                  className={`text-gray-400 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`}
-                />
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span>{t('logout')}</span>
               </button>
-
-              {/* Dropdown Menu */}
-              {isProfileOpen && (
-                <>
-                  <div 
-                    className="fixed inset-0 z-10" 
-                    onClick={() => setIsProfileOpen(false)}
-                  ></div>
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-20">
-                    <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-semibold text-gray-900">Government Portal</p>
-                      <p className="text-xs text-gray-500 mt-1">gov.admin@medrecord.lk</p>
-                    </div>
-                    
-                    <div className="py-2">
-                      <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3">
-                        <User size={16} className="text-gray-400" />
-                        <span>Profile Settings</span>
-                      </button>
-                      <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3">
-                        <Settings size={16} className="text-gray-400" />
-                        <span>Preferences</span>
-                      </button>
-                    </div>
-
-                    <div className="border-t border-gray-100 pt-2">
-                      <button
-                        onClick={handleLogout}
-                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-3 font-medium"
-                      >
-                        <LogOut size={16} />
-                        <span>Sign Out</span>
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
             </div>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden">
             <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-all"
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsMobileMenuOpen(!isMobileMenuOpen);
+              }}
+              className="bg-white/20 backdrop-blur-sm inline-flex items-center justify-center p-2 rounded-lg text-blue-100 hover:text-white hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-200 shadow-sm cursor-pointer"
+              aria-expanded={isMobileMenuOpen}
+              aria-label="Toggle navigation menu"
+              style={{ touchAction: 'manipulation', minHeight: '44px', minWidth: '44px' }}
             >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              <span className="sr-only">Open main menu</span>
+              {!isMobileMenuOpen ? (
+                <svg className="block h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              ) : (
+                <svg className="block h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-gray-200 bg-white">
-          <div className="px-4 pt-2 pb-4 space-y-1">
+      {/* Mobile Nav */}
+      <div className={`md:hidden ${isMobileMenuOpen ? 'block' : 'hidden'} relative z-50`}>
+        <div className="border-t border-blue-800 bg-gradient-to-b from-slate-800 to-slate-900 shadow-inner">
+          <div className="px-4 pt-4 pb-3 space-y-2">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
+                className={`block w-full px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
                   isActiveRoute(item.path)
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'bg-white/20 text-white shadow-sm border border-white/10'
+                    : 'text-blue-100 hover:bg-white/10 hover:text-white hover:border-white/5 border border-transparent'
                 }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+                style={{ textDecoration: 'none' }}
               >
-                {item.icon}
-                <span>{item.label}</span>
+                <div className="flex items-center space-x-3">
+                  {item.icon}
+                  <span>{item.label}</span>
+                </div>
               </Link>
             ))}
 
-            {/* Mobile Profile Section */}
-            <div className="pt-4 mt-4 border-t border-gray-200">
-              <div className="flex items-center space-x-3 px-4 py-3 bg-gray-50 rounded-lg mb-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                  <User size={20} className="text-white" />
+            {/* Mobile User Info & Logout */}
+            <div className="border-t border-blue-700/50 mt-4 pt-4">
+              <div className="flex items-center px-4 py-3 bg-white/5 rounded-lg mb-3">
+                <div className="w-10 h-10 bg-emerald-500 rounded-lg flex items-center justify-center shadow-sm">
+                  <div className="w-4 h-4 bg-emerald-200 rounded-full animate-pulse"></div>
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">Government Portal</p>
-                  <p className="text-xs text-gray-500">Administrator</p>
+                <div className="ml-3 text-sm">
+                  <p className="font-medium text-white">{getGovernmentEmail()}</p>
+                  <p className="text-xs text-emerald-300">{t('currentlyOnline')}</p>
                 </div>
               </div>
-
-              <div className="space-y-1">
-                <button className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
-                  <Bell size={18} />
-                  <span>Notifications</span>
-                  <span className="ml-auto w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    3
-                  </span>
-                </button>
-                <button className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
-                  <Settings size={18} />
-                  <span>Settings</span>
-                </button>
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg font-medium shadow-sm"
-                >
-                  <LogOut size={18} />
-                  <span>Sign Out</span>
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleLogout();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 focus:ring-offset-slate-800 transition-all duration-200 flex items-center justify-center space-x-2 shadow-sm cursor-pointer"
+                style={{ touchAction: 'manipulation' }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span>{t('logout')}</span>
+              </button>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 };
 
 export default GovernmentNav;
-
-// import { useState } from 'react';
-// import { Link, useNavigate, useLocation } from 'react-router-dom';
-// import { LayoutDashboard, TrendingUp, FileText, LogOut, Menu, X, ChevronDown, Bell, Settings, User } from 'lucide-react';
-
-// const GovernmentNav = ({ setIsAuthenticated, setRole }) => {
-//   const navigate = useNavigate();
-//   const location = useLocation();
-//   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-//   const [isProfileOpen, setIsProfileOpen] = useState(false);
-
-//   const handleLogout = () => {
-//     localStorage.removeItem("access_token");
-//     localStorage.removeItem("refresh_token");
-//     localStorage.removeItem("role");
-//     setIsAuthenticated(false);
-//     setRole(null);
-//     navigate('/');
-//   };
-
-//   const isActiveRoute = (path) => location.pathname === path;
-
-//   const navItems = [
-//     {
-//       path: '/government_personnel/dashboard',
-//       label: 'Hospitals',
-//       icon: <LayoutDashboard size={20} />,
-//     },
-//     {
-//       path: '/government_personnel/prediction',
-//       label: 'Analytics',
-//       icon: <TrendingUp size={20} />,
-//     },
-//     {
-//       path: '/government_personnel/reports',
-//       label: 'Reports',
-//       icon: <FileText size={20} />,
-//     },
-//   ];
-
-//   return (
-//     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-//       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-//         <div className="flex justify-between items-center h-16">
-//           {/* Logo Section */}
-//           <div className="flex items-center space-x-8">
-//             <Link to="/government_personnel/dashboard" className="flex items-center space-x-3 group">
-//               <div className="relative">
-//                 <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center transform group-hover:scale-105 transition-transform shadow-lg">
-//                   <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-//                     <path d="M12 2L2 7h20L12 2zM2 7v7c0 5 10 8 10 8s10-3 10-8V7H2z" />
-//                   </svg>
-//                 </div>
-//                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-//               </div>
-//               <div className="hidden sm:block">
-//                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-//                   MedRecord
-//                 </h1>
-//                 <p className="text-xs text-gray-500 font-medium">Government Portal</p>
-//               </div>
-//             </Link>
-
-//             {/* Desktop Navigation */}
-//             <div className="hidden md:flex items-center space-x-1">
-//               {navItems.map((item) => (
-//                 <Link
-//                   key={item.path}
-//                   to={item.path}
-//                   className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center space-x-2 group ${
-//                     isActiveRoute(item.path)
-//                       ? 'text-blue-600 bg-blue-50'
-//                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-//                   }`}
-//                 >
-//                   <span className={`transition-colors ${isActiveRoute(item.path) ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'}`}>
-//                     {item.icon}
-//                   </span>
-//                   <span>{item.label}</span>
-//                   {isActiveRoute(item.path) && (
-//                     <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full"></span>
-//                   )}
-//                 </Link>
-//               ))}
-//             </div>
-//           </div>
-
-//           {/* Right Section - Desktop */}
-//           <div className="hidden md:flex items-center space-x-3">
-//             {/* Notifications */}
-//             <button className="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
-//               <Bell size={20} />
-//               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-//             </button>
-
-//             {/* Settings */}
-//             <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
-//               <Settings size={20} />
-//             </button>
-
-//             {/* Profile Dropdown */}
-//             <div className="relative">
-//               <button
-//                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-//                 className="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-all"
-//               >
-//                 <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-md">
-//                   <User size={18} className="text-white" />
-//                 </div>
-//                 <div className="text-left hidden lg:block">
-//                   <p className="text-sm font-semibold text-gray-700">Government</p>
-//                   <p className="text-xs text-gray-500">Administrator</p>
-//                 </div>
-//                 <ChevronDown 
-//                   size={16} 
-//                   className={`text-gray-400 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`}
-//                 />
-//               </button>
-
-//               {/* Dropdown Menu */}
-//               {isProfileOpen && (
-//                 <>
-//                   <div 
-//                     className="fixed inset-0 z-10" 
-//                     onClick={() => setIsProfileOpen(false)}
-//                   ></div>
-//                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-20">
-//                     <div className="px-4 py-3 border-b border-gray-100">
-//                       <p className="text-sm font-semibold text-gray-900">Government Portal</p>
-//                       <p className="text-xs text-gray-500 mt-1">gov.admin@medrecord.lk</p>
-//                     </div>
-                    
-//                     <div className="py-2">
-//                       <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3">
-//                         <User size={16} className="text-gray-400" />
-//                         <span>Profile Settings</span>
-//                       </button>
-//                       <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3">
-//                         <Settings size={16} className="text-gray-400" />
-//                         <span>Preferences</span>
-//                       </button>
-//                     </div>
-
-//                     <div className="border-t border-gray-100 pt-2">
-//                       <button
-//                         onClick={handleLogout}
-//                         className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-3 font-medium"
-//                       >
-//                         <LogOut size={16} />
-//                         <span>Sign Out</span>
-//                       </button>
-//                     </div>
-//                   </div>
-//                 </>
-//               )}
-//             </div>
-//           </div>
-
-//           {/* Mobile Menu Button */}
-//           <div className="md:hidden">
-//             <button
-//               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-//               className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-all"
-//             >
-//               {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-//             </button>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* Mobile Menu */}
-//       {isMobileMenuOpen && (
-//         <div className="md:hidden border-t border-gray-200 bg-white">
-//           <div className="px-4 pt-2 pb-4 space-y-1">
-//             {navItems.map((item) => (
-//               <Link
-//                 key={item.path}
-//                 to={item.path}
-//                 onClick={() => setIsMobileMenuOpen(false)}
-//                 className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-//                   isActiveRoute(item.path)
-//                     ? 'bg-blue-50 text-blue-600'
-//                     : 'text-gray-600 hover:bg-gray-50'
-//                 }`}
-//               >
-//                 {item.icon}
-//                 <span>{item.label}</span>
-//               </Link>
-//             ))}
-
-//             {/* Mobile Profile Section */}
-//             <div className="pt-4 mt-4 border-t border-gray-200">
-//               <div className="flex items-center space-x-3 px-4 py-3 bg-gray-50 rounded-lg mb-3">
-//                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-//                   <User size={20} className="text-white" />
-//                 </div>
-//                 <div>
-//                   <p className="text-sm font-semibold text-gray-900">Government Portal</p>
-//                   <p className="text-xs text-gray-500">Administrator</p>
-//                 </div>
-//               </div>
-
-//               <div className="space-y-1">
-//                 <button className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
-//                   <Bell size={18} />
-//                   <span>Notifications</span>
-//                   <span className="ml-auto w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-//                     3
-//                   </span>
-//                 </button>
-//                 <button className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
-//                   <Settings size={18} />
-//                   <span>Settings</span>
-//                 </button>
-//                 <button
-//                   onClick={() => {
-//                     handleLogout();
-//                     setIsMobileMenuOpen(false);
-//                   }}
-//                   className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 rounded-lg font-medium shadow-sm"
-//                 >
-//                   <LogOut size={18} />
-//                   <span>Sign Out</span>
-//                 </button>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       )}
-//     </nav>
-//   );
-// };
-
-// export default GovernmentNav;
