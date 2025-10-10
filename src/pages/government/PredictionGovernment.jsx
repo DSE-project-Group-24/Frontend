@@ -530,14 +530,14 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
                   {(viewMode === 'historical' || viewMode === 'monthly') && (
                     <>
                       <Bar dataKey="moderate" fill="#10b981" name={t('moderate')} />
-                      <Bar dataKey="serious" fill="#ef4444" name="Serious" />
+                      <Bar dataKey="serious" fill="#ef4444" name={t('serious')} />
                       <Line 
                         type="monotone" 
                         dataKey="total" 
                         stroke="#3b82f6" 
                         strokeWidth={3}
                         dot={{ fill: '#3b82f6', r: 4 }}
-                        name="Total"
+                        name={t('total')}
                       />
                     </>
                   )}
@@ -551,7 +551,7 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
                         strokeWidth={2}
                         strokeDasharray="5 5"
                         dot={{ fill: '#10b981', r: 4 }}
-                        name="Predicted Moderate"
+                        name={t('predictedModerate')}
                       />
                       <Line 
                         type="monotone" 
@@ -560,7 +560,7 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
                         strokeWidth={2}
                         strokeDasharray="5 5"
                         dot={{ fill: '#ef4444', r: 4 }}
-                        name="Predicted Serious"
+                        name={t('predictedSerious')}
                       />
                       <Line 
                         type="monotone" 
@@ -568,7 +568,7 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
                         stroke="#8b5cf6" 
                         strokeWidth={3}
                         dot={{ fill: '#8b5cf6', r: 5 }}
-                        name="Predicted Total"
+                        name={t('predictedTotal')}
                       />
                     </>
                   )}
@@ -582,8 +582,8 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
         {viewMode === 'yearly' && (
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
             <div className="mb-4">
-              <h2 className="text-xl font-semibold text-gray-800 mb-1">Yearly Accident Comparison</h2>
-              <p className="text-sm text-gray-600">Total accidents by year with severity breakdown</p>
+              <h2 className="text-xl font-semibold text-gray-800 mb-1">{t('yearlyAccidentComparison')}</h2>
+              <p className="text-sm text-gray-600">{t('totalAccidentsByYear')}</p>
             </div>
             
             <div className="h-96">
@@ -601,7 +601,7 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
                   />
                   <Legend />
                   <Bar dataKey="moderate" stackId="a" fill="#10b981" name="Moderate" />
-                  <Bar dataKey="serious" stackId="a" fill="#ef4444" name="Serious" />
+                  <Bar dataKey="serious" stackId="a" fill="#ef4444" name={t('serious')} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -639,8 +639,8 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
               <div className="mb-4">
-                <h2 className="text-xl font-semibold text-gray-800 mb-1">Accidents by Day of Week</h2>
-                <p className="text-sm text-gray-600">Weekly pattern analysis</p>
+                <h2 className="text-xl font-semibold text-gray-800 mb-1">{t('accidentsByDayOfWeek')}</h2>
+                <p className="text-sm text-gray-600">{t('weeklyPatternAnalysis')}</p>
               </div>
               
               <div className="h-80">
@@ -662,7 +662,7 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
                     />
                     <Legend />
                     <Bar dataKey="moderate" fill="#10b981" name="Moderate" />
-                    <Bar dataKey="serious" fill="#ef4444" name="Serious" />
+                    <Bar dataKey="serious" fill="#ef4444" name={t('serious')} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -670,8 +670,8 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
 
             <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
               <div className="mb-4">
-                <h2 className="text-xl font-semibold text-gray-800 mb-1">Day Distribution</h2>
-                <p className="text-sm text-gray-600">Proportion of total accidents</p>
+                <h2 className="text-xl font-semibold text-gray-800 mb-1">{t('dayDistribution')}</h2>
+                <p className="text-sm text-gray-600">{t('proportionTotalAccidents')}</p>
               </div>
               
               <div className="h-80">
@@ -699,7 +699,7 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
 
             {/* Weekly Stats Table */}
             <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Day of Week Statistics</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">{t('dayOfWeekStatistics')}</h3>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50">
@@ -709,14 +709,14 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Serious</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Moderate</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Serious Rate</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Risk Level</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('riskLevel')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     {processedDayOfWeekData.map((item) => {
-                      const riskLevel = item.total > 950 ? 'High' : item.total > 850 ? 'Medium' : 'Low';
-                      const riskColor = riskLevel === 'High' ? 'text-red-600 bg-red-50' : 
-                                       riskLevel === 'Medium' ? 'text-yellow-600 bg-yellow-50' : 
+                      const riskLevel = item.total > 950 ? t('high') : item.total > 850 ? t('medium') : t('low');
+                      const riskColor = item.total > 950 ? 'text-red-600 bg-red-50' : 
+                                       item.total > 850 ? 'text-yellow-600 bg-yellow-50' : 
                                        'text-green-600 bg-green-50';
                       return (
                         <tr key={item.fullDay} className="hover:bg-gray-50">
@@ -744,8 +744,8 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
           <div className="flex flex-col md:flex-row items-center justify-between mb-4">
             <div>
-              <h2 className="text-xl font-semibold text-gray-800 mb-1">Daily Accident Forecast</h2>
-              <p className="text-sm text-gray-600">Next 7 days prediction</p>
+              <h2 className="text-xl font-semibold text-gray-800 mb-1">{t('dailyAccidentForecast')}</h2>
+              <p className="text-sm text-gray-600">{t('next7Days')}</p>
             </div>
             <button
               onClick={fetchDailyPrediction}
@@ -761,7 +761,7 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
                   Loading...
                 </div>
               ) : (
-                'Generate Daily Forecast'
+                t('generateDailyForecast')
               )}
             </button>
           </div>
@@ -798,7 +798,7 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
                       strokeWidth={3}
                       fillOpacity={1}
                       fill="url(#colorDaily)"
-                      name="Predicted Accidents"
+                      name={t('predictedAccidents')}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -810,7 +810,7 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
                     <p className="text-xs text-gray-600 mb-1">{item.dayOfWeek}</p>
                     <p className="text-sm font-medium text-gray-700 mb-2">{item.day}</p>
                     <p className="text-2xl font-bold text-purple-600">{item.accidents}</p>
-                    <p className="text-xs text-gray-500 mt-1">accidents</p>
+                    <p className="text-xs text-gray-500 mt-1">{t('accidents')}</p>
                   </div>
                 ))}
               </div>
@@ -818,28 +818,28 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
               <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-4 border border-purple-200">
                 <h4 className="text-sm font-semibold text-gray-800 mb-2 flex items-center">
                   <AlertTriangle className="mr-2 text-purple-600" size={16} />
-                  Weekly Insights
+                  {t('weeklyInsights')}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
-                  <div>• Total weekly forecast: <span className="font-semibold text-purple-600">
+                  <div>• {t('totalWeeklyForecast')} <span className="font-semibold text-purple-600">
                     {processedPredictedDaily.reduce((sum, d) => sum + d.accidents, 0).toFixed(1)}
-                  </span> accidents</div>
-                  <div>• Average daily: <span className="font-semibold text-purple-600">
+                  </span> {t('accidents')}</div>
+                  <div>• {t('averageDaily')} <span className="font-semibold text-purple-600">
                     {(processedPredictedDaily.reduce((sum, d) => sum + d.accidents, 0) / processedPredictedDaily.length).toFixed(1)}
-                  </span> accidents</div>
-                  <div>• Peak day: <span className="font-semibold text-orange-600">
+                  </span> {t('accidents')}</div>
+                  <div>• {t('peakDay')} <span className="font-semibold text-orange-600">
                     {Math.max(...processedPredictedDaily.map(d => d.accidents)).toFixed(1)}
-                  </span> accidents</div>
-                  <div>• Lowest day: <span className="font-semibold text-green-600">
+                  </span> {t('accidents')}</div>
+                  <div>• {t('lowestDay')} <span className="font-semibold text-green-600">
                     {Math.min(...processedPredictedDaily.map(d => d.accidents)).toFixed(1)}
-                  </span> accidents</div>
+                  </span> {t('accidents')}</div>
                 </div>
               </div>
             </>
           ) : (
             <div className="text-center py-12">
               <Clock className="mx-auto mb-4 text-gray-400" size={48} />
-              <p className="text-gray-600">Click "Generate Daily Forecast" to view predictions for the next 7 days</p>
+              <p className="text-gray-600">{t('clickGenerate')}</p>
             </div>
           )}
         </div>
@@ -848,8 +848,8 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
         {(viewMode === 'monthly' || viewMode === 'historical') && (
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border border-gray-200">
             <div className="mb-4">
-              <h2 className="text-xl font-semibold text-gray-800 mb-1">Severity Rate Trend</h2>
-              <p className="text-sm text-gray-600">Percentage of serious accidents over time</p>
+              <h2 className="text-xl font-semibold text-gray-800 mb-1">{t('severityRateTrend')}</h2>
+              <p className="text-sm text-gray-600">{t('percentageSeriousAccidents')}</p>
             </div>
             
             <div className="h-80">
@@ -867,7 +867,7 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
                   <YAxis 
                     stroke="#666" 
                     fontSize={12}
-                    label={{ value: 'Serious Rate (%)', angle: -90, position: 'insideLeft' }}
+                    label={{ value: t('seriousRatePercent'), angle: -90, position: 'insideLeft' }}
                   />
                   <Tooltip 
                     contentStyle={{
@@ -894,7 +894,7 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
         {/* Data Table - Historical */}
         {viewMode === 'historical' && (
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Historical Monthly Data</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">{t('historicalMonthlyData')}</h3>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
@@ -925,7 +925,7 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
         {/* Data Table - Predicted */}
         {viewMode === 'predicted' && processedPredictedMonthly.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Predicted Monthly Data</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">{t('predictedMonthlyData')}</h3>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-indigo-50">

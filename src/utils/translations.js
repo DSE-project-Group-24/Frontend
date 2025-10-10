@@ -568,7 +568,42 @@ const translations = {
     overallSeriousRate: "Overall serious accident rate is",
     indicatingProportion: "%, indicating the proportion requiring immediate response.",
     predictionValue: "Prediction Value",
-    useForecasts: "Use forecasts for resource allocation, patrol planning, and preventive measures during high-risk periods."
+    useForecasts: "Use forecasts for resource allocation, patrol planning, and preventive measures during high-risk periods.",
+    
+    // Daily Forecast
+    dailyAccidentForecast: "Daily Accident Forecast",
+    next7Days: "Next 7 days prediction",
+    generateDailyForecast: "Generate Daily Forecast",
+    clickGenerate: "Click \"Generate Daily Forecast\" to view predictions for the next 7 days",
+    accidents: "accidents",
+    weeklyInsights: "Weekly Insights",
+    totalWeeklyForecast: "Total weekly forecast:",
+    averageDaily: "Average daily:",
+    peakDay: "Peak day:",
+    lowestDay: "Lowest day:",
+    severityRateTrend: "Severity Rate Trend",
+    percentageSeriousAccidents: "Percentage of serious accidents over time",
+    seriousRatePercent: "Serious Rate (%)",
+    
+    // Chart elements
+    yearlyAccidentComparison: "Yearly Accident Comparison",
+    totalAccidentsByYear: "Total accidents by year with severity breakdown",
+    accidentsByDayOfWeek: "Accidents by Day of Week", 
+    weeklyPatternAnalysis: "Weekly pattern analysis",
+    dayDistribution: "Day Distribution",
+    proportionTotalAccidents: "Proportion of total accidents",
+    dayOfWeekStatistics: "Day of Week Statistics",
+    riskLevel: "Risk Level",
+    high: "High",
+    medium: "Medium",
+    low: "Low",
+    historicalMonthlyData: "Historical Monthly Data",
+    predictedMonthlyData: "Predicted Monthly Data",
+    loading: "Loading...",
+    predictedModerate: "Predicted Moderate",
+    predictedSerious: "Predicted Serious", 
+    predictedTotal: "Predicted Total",
+    predictedAccidents: "Predicted Accidents"
   },
   
   si: {
@@ -1201,7 +1236,42 @@ const translations = {
     overallSeriousRate: "සමස්ත බරපතල අනතුරු අනුපාතය",
     indicatingProportion: "%, ක්ෂණික ප්‍රතිචාර අවශ්‍ය අනුපාතය දක්වයි.",
     predictionValue: "පුරෝකථන වටිනාකම",
-    useForecasts: "ඉහළ අවදානම් කාලවලදී සම්පත් බෙදාහැරීම, මුර සැලසුම් සහ නිවාරණ ක්‍රියාමාර්ග සඳහා පුරෝකථන භාවිතා කරන්න."
+    useForecasts: "ඉහළ අවදානම් කාලවලදී සම්පත් බෙදාහැරීම, මුර සැලසුම් සහ නිවාරණ ක්‍රියාමාර්ග සඳහා පුරෝකථන භාවිතා කරන්න.",
+    
+    // Daily Forecast
+    dailyAccidentForecast: "දෛනික අනතුරු පුරෝකථනය",
+    next7Days: "ඊළඟ දින 7 පුරෝකථනය",
+    generateDailyForecast: "දෛනික පුරෝකථනය ජනනය කරන්න",
+    clickGenerate: "ඊළඟ දින 7 සඳහා පුරෝකථන බැලීමට \"දෛනික පුරෝකථනය ජනනය කරන්න\" ක්ලික් කරන්න",
+    accidents: "අනතුරු",
+    weeklyInsights: "සතිපතා අවබෝධයන්",
+    totalWeeklyForecast: "සම්පූර්ණ සතිපතා පුරෝකථනය:",
+    averageDaily: "දෛනික සාමාන්‍යය:",
+    peakDay: "උච්ච දිනය:",
+    lowestDay: "අවම දිනය:",
+    severityRateTrend: "බරපතලකම අනුපාත ප්‍රවණතාව",
+    percentageSeriousAccidents: "කාලය සමඟ බරපතල අනතුරුවල ප්‍රතිශතය",
+    seriousRatePercent: "බරපතල අනුපාතය (%)",
+    
+    // Chart elements
+    yearlyAccidentComparison: "වාර්ෂික අනතුරු සංසන්දනය",
+    totalAccidentsByYear: "බරපතල බෙදීම සමඟ වර්ෂය අනුව මුළු අනතුරු",
+    accidentsByDayOfWeek: "සතියේ දිනය අනුව අනතුරු",
+    weeklyPatternAnalysis: "සතිපතා රටා විශ්ලේෂණය",
+    dayDistribution: "දින ව්‍යාප්තිය",
+    proportionTotalAccidents: "මුළු අනතුරුවල අනුපාතය",
+    dayOfWeekStatistics: "සතියේ දින සංඛ්‍යාලේඛන",
+    riskLevel: "අවදානම් මට්ටම",
+    high: "ඉහළ",
+    medium: "මධ්‍යම",
+    low: "අඩු",
+    historicalMonthlyData: "ඓතිහාසික මාසික දත්ත",
+    predictedMonthlyData: "පුරෝකථන මාසික දත්ත",
+    loading: "පූරණය වෙමින්...",
+    predictedModerate: "පුරෝකථන මධ්‍යම",
+    predictedSerious: "පුරෝකථන බරපතල",
+    predictedTotal: "පුරෝකථන මුළු",
+    predictedAccidents: "පුරෝකථන අනතුරු"
   },
   
   ta: {
@@ -1711,7 +1781,40 @@ const translations = {
     "PMCU, Omanthai": "முதன்मை சுகாதार மையம் - ஓமந்தை",
     "PMCU, Bogeswewa": "முதன்மை சுகாதார மையம் - போகேஸ்வேவ",
     "DH,Kodikamam": "மாவட்ட मருত्துवमनै - கொடிகாமம்",
-    "DH,Erukalampitti": "மாவட்ட मருत्துवमनै - எருகலம்பிட்டி",
+    "DH,Erukalampitti": "மாவட்ட மருத்துவமனை - எருகலம்பிட்டி",
+    
+    // Daily Forecast
+    dailyAccidentForecast: "தினசரி விபத்து முன்கணிப்பு",
+    next7Days: "அடுத்த 7 நாட்கள் முன்கணிப்பு",
+    generateDailyForecast: "தினசரி முன்கணிப்பை உருவாக்கவும்",
+    clickGenerate: "அடுத்த 7 நாட்களுக்கான முன்கணிப்புகளைப் பார்க்க \"தினசரி முன்கணிப்பை உருவாக்கவும்\" என்பதைக் கிளிக் செய்யவும்",
+    accidents: "விபத்துகள்",
+    weeklyInsights: "வாராந்திர நுண்ணறிவுகள்",
+    totalWeeklyForecast: "மொத்த வாராந்திர முன்கணிப்பு:",
+    averageDaily: "தினசரி சராசரி:",
+    peakDay: "உச்ச நாள்:",
+    lowestDay: "குறைந்த நாள்:",
+    severityRateTrend: "தீவிரம் விகித போக்கு",
+    percentageSeriousAccidents: "காலப்போக்கில் தீவிர விபத்துகளின் சதவிகிதம்",
+    seriousRatePercent: "தீவிர விகிதம் (%)",
+    
+    // Chart elements
+    yearlyAccidentComparison: "வருடாந்திர விபத்து ஒப்பீடு",
+    accidentsByDayOfWeek: "வாரத்தின் நாளின் அடிப்படையில் விபத்துகள்",
+    weeklyPatternAnalysis: "வாராந்திர முறை பகுப்பாய்வு",
+    dayDistribution: "நாள் விநியோகம்",
+    dayOfWeekStatistics: "வாரத்தின் நாள் புள்ளிவிவரங்கள்",
+    riskLevel: "ஆபத்து நிலை",
+    high: "உயர்ந்த",
+    medium: "நடுத்தர",
+    low: "குறைந்த",
+    historicalMonthlyData: "வரலாற்று மாதாந்திர தரவு",
+    predictedMonthlyData: "முன்கணிக்கப்பட்ட மாதாந்திர தரவு",
+    loading: "ஏற்றுகிறது...",
+    predictedModerate: "முன்கணிக்கப்பட்ட மிதமான",
+    predictedSerious: "முன்கணிக்கப்பட்ட தீவிரம்",
+    predictedTotal: "முன்கணிக்கப்பட்ட மொத்தம்",
+    predictedAccidents: "முன்கணிக்கப்பட்ட விபத்துகள்"
   }
 };
 
