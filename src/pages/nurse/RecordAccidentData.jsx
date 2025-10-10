@@ -23,7 +23,7 @@ import { t } from "../../utils/translations";
  */
 const useAuth = () => {
   const id = window.localStorage.getItem("user_id") || "demo-nurse-id";
-  const name = window.localStorage.getItem("name") || "Demo Nurse";
+  const name = window.localStorage.getItem("name") || t('demoNurse');
   //window.localStorage.setItem("user_id", id);
   return { id, name, role: "nurse" };
 };
@@ -221,7 +221,7 @@ const StatusBadge = ({ completed }) => (
         : "bg-yellow-50 text-yellow-800 border-yellow-200"
     }`}
   >
-    {completed ? "Completed" : "Not Completed"}
+    {completed ? t('completed') : t('notCompleted')}
   </span>
 );
 
@@ -239,15 +239,15 @@ const RecordRow = ({ rec, currentUserId, onView, onEdit }) => {
         <StatusBadge completed={!!rec.Completed} />
       </div>
       <div className="text-xs text-gray-500 mt-1">
-        Managed by:{" "}
-        {rec.managed_by === currentUserId ? "You" : rec.managed_by_name}
+        {t('managedBy')}{" "}
+        {rec.managed_by === currentUserId ? t('you') : rec.managed_by_name}
       </div>
       <div className="flex gap-2 mt-3">
         <button
           onClick={() => onView(rec)}
           className="px-3 py-1.5 rounded-lg border bg-gray-100 hover:bg-gray-200 text-sm"
         >
-          View
+          {t('view')}
         </button>
         <button
           onClick={() => onEdit(rec)}
@@ -258,7 +258,7 @@ const RecordRow = ({ rec, currentUserId, onView, onEdit }) => {
               : "bg-gray-200 text-gray-500 cursor-not-allowed"
           }`}
         >
-          Edit
+          {t('edit')}
         </button>
       </div>
     </div>
@@ -777,7 +777,7 @@ const AccidentRecordSystem = () => {
       <NurseNav />
       <div className="container mx-auto p-4 flex-1">
         <h1 className="text-2xl font-bold mb-6">
-          Accident Record Management System
+          {t('accidentRecordManagementSystem')}
         </h1>
 
         {message && (
@@ -796,7 +796,7 @@ const AccidentRecordSystem = () => {
           {/* Left: Patients (kept) */}
           <div className="bg-white p-4 rounded shadow">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xl font-semibold">Patients</h2>
+              <h2 className="text-xl font-semibold">{t('patients')}</h2>
             </div>
 
             {/* Search */}
@@ -804,7 +804,7 @@ const AccidentRecordSystem = () => {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search by name / NIC / phone / DOB"
+                placeholder={t('searchByNameNicPhoneDob')}
                 className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
               />
             </div>
@@ -837,10 +837,10 @@ const AccidentRecordSystem = () => {
                         </div>
                         <div className="text-sm text-gray-600">
                           {val(patient, "Contact Number", "contact_number") ||
-                            "No Contact"}{" "}
+                            t('noContact')}{" "}
                           •{" "}
                           {val(patient, "Date of Birth", "date_of_birth") ||
-                            "No DOB"}
+                            t('noDob')}
                         </div>
                       </div>
                     );
@@ -857,10 +857,10 @@ const AccidentRecordSystem = () => {
             {/* Actions */}
             <div className="bg-white p-4 rounded shadow">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xl font-semibold">Actions</h2>
+                <h2 className="text-xl font-semibold">{t('actions')}</h2>
               </div>
               <div className="text-sm mb-3">
-                Signed in as: <b>{me.name}</b> (role: {me.role})
+                {t('signedInAs')} <b>{me.name}</b> (role: {me.role})
               </div>
               <button
                 onClick={startCreate}
@@ -871,7 +871,7 @@ const AccidentRecordSystem = () => {
                     : "bg-gray-200 text-gray-500"
                 }`}
               >
-                Create new record
+                {t('createNewRecord')}
               </button>
             </div>
 
@@ -879,7 +879,7 @@ const AccidentRecordSystem = () => {
             {selectedPatient && mode === "idle" && (
               <div className="bg-white p-4 rounded shadow">
                 <h3 className="text-lg font-semibold mb-2">
-                  Existing accident records —{" "}
+                  {t('existingAccidentRecords')}{" "}
                   {val(selectedPatient, "Full Name", "full_name", "name")}
                 </h3>
                 {loadingRecords ? (
@@ -911,10 +911,10 @@ const AccidentRecordSystem = () => {
                     <div>
                       <h3 className="text-xl md:text-2xl font-bold text-gray-800">
                         {mode === "create"
-                          ? "Create Accident Record"
+                          ? t('createAccidentRecord')
                           : mode === "edit"
-                          ? "Edit Accident Record"
-                          : "View Accident Record"}
+                          ? t('editAccidentRecord')
+                          : t('viewAccidentRecord')}
                       </h3>
                       <p className="text-sm text-gray-500">
                         Patient:{" "}
