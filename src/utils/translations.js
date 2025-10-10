@@ -638,7 +638,55 @@ const translations = {
     automatedGeneration: "Automated generation of PDF/Excel reports with visualizations and key metrics (e.g., accident rates by district).",
     ruleBasedInsights: "Rule-based insights, such as correlation analysis between traffic volume and accident severity.",
     scheduledReport: "Scheduled report delivery via email for ongoing monitoring.",
-    transformRawData: "Transform raw data into strategic intelligence for safer roads in the North Province."
+    transformRawData: "Transform raw data into strategic intelligence for safer roads in the North Province.",
+    
+    // Reports Government Page - Additional Keys
+    setupFiltersParametersMessage: "Set up filters and parameters to discover meaningful patterns in accident data. Use the controls below to configure your analysis.",
+    dataSelection: "Data Selection",
+    mustIncludeConditions: "Must Include (Conditions)",
+    mustIncludeOutcomes: "Must Include (Outcomes)",
+    focusSpecificOutcome: "Focus on Specific Outcome",
+    enableSpecificTarget: "Enable Specific Target",
+    selectCategory: "Select Category",
+    chooseCategoryPlaceholder: "Choose a category...",
+    selectValues: "Select Values",
+    noValuesAvailable: "No values available",
+    leaveUncheckedNote: "Leave unchecked to include all values for this category",
+    addFilter: "Add Filter",
+    noFiltersApplied: "No filters applied yet",
+    removeFilter: "Remove",
+    allValuesIncluded: "All values included",
+    chooseCategory: "Choose category...",
+    specificValue: "Specific Value",
+    target: "Target",
+    discoveredPatterns: "Discovered Patterns",
+    meaningfulRelationships: "Meaningful relationships in medical data",
+    recordsAnalyzed: "Records Analyzed",
+    whenWeSee: "When We See",
+    weOftenFind: "We Often Find",
+    frequency: "Frequency",
+    reliability: "Reliability",
+    strength: "Strength",
+    noPatternsFound: "No patterns found yet",
+    configureFiltersMessage: "Configure your filters and click \"Discover Patterns\"",
+    howToReadResults: "How to Read Results",
+    whenWeSeeDesc: "Patient characteristics or conditions",
+    weOftenFindDesc: "Outcomes commonly occurring with those characteristics",
+    frequencyDesc: "How often this pattern appears in the data",
+    reliabilityDesc: "How trustworthy the connection is (higher = better)",
+    strengthDesc: "How much stronger than random chance (higher = more significant)",
+    selectPatientRecords: "Select which patient records to include in the analysis. This helps focus on specific populations.",
+    patternsIncludeCharacteristics: "Patterns must include these characteristics in the 'When We See' column",
+    patternsIncludeOutcomes: "Patterns must include these in the 'We Often Find' column",
+    discoverPatterns: "Discover Patterns",
+    
+    // Tooltip texts
+    supportTooltip: "How often a pattern must appear in the data (higher = more common patterns only)",
+    confidenceTooltip: "How reliable the pattern prediction must be (higher = more trustworthy patterns)",
+    
+    // Alert messages
+    selectBothCategoryValue: "Please select both category and value for the specific target.",
+    analysisFailed: "Analysis failed. Please try again."
   },
   
   si: {
@@ -1341,7 +1389,55 @@ const translations = {
     automatedGeneration: "ප්‍රදර්ශන සහ ප්‍රධාන ප්‍රමිතික සමඟ PDF/Excel වාර්තා ස්වයංක්‍රීය ජනනය (උදා: දිස්ත්‍රික්ක අනුව අනතුරු අනුපාත).",
     ruleBasedInsights: "රථවාහන පරිමාව සහ අනතුරු බරපතලකම අතර සහසම්බන්ධතා විශ්ලේෂණය වැනි නීති මත පදනම් වූ තීක්ෂ්ණතා.",
     scheduledReport: "අඛණ්ඩ නිරීක්ෂණය සඳහා ඊමේල් හරහා සැලසුම්ගත වාර්තා බෙදාහැරීම.",
-    transformRawData: "උතුරු පළාතේ ආරක්ෂිත මාර්ග සඳහා අශෝධිත දත්ත උපායමාර්ගික බුද්ධිමත්තවයට පරිවර්තනය කරන්න."
+    transformRawData: "උතුරු පළාතේ ආරක්ෂිත මාර්ග සඳහා අශෝධිත දත්ත උපායමාර්ගික බුද්ධිමත්තවයට පරිවර්තනය කරන්න.",
+    
+    // Reports Government Page - Additional Keys
+    setupFiltersParametersMessage: "අනතුරු දත්තවල අර්ථවත් රටා සොයාගැනීම සඳහා පෙරහන් සහ පරාමිති සකසන්න. ඔබේ විශ්ලේෂණය වින්‍යාසගත කිරීම සඳහා පහත පාලන පරිහරණ භාවිතා කරන්න.",
+    dataSelection: "දත්ත තේරීම",
+    mustIncludeConditions: "අනිවාර්යයෙන් ඇතුළත් කළ යුතු (තත්වයන්)",
+    mustIncludeOutcomes: "අනිවාර්යයෙන් ඇතුළත් කළ යුතු (ප්‍රතිඵල)",
+    focusSpecificOutcome: "විශේෂිත ප්‍රතිඵලයක් කෙරෙහි අවධානය යොමු කරන්න",
+    enableSpecificTarget: "විශේෂිත ඉලක්කයක් සක්‍රීය කරන්න",
+    selectCategory: "කාණ්ඩයක් තෝරන්න",
+    chooseCategoryPlaceholder: "කාණ්ඩයක් තෝරන්න...",
+    selectValues: "අගයන් තෝරන්න",
+    noValuesAvailable: "කිසිදු අගයක් නොමැත",
+    leaveUncheckedNote: "මෙම කාණ්ඩය සඳහා සියලු අගයන් ඇතුළත් කිරීමට සලකුණු කර නොතබන්න",
+    addFilter: "පෙරහන එකතු කරන්න",
+    noFiltersApplied: "තවම පෙරහන් යොදා නැත",
+    removeFilter: "ඉවත් කරන්න",
+    allValuesIncluded: "සියලු අගයන් ඇතුළත්",
+    chooseCategory: "කාණ්ඩයක් තෝරන්න...",
+    specificValue: "විශේෂිත අගය",
+    target: "ඉලක්කය",
+    discoveredPatterns: "සොයාගත් රටා",
+    meaningfulRelationships: "වෛද්‍ය දත්තවල අර්ථවත් සම්බන්ධතා",
+    recordsAnalyzed: "විශ්ලේෂණය කළ වාර්තා",
+    whenWeSee: "අපි දකින විට",
+    weOftenFind: "අපි බොහෝ විට සොයා ගන්නේ",
+    frequency: "සංඛ්‍යාතය",
+    reliability: "විශ්වසනීයත්වය",
+    strength: "ශක්තිය",
+    noPatternsFound: "තවම රටා හමු නොවීය",
+    configureFiltersMessage: "ඔබේ පෙරහන් වින්‍යාසගත කර \"රටා සොයාගන්න\" ක්ලික් කරන්න",
+    howToReadResults: "ප්‍රතිඵල කියවන්නේ කෙසේද",
+    whenWeSeeDesc: "රෝගියාගේ ලක්ෂණ හෝ තත්වයන්",
+    weOftenFindDesc: "එම ලක්ෂණ සමඟ බහුලව සිදුවන ප්‍රතිඵල",
+    frequencyDesc: "මෙම රටාව දත්තවල කී දෙනාක් පතිත වේද",
+    reliabilityDesc: "සම්බන්ධතාව කෙතරම් විශ්වසනීයද (ඉහළ = වඩා හොඳ)",
+    strengthDesc: "අහඹු අවස්ථාවට වඩා කෙතරම් ශක්තිමත්ද (ඉහළ = වඩා වැදගත්)",
+    selectPatientRecords: "විශ්ලේෂණයට ඇතුළත් කළ යුතු රෝගී වාර්තා තෝරන්න. මෙය විශේෂිත ජනගහනයක් කෙරෙහි අවධානය යොමු කිරීමට උපකාරී වේ.",
+    patternsIncludeCharacteristics: "රටා 'අපි දකින විට' තීරුවේ මෙම ලක්ෂණ අනිවාර්යයෙන් ඇතුළත් කළ යුතුය",
+    patternsIncludeOutcomes: "රටා 'අපि බොහෝ විට සොයා ගන්නේ' තීරුවේ මේවා අනිවාර්යයෙන් ඇතුළත් කළ යුතුය",
+    discoverPatterns: "රටා සොයාගන්න",
+    
+    // Tooltip texts
+    supportTooltip: "දත්තවල රටාවක් කී දෙනා පතිත විය යුතුද (ඉහළ = සාමාන්‍ය රටා පමණි)",
+    confidenceTooltip: "රටාවේ පුරෝකථනය කෙතරම් විශ්වසනීය විය යුතුද (ඉහළ = වඩා විශ්වසනීය රටා)",
+    
+    // Alert messages
+    selectBothCategoryValue: "කරුණාකර විශේෂිත ඉලක්කය සඳහා කාණ්ඩය සහ අගය යන දෙකම තෝරන්න.",
+    analysisFailed: "විශ්ලේෂණය අසාර්ථක විය. කරුණාකර නැවත උත්සාහ කරන්න."
   },
   
   ta: {
@@ -1919,7 +2015,55 @@ const translations = {
     automatedGeneration: "காட்சிப்படுத்தல்கள் மற்றும் முக்கிய அளவீடுகளுடன் PDF/Excel அறிக்கைகளின் தானியங்கு உருவாக்கம் (எ.கா: மாவட்டத்தின்படி விபத்து விகிதங்கள்).",
     ruleBasedInsights: "போக்குவரத்து அளவு மற்றும் விபத்து தீவிரத்திற்கு இடையேயான தொடர்பு பகுப்பாய்வு போன்ற விதி அடிப்படையிலான நுண்ணறிவுகள்.",
     scheduledReport: "தொடர்ச்சியான கண்காணிப்பிற்காக மின்னஞ்சல் மூலம் திட்டமிடப்பட்ட அறிக்கை விநியோகம்.",
-    transformRawData: "வடக்கு மாகாணத்தில் பாதுகாப்பான சாலைகளுக்கான மூல தரவை மூலோபாய நுண்ணறிவாக மாற்றுங்கள்."
+    transformRawData: "வடக்கு மாகாணத்தில் பாதுகாப்பான சாலைகளுக்கான மூல தரவை மூலோபாய நுண்ணறிவாக மாற்றுங்கள்.",
+    
+    // Reports Government Page - Additional Keys
+    setupFiltersParametersMessage: "விபத்து தரவில் அர்த்தமுள்ள வடிவங்களைக் கண்டறிய வடிப்பான்கள் மற்றும் அளவுருக்களை அமைக்கவும். உங்கள் பகுப்பாய்வை கட்டமைக்க கீழே உள்ள கட்டுப்பாடுகளைப் பயன்படுத்துங்கள்.",
+    dataSelection: "தரவு தேர்வு",
+    mustIncludeConditions: "அவசியம் சேர்க்க வேண்டியவை (நிலைமைகள்)",
+    mustIncludeOutcomes: "அவசியம் சேர்க்க வேண்டியவை (விளைவுகள்)",
+    focusSpecificOutcome: "குறிப்பிட்ட விளைவில் கவனம் செலுத்துங்கள்",
+    enableSpecificTarget: "குறிப்பிட்ட இலக்கை இயக்கவும்",
+    selectCategory: "வகையைத் தேர்ந்தெடுக்கவும்",
+    chooseCategoryPlaceholder: "ஒரு வகையைத் தேர்ந்தெடுக்கவும்...",
+    selectValues: "மதிப்புகளைத் தேர்ந்தெடுக்கவும்",
+    noValuesAvailable: "மதிப்புகள் எதுவும் கிடைக்கவில்லை",
+    leaveUncheckedNote: "இந்த வகைக்கான அனைத்து மதிப்புகளையும் சேர்க்க குறிக்காமல் விடுங்கள்",
+    addFilter: "வடிப்பான் சேர்க்கவும்",
+    noFiltersApplied: "இன்னும் வடிப்பான்கள் பயன்படுத்தப்படவில்லை",
+    removeFilter: "அகற்று",
+    allValuesIncluded: "அனைத்து மதிப்புகளும் சேர்க்கப்பட்டுள்ளன",
+    chooseCategory: "ஒரு வகையைத் தேர்ந்தெடுக்கவும்...",
+    specificValue: "குறிப்பிட்ட மதிப்பு",
+    target: "இலக்கு",
+    discoveredPatterns: "கண்டுபிடிக்கப்பட்ட வடிவங்கள்",
+    meaningfulRelationships: "மருத்துவ தரவில் அர்த்தமுள்ள உறவுகள்",
+    recordsAnalyzed: "பகுப்பாய்வு செய்யப்பட்ட பதிவுகள்",
+    whenWeSee: "நாம் பார்க்கும்போது",
+    weOftenFind: "நாம் அடிக்கடி கண்டறிவது",
+    frequency: "அதிர்வெண்",
+    reliability: "நம்பகத்தன்மை",
+    strength: "வலிமை",
+    noPatternsFound: "இன்னும் வடிவங்கள் எதுவும் கிடைக்கவில்லை",
+    configureFiltersMessage: "உங்கள் வடிப்பான்களை கட்டமைத்து \"வடிவங்களைக் கண்டறியுங்கள்\" என்பதைக் கிளிக் செய்யுங்கள்",
+    howToReadResults: "முடிவுகளை எப்படிப் படிப்பது",
+    whenWeSeeDesc: "நோயாளியின் பண்புகள் அல்லது நிலைமைகள்",
+    weOftenFindDesc: "அந்த பண்புகளுடன் பொதுவாக நிகழும் விளைவுகள்",
+    frequencyDesc: "இந்த வடிவம் தரவில் எவ்வளவு அடிக்கடி தோன்றுகிறது",
+    reliabilityDesc: "இணைப்பு எவ்வளவு நம்பகமானது (அதிகம் = சிறந்தது)",
+    strengthDesc: "சீரற்ற வாய்ப்பை விட எவ்வளவு வலிமையானது (அதிகம் = அதிக முக்கியத்துவம்)",
+    selectPatientRecords: "பகுப்பாய்வில் சேர்க்க வேண்டிய நோயாளி பதிவுகளைத் தேர்ந்தெடுக்கவும். இது குறிப்பிட்ட மக்கள்தொகையில் கவனம் செலுத்த உதவுகிறது.",
+    patternsIncludeCharacteristics: "வடிவங்கள் 'நாம் பார்க்கும்போது' நெடுவரிசையில் இந்த பண்புகளை அவசியம் சேர்க்க வேண்டும்",
+    patternsIncludeOutcomes: "வடிவங்கள் 'நாம் அடிக்கடி கண்டறிவது' நெடுவரிசையில் இவற்றை அவசியம் சேர்க்க வேண்டும்",
+    discoverPatterns: "வடிவங்களைக் கண்டறியுங்கள்",
+    
+    // Tooltip texts
+    supportTooltip: "தரவில் ஒரு வடிவம் எத்தனை முறை தோன்ற வேண்டும் (அதிகம் = பொதுவான வடிவங்கள் மட்டும்)",
+    confidenceTooltip: "வடிவ முன்னறிவிப்பு எவ்வளவு நம்பகமானதாக இருக்க வேண்டும் (அதிகம் = அதிக நம்பகமான வடிவங்கள்)",
+    
+    // Alert messages
+    selectBothCategoryValue: "குறிப்பிட்ட இலக்கிற்கு வகை மற்றும் மதிப்பு இரண்டையும் தேர்ந்தெடுக்கவும்.",
+    analysisFailed: "பகுப்பாய்வு தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்."
   }
 };
 

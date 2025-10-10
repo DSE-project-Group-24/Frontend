@@ -13,6 +13,34 @@ function splitToken(token) {
   return { col: token.slice(0, idx), val: token.slice(idx + 1) };
 }
 
+function translateColumnName(columnName, t) {
+  // Map column names to translation keys
+  const columnMap = {
+    'severity': 'severity',
+    'visibility': 'visibility',
+    'roadCondition': 'roadCondition',
+    'roadType': 'roadType',
+    'categoryOfRoad': 'categoryOfRoad',
+    'approximateSpeed': 'approximateSpeed',
+    'modeOfTraveling': 'modeOfTraveling',
+    'collisionWith': 'collisionWith',
+    'modeOfTransportToHospital': 'modeOfTransportToHospital',
+    'alcoholConsumption': 'alcoholConsumption',
+    'illicitDrugs': 'illicitDrugs',
+    'helmetWorn': 'helmetWorn',
+    'firstAidGivenAtScene': 'firstAidGivenAtScene',
+    'hospitalDistanceFromHome': 'hospitalDistanceFromHome',
+    'hospital': 'hospital',
+    'familyCurrentStatus': 'familyCurrentStatus',
+    'bystanderExpenditurePerDay': 'bystanderExpenditurePerDay',
+    'travelingExpenditurePerDay': 'travelingExpenditurePerDay',
+    'anyOtherHospitalAdmissionExpenditure': 'anyOtherHospitalAdmissionExpenditure'
+  };
+  
+  // Return translated name if available, otherwise return original
+  return columnMap[columnName] ? t(columnMap[columnName]) : columnName;
+}
+
 function groupTokens(tokens) {
   const map = new Map();
   tokens.forEach((t) => {
@@ -86,7 +114,7 @@ const Skeleton = ({ className = "" }) => (
 );
 
 /* ---------------- Filter Section ---------------- */
-function FilterSection({ title, icon: Icon, grouped = [], value = [], onChange, hint }) {
+function FilterSection({ title, icon: Icon, grouped = [], value = [], onChange, hint, t }) {
   const [draftCol, setDraftCol] = useState("");
   const [draftVals, setDraftVals] = useState([]);
 
@@ -135,22 +163,22 @@ function FilterSection({ title, icon: Icon, grouped = [], value = [], onChange, 
       {/* Active Filters */}
       <div className="space-y-2 mb-4">
         {!Array.isArray(value) || value.length === 0 ? (
-          <p className="text-sm text-slate-400 italic">No filters applied yet</p>
+          <p className="text-sm text-slate-400 italic">{t('noFiltersApplied')}</p>
         ) : (
           value.map((f) => (
             <div key={f.column} className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-3 border border-indigo-100">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-slate-800">{f.column}</span>
+                <span className="text-sm font-semibold text-slate-800">{translateColumnName(f.column, t)}</span>
                 <button
                   onClick={() => removeFilter(f.column)}
                   className="text-xs text-red-600 hover:text-red-800 font-medium"
                 >
-                  Remove
+                  {t('removeFilter')}
                 </button>
               </div>
               <div className="text-xs text-slate-700">
                 {!Array.isArray(f.selected) || f.selected.length === 0 ? (
-                  <em className="text-slate-500">All values included</em>
+                  <em className="text-slate-500">{t('allValuesIncluded')}</em>
                 ) : (
                   <div className="flex flex-wrap gap-1">
                     {f.selected.map(v => <Badge key={v} color="purple">{v}</Badge>)}
@@ -165,7 +193,7 @@ function FilterSection({ title, icon: Icon, grouped = [], value = [], onChange, 
       {/* Add New Filter */}
       <div className="border-t border-slate-200 pt-4 space-y-3">
         <div>
-          <label className="text-xs font-medium text-slate-700 mb-1 block">Select Category</label>
+          <label className="text-xs font-medium text-slate-700 mb-1 block">{t('selectCategory')}</label>
           <select
             className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={draftCol}
@@ -174,16 +202,16 @@ function FilterSection({ title, icon: Icon, grouped = [], value = [], onChange, 
               setDraftVals([]);
             }}
           >
-            <option value="">Choose a category...</option>
+            <option value="">{t('chooseCategoryPlaceholder')}</option>
             {colOptions.map((c) => (
-              <option key={c} value={c}>{c}</option>
+              <option key={c} value={c}>{translateColumnName(c, t)}</option>
             ))}
           </select>
         </div>
 
         {draftCol && (
           <div>
-            <label className="text-xs font-medium text-slate-700 mb-2 block">Select Values</label>
+            <label className="text-xs font-medium text-slate-700 mb-2 block">{t('selectValues')}</label>
             <div className="max-h-40 overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-3">
               <div className="space-y-2">
                 {Array.isArray(currentValues) && currentValues.length > 0 ? (
@@ -199,12 +227,12 @@ function FilterSection({ title, icon: Icon, grouped = [], value = [], onChange, 
                     </label>
                   ))
                 ) : (
-                  <p className="text-sm text-slate-400 italic">No values available</p>
+                  <p className="text-sm text-slate-400 italic">{t('noValuesAvailable')}</p>
                 )}
               </div>
             </div>
             <p className="mt-2 text-xs text-slate-500 italic">
-              Leave unchecked to include all values for this category
+              {t('leaveUncheckedNote')}
             </p>
           </div>
         )}
@@ -214,7 +242,7 @@ function FilterSection({ title, icon: Icon, grouped = [], value = [], onChange, 
           disabled={!draftCol}
           className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          Add Filter
+          {t('addFilter')}
         </button>
       </div>
     </div>
@@ -222,7 +250,7 @@ function FilterSection({ title, icon: Icon, grouped = [], value = [], onChange, 
 }
 
 /* ---------------- Target Selector ---------------- */
-function TargetSelector({ title, grouped = [], enabled, onToggle, targetCol, setTargetCol, targetVal, setTargetVal }) {
+function TargetSelector({ title, grouped = [], enabled, onToggle, targetCol, setTargetCol, targetVal, setTargetVal, t }) {
   const colOptions = Array.isArray(grouped) ? grouped.map((g) => g.column) : [];
   const currentValues = React.useMemo(() => {
     if (!Array.isArray(grouped) || !targetCol) return [];
@@ -245,13 +273,13 @@ function TargetSelector({ title, grouped = [], enabled, onToggle, targetCol, set
             checked={enabled}
             onChange={() => onToggle(!enabled)}
           />
-          <span className="text-sm font-medium text-slate-700">Enable Specific Target</span>
+          <span className="text-sm font-medium text-slate-700">{t('enableSpecificTarget')}</span>
         </label>
 
         {enabled && (
           <div className="space-y-3 pl-2 border-l-2 border-indigo-200">
             <div>
-              <label className="text-xs font-medium text-slate-700 mb-1 block">Category</label>
+              <label className="text-xs font-medium text-slate-700 mb-1 block">{t('selectCategory')}</label>
               <select
                 className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 value={targetCol}
@@ -260,16 +288,16 @@ function TargetSelector({ title, grouped = [], enabled, onToggle, targetCol, set
                   setTargetVal("");
                 }}
               >
-                <option value="">Choose category...</option>
+                <option value="">{t('chooseCategory')}</option>
                 {colOptions.map((c) => (
-                  <option key={c} value={c}>{c}</option>
+                  <option key={c} value={c}>{translateColumnName(c, t)}</option>
                 ))}
               </select>
             </div>
 
             {targetCol && (
               <div>
-                <label className="text-xs font-medium text-slate-700 mb-2 block">Specific Value</label>
+                <label className="text-xs font-medium text-slate-700 mb-2 block">{t('specificValue')}</label>
                 <div className="max-h-40 overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <div className="space-y-2">
                     {Array.isArray(currentValues) && currentValues.length > 0 ? (
@@ -286,14 +314,14 @@ function TargetSelector({ title, grouped = [], enabled, onToggle, targetCol, set
                         </label>
                       ))
                     ) : (
-                      <p className="text-sm text-slate-400 italic">No values available</p>
+                      <p className="text-sm text-slate-400 italic">{t('noValuesAvailable')}</p>
                     )}
                   </div>
                 </div>
                 {targetVal && (
                   <div className="mt-2 p-2 bg-green-50 rounded border border-green-200">
                     <p className="text-xs text-green-800">
-                      <strong>Target:</strong> {targetCol} = {targetVal}
+                      <strong>{t('target')}:</strong> {translateColumnName(targetCol, t)} = {targetVal}
                     </p>
                   </div>
                 )}
@@ -357,7 +385,7 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
         : null;
 
       if (rhsExact && !rhsToken) {
-        alert("Please select both category and value for the specific target.");
+        alert(t('selectBothCategoryValue'));
         setRunning(false);
         return;
       }
@@ -383,7 +411,7 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
       setStats(response.data.stats || null);
       setRules(response.data.rules || []);
     } catch (e) {
-      alert(e.response?.data?.detail || "Analysis failed. Please try again.");
+      alert(e.response?.data?.detail || t('analysisFailed'));
     } finally {
       setRunning(false);
     }
@@ -423,7 +451,7 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
                 <h2 className="text-xl font-bold">{t('configureAnalysis')}</h2>
               </div>
               <p className="text-indigo-100 text-sm">
-{t('setupFiltersParametersMessage')}
+                {t('setupFiltersParametersMessage')}
               </p>
             </div>
 
@@ -449,7 +477,7 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
                       min={0.005}
                       max={0.2}
                       step={0.005}
-                      tooltip="How often a pattern must appear in the data (higher = more common patterns only)"
+                      tooltip={t('supportTooltip')}
                     />
                     <Slider
                       label={t('minConfidence')}
@@ -458,7 +486,7 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
                       min={0.1}
                       max={0.9}
                       step={0.05}
-                      tooltip="How reliable the pattern prediction must be (higher = more trustworthy patterns)"
+                      tooltip={t('confidenceTooltip')}
                     />
                   </div>
 
@@ -468,42 +496,45 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
                     className="w-full mt-6 bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                   >
                     <Search className="h-5 w-5" />
-                    {running ? t('running') : t('runApriori')}
+                    {running ? t('running') : t('discoverPatterns')}
                   </button>
                 </div>
 
                 {/* Data Selection */}
                 <FilterSection
-                  title="Data Selection"
+                  title={t('dataSelection')}
                   icon={Filter}
                   grouped={grouped}
                   value={preFilters}
                   onChange={setPreFilters}
-                  hint="Select which patient records to include in the analysis. This helps focus on specific populations."
+                  hint={t('selectPatientRecords')}
+                  t={t}
                 />
 
                 {/* Pattern Filters */}
                 <FilterSection
-                  title="Must Include (Conditions)"
+                  title={t('mustIncludeConditions')}
                   icon={Filter}
                   grouped={grouped}
                   value={postAFilters}
                   onChange={setPostAFilters}
-                  hint="Patterns must include these characteristics in the 'When We See' column"
+                  hint={t('patternsIncludeCharacteristics')}
+                  t={t}
                 />
 
                 <FilterSection
-                  title="Must Include (Outcomes)"
+                  title={t('mustIncludeOutcomes')}
                   icon={Filter}
                   grouped={grouped}
                   value={postCFilters}
                   onChange={setPostCFilters}
-                  hint="Patterns must include these in the 'We Often Find' column"
+                  hint={t('patternsIncludeOutcomes')}
+                  t={t}
                 />
 
                 {/* Target Selector */}
                 <TargetSelector
-                  title="Focus on Specific Outcome"
+                  title={t('focusSpecificOutcome')}
                   grouped={grouped}
                   enabled={rhsExact}
                   onToggle={setRhsExact}
@@ -511,6 +542,7 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
                   setTargetCol={setRhsTargetCol}
                   targetVal={rhsTargetVal}
                   setTargetVal={setRhsTargetVal}
+                  t={t}
                 />
               </>
             )}
@@ -525,13 +557,13 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
                   <div className="flex items-center gap-3">
                     <Users className="h-6 w-6 text-green-600" />
                     <div>
-                      <h2 className="text-xl font-bold text-slate-900">Discovered Patterns</h2>
-                      <p className="text-sm text-slate-600">Meaningful relationships in medical data</p>
+                      <h2 className="text-xl font-bold text-slate-900">{t('discoveredPatterns')}</h2>
+                      <p className="text-sm text-slate-600">{t('meaningfulRelationships')}</p>
                     </div>
                   </div>
                   {stats && (
                     <div className="bg-white px-4 py-2 rounded-lg shadow-sm border border-green-200">
-                      <div className="text-xs text-slate-600">Records Analyzed</div>
+                      <div className="text-xs text-slate-600">{t('recordsAnalyzed')}</div>
                       <div className="text-lg font-bold text-green-600">
                         {stats.pre_filtered_records?.toLocaleString?.()}
                       </div>
@@ -546,11 +578,11 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b-2 border-slate-200">
-                        <th className="text-left px-3 py-3 text-slate-700 font-semibold">When We See</th>
-                        <th className="text-left px-3 py-3 text-slate-700 font-semibold">We Often Find</th>
-                        <th className="text-left px-3 py-3 text-slate-700 font-semibold">Frequency</th>
-                        <th className="text-left px-3 py-3 text-slate-700 font-semibold">Reliability</th>
-                        <th className="text-left px-3 py-3 text-slate-700 font-semibold">Strength</th>
+                        <th className="text-left px-3 py-3 text-slate-700 font-semibold">{t('whenWeSee')}</th>
+                        <th className="text-left px-3 py-3 text-slate-700 font-semibold">{t('weOftenFind')}</th>
+                        <th className="text-left px-3 py-3 text-slate-700 font-semibold">{t('frequency')}</th>
+                        <th className="text-left px-3 py-3 text-slate-700 font-semibold">{t('reliability')}</th>
+                        <th className="text-left px-3 py-3 text-slate-700 font-semibold">{t('strength')}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -569,8 +601,8 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
                           <td colSpan={5} className="px-3 py-12 text-center">
                             <div className="text-slate-400">
                               <Search className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                              <p className="font-medium">No patterns found yet</p>
-                              <p className="text-xs mt-1">Configure your filters and click "Discover Patterns"</p>
+                              <p className="font-medium">{t('noPatternsFound')}</p>
+                              <p className="text-xs mt-1">{t('configureFiltersMessage')}</p>
                             </div>
                           </td>
                         </tr>
@@ -607,13 +639,13 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
 
                 {rules.length > 0 && (
                   <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                    <h4 className="text-sm font-semibold text-blue-900 mb-2">How to Read Results</h4>
+                    <h4 className="text-sm font-semibold text-blue-900 mb-2">{t('howToReadResults')}</h4>
                     <ul className="text-xs text-blue-800 space-y-1 leading-relaxed">
-                      <li><strong>When We See:</strong> Patient characteristics or conditions</li>
-                      <li><strong>We Often Find:</strong> Outcomes commonly occurring with those characteristics</li>
-                      <li><strong>Frequency:</strong> How often this pattern appears in the data</li>
-                      <li><strong>Reliability:</strong> How trustworthy the connection is (higher = better)</li>
-                      <li><strong>Strength:</strong> How much stronger than random chance (higher = more significant)</li>
+                      <li><strong>{t('whenWeSee')}:</strong> {t('whenWeSeeDesc')}</li>
+                      <li><strong>{t('weOftenFind')}:</strong> {t('weOftenFindDesc')}</li>
+                      <li><strong>{t('frequency')}:</strong> {t('frequencyDesc')}</li>
+                      <li><strong>{t('reliability')}:</strong> {t('reliabilityDesc')}</li>
+                      <li><strong>{t('strength')}:</strong> {t('strengthDesc')}</li>
                     </ul>
                   </div>
                 )}

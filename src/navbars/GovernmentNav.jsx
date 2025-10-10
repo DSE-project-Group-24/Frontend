@@ -126,8 +126,8 @@ const GovernmentNav = ({ setIsAuthenticated, setRole }) => {
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-300 rounded-full translate-y-24 -translate-x-24"></div>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-35">
+      <div className="relative z-10 w-full px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-35 min-h-[80px]">
           {/* Logo/Brand */}
           <div className="flex items-center space-x-3">
             <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -140,6 +140,7 @@ const GovernmentNav = ({ setIsAuthenticated, setRole }) => {
               <p className="text-xs sm:text-sm text-blue-200">{t('governmentPortal')}</p>
             </div>
           </div>
+  
 
           {/* Desktop Nav */}
           <div className="hidden md:block">
