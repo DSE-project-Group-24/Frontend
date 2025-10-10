@@ -614,6 +614,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Info, Search, Filter, TrendingUp, Users, FileText, Settings } from "lucide-react";
 import GovernmentNav from "../../navbars/GovernmentNav";
 import API from "../../utils/api";
+import { t } from "../../utils/translations";
 
 /* ---------------- Utils ---------------- */
 function splitToken(token) {
@@ -1010,9 +1011,9 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
             <FileText className="h-8 w-8 text-indigo-600" />
-            <h1 className="text-3xl font-bold text-slate-900">Medical Pattern Discovery</h1>
+            <h1 className="text-3xl font-bold text-slate-900">{t('governmentReports')} - {t('associationRules')}</h1>
           </div>
-          <p className="text-slate-600">Government Health Analytics Dashboard</p>
+          <p className="text-slate-600">{t('governmentPortal')} {t('analytics')} {t('dashboard')}</p>
         </div>
 
         {bootError && (
@@ -1029,10 +1030,10 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
             <div className="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl p-6 text-white shadow-lg">
               <div className="flex items-center gap-3 mb-4">
                 <Settings className="h-6 w-6" />
-                <h2 className="text-xl font-bold">Configure Analysis</h2>
+                <h2 className="text-xl font-bold">{t('configureAnalysis')}</h2>
               </div>
               <p className="text-indigo-100 text-sm">
-                Set up your filters and parameters to discover meaningful patterns in medical data
+{t('setupFiltersParametersMessage')}
               </p>
             </div>
 
@@ -1047,12 +1048,12 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                   <h3 className="text-base font-semibold text-slate-800 mb-4 flex items-center gap-2">
                     <Settings className="h-5 w-5 text-indigo-600" />
-                    Analysis Settings
+                    {t('analysisSettings')}
                   </h3>
                   
                   <div className="space-y-6">
                     <Slider
-                      label="Minimum Occurrence Rate"
+                      label={t('minSupport')}
                       value={minSupport}
                       onChange={setMinSupport}
                       min={0.005}
@@ -1061,7 +1062,7 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
                       tooltip="How often a pattern must appear in the data (higher = more common patterns only)"
                     />
                     <Slider
-                      label="Minimum Reliability"
+                      label={t('minConfidence')}
                       value={minConfidence}
                       onChange={setMinConfidence}
                       min={0.1}
@@ -1077,7 +1078,7 @@ const ReportsGovernment = ({ setIsAuthenticated, setRole }) => {
                     className="w-full mt-6 bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                   >
                     <Search className="h-5 w-5" />
-                    {running ? "Analyzing Data..." : "Discover Patterns"}
+                    {running ? t('running') : t('runApriori')}
                   </button>
                 </div>
 

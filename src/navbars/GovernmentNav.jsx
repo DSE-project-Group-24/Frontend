@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, TrendingUp, FileText, LogOut, Menu, X, ChevronDown, Bell, Settings, User, BookOpen, AlertTriangle } from 'lucide-react';
+import LanguageSwitcher from '../components/LanguageSwitcher';
+import { t } from '../utils/translations';
 
 const GovernmentNav = ({ setIsAuthenticated, setRole }) => {
   const navigate = useNavigate();
@@ -22,27 +24,27 @@ const GovernmentNav = ({ setIsAuthenticated, setRole }) => {
   const navItems = [
     {
       path: '/government_personnel/dashboard',
-      label: 'Hospitals',
+      label: t('hospitals'),
       icon: <LayoutDashboard size={20} />,
     },
     {
       path: '/government_personnel/prediction',
-      label: 'Analytics',
+      label: t('analytics'),
       icon: <TrendingUp size={20} />,
     },
     {
       path: '/government_personnel/reports',
-      label: 'Reports',
+      label: t('reports'),
       icon: <FileText size={20} />,
     },
     {
       path: '/government_personnel/recent-accidents',
-      label: 'Recent Accidents',
+      label: t('recentAccidents'),
       icon: <AlertTriangle size={20} />,
     },
     {
       path: '/government_personnel/guide',
-      label: 'Guide',
+      label: t('guide'),
       icon: <BookOpen size={20} />,
     },
   ];
@@ -66,7 +68,7 @@ const GovernmentNav = ({ setIsAuthenticated, setRole }) => {
                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                   MedRecord
                 </h1>
-                <p className="text-xs text-gray-500 font-medium">Government Portal</p>
+                <p className="text-xs text-gray-500 font-medium">{t('governmentPortal')}</p>
               </div>
             </Link>
 
@@ -96,6 +98,9 @@ const GovernmentNav = ({ setIsAuthenticated, setRole }) => {
 
           {/* Right Section - Desktop */}
           <div className="hidden md:flex items-center space-x-3">
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+            
             {/* Notifications */}
             <button className="relative p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all">
               <Bell size={20} />
@@ -117,7 +122,7 @@ const GovernmentNav = ({ setIsAuthenticated, setRole }) => {
                   <User size={18} className="text-white" />
                 </div>
                 <div className="text-left hidden lg:block">
-                  <p className="text-sm font-semibold text-gray-700">Government</p>
+                  <p className="text-sm font-semibold text-gray-700">{t('governmentPortal')}</p>
                   <p className="text-xs text-gray-500">Administrator</p>
                 </div>
                 <ChevronDown 
@@ -135,7 +140,7 @@ const GovernmentNav = ({ setIsAuthenticated, setRole }) => {
                   ></div>
                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-20">
                     <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="text-sm font-semibold text-gray-900">Government Portal</p>
+                      <p className="text-sm font-semibold text-gray-900">{t('governmentPortal')}</p>
                       <p className="text-xs text-gray-500 mt-1">gov.admin@medrecord.lk</p>
                     </div>
                     
@@ -204,12 +209,15 @@ const GovernmentNav = ({ setIsAuthenticated, setRole }) => {
                   <User size={20} className="text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">Government Portal</p>
+                  <p className="text-sm font-semibold text-gray-900">{t('governmentPortal')}</p>
                   <p className="text-xs text-gray-500">Administrator</p>
                 </div>
               </div>
 
               <div className="space-y-1">
+                <div className="px-4 py-2">
+                  <LanguageSwitcher />
+                </div>
                 <button className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg">
                   <Bell size={18} />
                   <span>Notifications</span>

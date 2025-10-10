@@ -95,6 +95,27 @@ const translations = {
     basicInformation: "Basic Information",
     environmentConditions: "Environment Conditions",
     medicalFinancial: "Medical & Financial",
+
+    // Guide Page
+    guide: "User Guide",
+    guideTitle: "User Guide: MedRecord Government Portal",
+    guideSubtitle: "A step-by-step guide to navigating the road accident recording system for the North Province of Sri Lanka.",
+    guideSupportNote: "For technical support or feature requests, contact the MedRecord support team at support@medrecord.lk.",
+
+    // Prediction Government Page
+    comprehensiveAnalysisPredictions: "Comprehensive analysis of historical data and future predictions",
+    viewMode: "View Mode",
+    monthlyView: "Monthly View",
+    yearlyView: "Yearly View",
+    dayOfWeek: "Day of Week",
+    historicalOnly: "Historical Only",
+    predictedOnly: "Predicted Only",
+    historicalPredicted: "Historical + Predicted",
+
+    // Reports Government Page
+    configureAnalysis: "Configure Analysis",
+    setupFiltersParametersMessage: "Set up your filters and parameters to discover meaningful patterns in medical data",
+    analysisSettings: "Analysis Settings",
     
     // Accident Field Labels
     severity: "Severity",
@@ -184,6 +205,97 @@ const translations = {
     filteredPeriod: "Filtered Period",
     analysisPeriod: "Analysis Period",
     ofTotal: "of total",
+    
+    // Government Portal Specific
+    governmentPortal: "Government Portal",
+    hospitals: "Hospitals",
+    analytics: "Analytics",
+    reports: "Reports",
+    recentAccidents: "Recent Accidents",
+    guide: "Guide",
+    
+    // Hospital Management
+    hospitalManagement: "Hospital Management",
+    hospitalSearch: "Hospital Search",
+    searchHospitals: "Search hospitals by name, type, or region...",
+    hospitalDetails: "Hospital Details",
+    hospitalName: "Hospital Name",
+    type: "Type",
+    region: "Region",
+    city: "City",
+    contact: "Contact",
+    allTypes: "All Types",
+    allRegions: "All Regions",
+    clearAllFilters: "Clear All Filters",
+    geographicDistribution: "Geographic Distribution",
+    somethingWentWrong: "Something went wrong",
+    pleaseRefreshPage: "Please refresh the page or contact support",
+    
+    // Statistics
+    totalHospitals: "Total Hospitals",
+    activeHospitals: "Active Hospitals",
+    avgResponseTime: "Avg Response Time",
+    totalPatients: "Total Patients",
+    patientLoad: "Patient Load",
+    efficiency: "Efficiency",
+    minutes: "minutes",
+    vsLastMonth: "vs last month",
+    
+    // Prediction & Analytics
+    accidentForecast: "Accident Forecast",
+    forecastPrediction: "Forecast Prediction",
+    mediumSeverity: "Medium Severity",
+    seriousSeverity: "Serious Severity",
+    totalAccidents: "Total Accidents",
+    generatePrediction: "Generate Prediction",
+    monthsToForecast: "Months to forecast",
+    forecastResults: "Forecast Results",
+    projectedAccidents: "Projected Accidents",
+    forecastFor: "Forecast for",
+    months: "months",
+    forecastingData: "Forecasting data...",
+    
+    // Reports
+    associationRules: "Association Rules",
+    governmentReports: "Government Reports",
+    minSupport: "Min Support",
+    minConfidence: "Min Confidence",
+    runApriori: "Run Apriori",
+    running: "Running...",
+    results: "Results",
+    antecedents: "Antecedents",
+    consequents: "Consequents",
+    support: "Support",
+    confidence: "Confidence",
+    lift: "Lift",
+    noRules: "No rules — add filters and run.",
+    preTargetConsequents: "Pre — Target Consequents (dataset)",
+    postAntecedentsMustContain: "Post — Antecedents must contain",
+    postConsequentsMustContain: "Post — Consequents must contain",
+    postRhsMustBeExactly: "Post — RHS must be exactly target",
+    
+    // Recent Accidents
+    recentAccidentReports: "Recent Accident Reports",
+    accidentOverview: "Accident Overview",
+    severityDistribution: "Severity Distribution",
+    locationAnalysis: "Location Analysis",
+    timeAnalysis: "Time Analysis",
+    patientOutcomes: "Patient Outcomes",
+    refreshData: "Refresh Data",
+    lastUpdated: "Last Updated",
+    totalReported: "Total Reported",
+    criticalCases: "Critical Cases",
+    resolved: "Resolved",
+    pending: "Pending",
+    
+    // Guide
+    systemGuide: "System Guide",
+    gettingStarted: "Getting Started",
+    userManual: "User Manual",
+    troubleshooting: "Troubleshooting",
+    contactSupport: "Contact Support",
+    downloadPdf: "Download PDF",
+    searchGuide: "Search guide topics...",
     
     // Prediction Form
     medicalTransferPrediction: "Medical Transfer Prediction",
@@ -503,6 +615,97 @@ const translations = {
     analysisPeriod: "විශ්ලේෂණ කාලය",
     ofTotal: "මුළු එකතුවෙන්",
     
+    // Government Portal Specific
+    governmentPortal: "රජයේ පෝර්ටලය",
+    hospitals: "රෝහල්",
+    analytics: "විශ්ලේෂණ",
+    reports: "වාර්තා",
+    recentAccidents: "මෑත අනතුරු",
+    guide: "මාර්ගෝපදේශය",
+    
+    // Hospital Management
+    hospitalManagement: "රෝහල් කළමනාකරණය",
+    hospitalSearch: "රෝහල් සෙවීම",
+    searchHospitals: "නම, වර්ගය හෝ කලාපය අනුව රෝහල් සොයන්න...",
+    hospitalDetails: "රෝහල් විස්තර",
+    hospitalName: "රෝහලේ නම",
+    type: "වර්ගය",
+    region: "කලාපය",
+    city: "නගරය",
+    contact: "සම්බන්ධතාව",
+    allTypes: "සියලු වර්ග",
+    allRegions: "සියලු කලාප",
+    clearAllFilters: "සියලු පෙරහන් ඉවත් කරන්න",
+    geographicDistribution: "භූගෝලික ව්‍යාප්තිය",
+    somethingWentWrong: "යමක් වැරදී ගියා",
+    pleaseRefreshPage: "කරුණාකර පිටුව නැවුම් කරන්න හෝ සහායට සම්බන්ධ වන්න",
+    
+    // Statistics
+    totalHospitals: "සියලු රෝහල්",
+    activeHospitals: "සක්‍රීය රෝහල්",
+    avgResponseTime: "සාමාන්‍ය ප්‍රතිචාර කාලය",
+    totalPatients: "සියලු රෝගීන්",
+    patientLoad: "රෝගී පැටව්ම",
+    efficiency: "කාර්යක්ෂමතාව",
+    minutes: "මිනිත්තු",
+    vsLastMonth: "පසුගිය මාසයට සාපේක්ෂව",
+    
+    // Prediction & Analytics
+    accidentForecast: "අනතුරු පුරෝකථනය",
+    forecastPrediction: "පුරෝකථන අනාවැකිය",
+    mediumSeverity: "මධ්‍යම බරපතලකම",
+    seriousSeverity: "බරපතල බරපතලකම",
+    totalAccidents: "සියලු අනතුරු",
+    generatePrediction: "අනාවැකිය ජනනය කරන්න",
+    monthsToForecast: "පුරෝකථනය කළ යුතු මාස",
+    forecastResults: "පුරෝකථන ප්‍රතිඵල",
+    projectedAccidents: "ප්‍රක්ෂේපණ අනතුරු",
+    forecastFor: "සඳහා පුරෝකථනය",
+    months: "මාස",
+    forecastingData: "දත්ත පුරෝකථනය කරමින්...",
+    
+    // Reports
+    associationRules: "සම්බන්ධ නීති",
+    governmentReports: "රජයේ වාර්තා",
+    minSupport: "අවම සහාය",
+    minConfidence: "අවම විශ්වාසය",
+    runApriori: "ඇප්‍රියෝරි ධාවනය කරන්න",
+    running: "ධාවනය වෙමින්...",
+    results: "ප්‍රතිඵල",
+    antecedents: "පූර්වගාමී",
+    consequents: "ප්‍රතිඵල",
+    support: "සහාය",
+    confidence: "විශ්වාසය",
+    lift: "එසවීම",
+    noRules: "නීති නැත - පෙරහන් එකතු කර ධාවනය කරන්න.",
+    preTargetConsequents: "පූර්ව - ඉලක්ක ප්‍රතිඵල (දත්ත කට්ටලය)",
+    postAntecedentsMustContain: "පශ්චාත් - පූර්වගාමීන්ට අඩංගු විය යුතුය",
+    postConsequentsMustContain: "පශ්චාත් - ප්‍රතිඵලවලට අඩංගු විය යුතුය",
+    postRhsMustBeExactly: "පශ්චාත් - RHS හරියටම ඉලක්කය විය යුතුය",
+    
+    // Recent Accidents
+    recentAccidentReports: "මෑත අනතුරු වාර්තා",
+    accidentOverview: "අනතුරු විළඹුම",
+    severityDistribution: "බරපතලකම් ව්‍යාප්තිය",
+    locationAnalysis: "ස්ථාන විශ්ලේෂණය",
+    timeAnalysis: "කාල විශ්ලේෂණය",
+    patientOutcomes: "රෝගී ප්‍රතිඵල",
+    refreshData: "දත්ත නැවුම් කරන්න",
+    lastUpdated: "අවසන් වරට යාවත්කාලීන කරන ලදී",
+    totalReported: "සම්පූර්ණ වාර්තා කරන ලද",
+    criticalCases: "තීරණාත්මක අවස්ථා",
+    resolved: "විසඳා ගත්",
+    pending: "පොරොත්තුවේ",
+    
+    // Guide
+    systemGuide: "පද්ධති මාර්ගෝපදේශය",
+    gettingStarted: "ආරම්භ කිරීම",
+    userManual: "පරිශීලක අත්පොත",
+    troubleshooting: "ගැටළු නිරාකරණය",
+    contactSupport: "සහායට සම්බන්ධ වන්න",
+    downloadPdf: "PDF බාගන්න",
+    searchGuide: "මාර්ගෝපදේශ මාතෘකා සොයන්න...",
+    
     // Prediction Form
     medicalTransferPrediction: "වෛද්‍ය මාරු කිරීමේ පුරෝකථනය",
     completeFormForAnalysis: "AI බලගැන්වූ මාරු කිරීමේ සම්භාවිතා විශ්ලේෂණය ලබා ගැනීමට පෝරමය සම්පූර්ණ කරන්න",
@@ -717,7 +920,28 @@ const translations = {
     allRightsReserved: "සියලුම හිමිකම් ආරක්ෂිතයි",
     licensedHealthcarePlatform: "බලපත්‍රිත සෞඛ්‍ය සේවා කළමනාකරණ වේදිකාව - HIPAA යටතේ රෝගී දත්ත ආරක්ෂිතයි",
     builtBy: "නිර්මාණය කළේ",
-    groupDataScienceEngineering: "24 කණ්ඩායම - දත්ත විද්‍යා ඉංජිනේරු"
+    groupDataScienceEngineering: "24 කණ්ඩායම - දත්ත විද්‍යා ඉංජිනේරු",
+
+    // Guide Page
+    guide: "භාවිත මාර්ගෝපදේශය",
+    guideTitle: "භාවිත මාර්ගෝපදේශය: MedRecord ප්‍රජාතන්ත්‍රවාදී ද්වාරය",
+    guideSubtitle: "ශ්‍රී ලංකාවේ උතුරු පළාතේ මාර්ග අනතුරු වාර්තා කිරීමේ පද්ධතිය සැරිසැරීමට පියවරෙන් පියවර මාර්ගෝපදේශයක්.",
+    guideSupportNote: "තාක්ෂණික සහාය හෝ විශේෂාංග ඉල්ලීම් සඳහා, support@medrecord.lk වෙත MedRecord සහාය කණ්ඩායම හමුවන්න.",
+
+    // Prediction Government Page
+    comprehensiveAnalysisPredictions: "ඓතිහාසික දත්ත සහ අනාගත පුරෝකථනවල විස්තීර්ණ විශ්ලේෂණය",
+    viewMode: "දැක්ම මාදිලිය",
+    monthlyView: "මාසික දසුන",
+    yearlyView: "වාර්ෂික දසුන",
+    dayOfWeek: "සතියේ දිනය",
+    historicalOnly: "ඓතිහාසික පමණක්",
+    predictedOnly: "පුරෝකථන පමණක්",
+    historicalPredicted: "ඓතිහාසික + පුරෝකථන",
+
+    // Reports Government Page
+    configureAnalysis: "විශ්ලේෂණය වින්‍යාසය",
+    setupFiltersParametersMessage: "වෛද්‍ය දත්තවල අර්ථවත් රටා සොයා ගැනීමට ඔබේ පෙරහන් සහ පරාමිති සකසන්න",
+    analysisSettings: "විශ්ලේෂණ සැකසුම්",
   },
   
   ta: {
@@ -1048,7 +1272,119 @@ const translations = {
     datasetCoverage: "தரவுத்தொகுப்பு கவரேஜ்",
     filteredPeriod: "வடிகட்டிய காலம்",
     analysisPeriod: "பகுப்பாய்வு காலம்",
-    ofTotal: "மொத்தத்தில்"
+    ofTotal: "மொத்தத்தில்",
+    
+    // Government Portal Specific
+    governmentPortal: "அரசு போர்ட்டல்",
+    hospitals: "மருத்துவமனைகள்",
+    analytics: "பகுப்பாய்வு",
+    reports: "அறிக்கைகள்",
+    recentAccidents: "சமீபத்திய விபத்துகள்",
+    guide: "வழிகாட்டி",
+    
+    // Hospital Management
+    hospitalManagement: "மருத்துவமனை மேலாண்மை",
+    hospitalSearch: "மருத்துவமனை தேடல்",
+    searchHospitals: "பெயர், வகை அல்லது பிராந்தியத்தின் அடிப்படையில் மருத்துவமனைகளைத் தேடுங்கள்...",
+    hospitalDetails: "மருத்துவமனை விவரங்கள்",
+    hospitalName: "மருத்துவமனையின் பெயர்",
+    type: "வகை",
+    region: "பிராந்தியம்",
+    city: "நகரம்",
+    contact: "தொடர்பு",
+    allTypes: "அனைத்து வகைகள்",
+    allRegions: "அனைத்து பிராந்தியங்கள்",
+    clearAllFilters: "அனைத்து வடிப்பான்களையும் அழிக்கவும்",
+    geographicDistribution: "புவியியல் விநியோகம்",
+    somethingWentWrong: "ஏதோ தவறு நடந்தது",
+    pleaseRefreshPage: "தயவுசெய்து பக்கத்தை புதுப்பிக்கவும் அல்லது ஆதரவைத் தொடர்பு கொள்ளவும்",
+    
+    // Statistics
+    totalHospitals: "மொத்த மருத்துவமனைகள்",
+    activeHospitals: "செயலில் உள்ள மருத்துவமனைகள்",
+    avgResponseTime: "சராசரி பதில் நேரம்",
+    totalPatients: "மொத்த நோயாளிகள்",
+    patientLoad: "நோயாளி சுமை",
+    efficiency: "திறன்",
+    minutes: "நிமிடங்கள்",
+    vsLastMonth: "கடந்த மாதத்துடன் ஒப்பிடுகையில்",
+    
+    // Prediction & Analytics
+    accidentForecast: "விபத்து முன்னறிவிப்பு",
+    forecastPrediction: "முன்னறிவிப்பு கணிப்பு",
+    mediumSeverity: "நடுத்தர தீவிரத்தன்மை",
+    seriousSeverity: "தீவிர தீவிரத்தன்மை",
+    totalAccidents: "மொத்த விபத்துகள்",
+    generatePrediction: "கணிப்பை உருவாக்கவும்",
+    monthsToForecast: "முன்னறிவிப்பு செய்ய மாதங்கள்",
+    forecastResults: "முன்னறிவிப்பு முடிவுகள்",
+    projectedAccidents: "கணிக்கப்பட்ட விபத்துகள்",
+    forecastFor: "முன்னறிவிப்பு",
+    months: "மாதங்கள்",
+    forecastingData: "தரவை முன்னறிவிப்பு செய்கிறது...",
+    
+    // Reports
+    associationRules: "சங்க விதிகள்",
+    governmentReports: "அரசு அறிக்கைகள்",
+    minSupport: "குறைந்தபட்ச ஆதரவு",
+    minConfidence: "குறைந்தபட்ச நம்பிக்கை",
+    runApriori: "அப்ரியோரியை இயக்கவும்",
+    running: "இயங்குகிறது...",
+    results: "முடிவுகள்",
+    antecedents: "முன்னோடிகள்",
+    consequents: "விளைவுகள்",
+    support: "ஆதரவு",
+    confidence: "நம்பிக்கை",
+    lift: "உயர்த்துதல்",
+    noRules: "விதிகள் இல்லை - வடிப்பான்களைச் சேர்த்து இயக்கவும்.",
+    preTargetConsequents: "முன் - இலக்கு விளைவுகள் (தரவுத்தொகுப்பு)",
+    postAntecedentsMustContain: "பின் - முன்னோடிகள் கொண்டிருக்க வேண்டும்",
+    postConsequentsMustContain: "பின் - விளைவுகள் கொண்டிருக்க வேண்டும்",
+    postRhsMustBeExactly: "பின் - RHS சரியாக இலக்காக இருக்க வேண்டும்",
+    
+    // Recent Accidents
+    recentAccidentReports: "சமீபத்திய விபத்து அறிக்கைகள்",
+    accidentOverview: "விபத்து மேலோட்டம்",
+    severityDistribution: "தீவிரத்தன்மை விநியோகம்",
+    locationAnalysis: "இடம் பகுப்பாய்வு",
+    timeAnalysis: "நேர பகுப்பாய்வு",
+    patientOutcomes: "நோயாளி முடிவுகள்",
+    refreshData: "தரவை புதுப்பிக்கவும்",
+    lastUpdated: "கடைசியாக புதுப்பிக்கப்பட்டது",
+    totalReported: "மொத்தம் அறிவிக்கப்பட்டது",
+    criticalCases: "முக்கிய வழக்குகள்",
+    resolved: "தீர்க்கப்பட்டது",
+    pending: "நிலுவையில்",
+    
+    // Guide
+    systemGuide: "கணினி வழிகாட்டி",
+    gettingStarted: "தொடக்கம்",
+    userManual: "பயனர் கையேடு",
+    troubleshooting: "சிக்கல் நிவாரணம்",
+    contactSupport: "ஆதரவைத் தொடர்பு கொள்ளவும்",
+    downloadPdf: "PDF பதிவிறக்கவும்",
+    searchGuide: "வழிகாட்டி தலைப்புகளைத் தேடுங்கள்...",
+
+    // Guide Page
+    guide: "பயனர் வழிகாட்டி",
+    guideTitle: "பயனர் வழிகாட்டி: MedRecord அரசாங்க போர்ட்டல்",
+    guideSubtitle: "இலங்கையின் வடக்கு மாகாணத்தில் சாலை விபத்து பதிவு முறைமையை வழிநடத்துவதற்கான படிப்படியான வழிகாட்டி.",
+    guideSupportNote: "தொழில்நுட்ப ஆதரவு அல்லது அம்ச கோரிக்கைகளுக்கு, support@medrecord.lk இல் MedRecord ஆதரவு குழுவைத் தொடர்பு கொள்ளுங்கள்.",
+
+    // Prediction Government Page
+    comprehensiveAnalysisPredictions: "வரலாற்று தரவு மற்றும் எதிர்கால கணிப்புகளின் விரிவான பகுப்பாய்வு",
+    viewMode: "பார்வை முறை",
+    monthlyView: "மாதாந்திர பார்வை",
+    yearlyView: "ஆண்டு பார்வை",
+    dayOfWeek: "வாரத்தின் நாள்",
+    historicalOnly: "வரலாற்று மட்டும்",
+    predictedOnly: "கணிக்கப்பட்ட மட்டும்",
+    historicalPredicted: "வரலாற்று + கணிக்கப்பட்ட",
+
+    // Reports Government Page
+    configureAnalysis: "பகுப்பாய்வை உள்ளமை",
+    setupFiltersParametersMessage: "மருத்துவ தரவில் அர்த்தமுள்ள வடிவங்களைக் கண்டறிய உங்கள் வடிப்பான்கள் மற்றும் அளவுருக்களை அமைக்கவும்",
+    analysisSettings: "பகுப்பாய்வு அமைப்புகள்",
   }
 };
 
@@ -1072,8 +1408,8 @@ export const t = (key) => {
 export const getAvailableLanguages = () => {
   return [
     { code: 'en', name: 'English', nativeName: 'English' },
+    { code: 'ta', name: 'Tamil', nativeName: 'தமிழ்' },
     { code: 'si', name: 'Sinhala', nativeName: 'සිංහල' },
-    { code: 'ta', name: 'Tamil', nativeName: 'தமிழ்' }
   ];
 };
 

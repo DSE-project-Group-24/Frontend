@@ -1081,6 +1081,7 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, L
 import { Calendar, TrendingUp, TrendingDown, AlertTriangle, Clock, Filter, Activity, BarChart3 } from 'lucide-react';
 import axios from 'axios';
 import GovernmentNav from '../../navbars/GovernmentNav';
+import { t } from '../../utils/translations';
 
 
 const API = axios.create({
@@ -1349,7 +1350,7 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading dashboard data...</p>
+          <p className="text-gray-600">{t('loading')}...</p>
         </div>
       </div>
     );
@@ -1370,9 +1371,9 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center">
             <Activity className="mr-3 text-blue-600" size={36} />
-            Temporal Accident Trends Dashboard
+            {t('analytics')} {t('dashboard')}
           </h1>
-          <p className="text-gray-600 text-lg">Comprehensive analysis of historical data and future predictions</p>
+          <p className="text-gray-600 text-lg">{t('comprehensiveAnalysisPredictions')}</p>
         </div>
 
         {/* Control Panel */}
@@ -1382,19 +1383,19 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Filter className="inline mr-1" size={16} />
-                View Mode
+                {t('viewMode')}
               </label>
               <select
                 value={viewMode}
                 onChange={(e) => setViewMode(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               >
-                <option value="monthly">Monthly View</option>
-                <option value="yearly">Yearly View</option>
-                <option value="weekly">Day of Week</option>
-                <option value="historical">Historical Only</option>
-                <option value="predicted">Predicted Only</option>
-                <option value="combined">Historical + Predicted</option>
+                <option value="monthly">{t('monthlyView')}</option>
+                <option value="yearly">{t('yearlyView')}</option>
+                <option value="weekly">{t('dayOfWeek')}</option>
+                <option value="historical">{t('historicalOnly')}</option>
+                <option value="predicted">{t('predictedOnly')}</option>
+                <option value="combined">{t('historicalPredicted')}</option>
               </select>
             </div>
 

@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import API from "../../utils/api";
 import GovernmentNav from './../../navbars/GovernmentNav';
 import { LayoutDashboard, TrendingUp, FileText, BookOpen } from 'lucide-react';
+import { t } from "../../utils/translations";
 
 const Guide = ({ setIsAuthenticated, setRole }) => {
   const [activeSection, setActiveSection] = useState('introduction');
 
   const sections = {
     introduction: {
-      title: 'Introduction to MedRecord Government Portal',
+      title: `Introduction to MedRecord ${t('governmentPortal')}`,
       icon: <BookOpen className="w-8 h-8 text-blue-600" />,
       content: (
         <div className="space-y-6">
@@ -39,7 +40,7 @@ const Guide = ({ setIsAuthenticated, setRole }) => {
       )
     },
     hospitals: {
-      title: 'Hospital Data Management',
+      title: t('hospitalManagement'),
       icon: <LayoutDashboard className="w-8 h-8 text-blue-600" />,
       content: (
         <div className="space-y-6">
@@ -149,9 +150,9 @@ const Guide = ({ setIsAuthenticated, setRole }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">User Guide: MedRecord Government Portal</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">{t('guideTitle')}</h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            A step-by-step guide to navigating the road accident recording system for the North Province of Sri Lanka.
+            {t('guideSubtitle')}
           </p>
         </div>
 
@@ -183,7 +184,7 @@ const Guide = ({ setIsAuthenticated, setRole }) => {
         {/* Footer Note */}
         <div className="mt-12 text-center text-gray-500">
           <p className="text-sm">
-            For technical support or feature requests, contact the MedRecord support team at support@medrecord.lk.
+            {t('guideSupportNote')}
           </p>
         </div>
       </div>
