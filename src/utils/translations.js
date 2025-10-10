@@ -246,6 +246,28 @@ const translations = {
     markCompleted: "Mark as Completed to finalize this record (no further edits allowed)",
     severityAutoSet: "Severity is set automatically later (default \"U\").",
     select: "Select…",
+    
+    // Additional UI elements
+    loadingPatients: "Loading patients...",
+    noPatientsFound: "No patients found",
+    loadingRecords: "Loading…",
+    noRecordsYet: "No records yet",
+    
+    // Dropdown option values
+    notNecessary: "Not Necessary",
+    motorBike: "Motor Bike",
+    threeWheelerSmall: "Three wheeler",  
+    otherVehicle: "Other Vehicle",
+    pillionRider: "Pillion Rider",
+    severelyAffected: "Severely Affected",
+    moderatelyAffected: "Moderately Affected",
+    mildlyAffected: "Mildly Affected",
+    notAffected: "Not Affected",
+    partialRecovery: "Partial Recovery",
+    completeRecovery: "Complete Recovery",
+    furtherInterventions: "Further Interventions",
+    fallFromVehicleOption: "Fall From Vehicle",
+    animalOption: "Animal",
 
     //footer
     emergencyCareExcellence: "Emergency Care Excellence",
@@ -1096,6 +1118,28 @@ const translations = {
     markCompleted: "මෙම වාර්තාව අවසන් කිරීම සඳහා සම්පූර්ණ ලෙස සලකුණු කරන්න (තවදුරටත් සංස්කරණ කිරීමට ඉඩ නොදේ)",
     severityAutoSet: "බරපතලකම පසුව ස්වයංක්‍රීයව සැකසේ (පෙරනිමි \"U\").",
     select: "තෝරන්න…",
+    
+    // Additional UI elements
+    loadingPatients: "රෝගීන් පූරණය කරමින්...",
+    noPatientsFound: "රෝගීන් හමු නොවිය",
+    loadingRecords: "පූරණය කරමින්…",
+    noRecordsYet: "තවම වාර්තා නැත",
+    
+    // Dropdown option values
+    notNecessary: "අවශ්‍ය නැත",
+    motorBike: "යතුරු පැදිය",
+    threeWheelerSmall: "ත්‍රිරෝද රථය",
+    otherVehicle: "වෙනත් වාහනය",
+    pillionRider: "පිටුපස සිටින්නා",
+    severelyAffected: "දැඩි ලෙස බලපෑමට ලක්වූ",
+    moderatelyAffected: "මධ්‍යම ලෙස බලපෑමට ලක්වූ",
+    mildlyAffected: "සුළු ලෙස බලපෑමට ලක්වූ",
+    notAffected: "බලපෑමට ලක් නොවූ",
+    partialRecovery: "අර්ධ සුවය",
+    completeRecovery: "සම්පූර්ණ සුවය",
+    furtherInterventions: "තවදුරටත් මැදිහත්වීම්",
+    fallFromVehicleOption: "වාහනයෙන් වැටීම",
+    animalOption: "සත්වයා",
     
     // Accidents
     accidentRecords: "අනතුරු වාර්තා",
@@ -2014,6 +2058,28 @@ const translations = {
     markCompleted: "இந்த பதிவை இறுதி செய்ய முடிந்ததாக குறிக்கவும் (மேலும் திருத்தங்கள் அனுமதிக்கப்படாது)",
     severityAutoSet: "தீவிரம் பின்னர் தானாக அமைக்கப்படும் (இயல்புநிலை \"U\").",
     select: "தேர்ந்தெடுக்கவும்…",
+    
+    // Additional UI elements
+    loadingPatients: "நோயாளிகளை ஏற்றுகிறது...",
+    noPatientsFound: "நோயாளிகள் எதுவும் கிடைக்கவில்லை",
+    loadingRecords: "ஏற்றுகிறது…",
+    noRecordsYet: "இன்னும் பதிவுகள் இல்லை",
+    
+    // Dropdown option values
+    notNecessary: "தேவையில்லை",
+    motorBike: "மோட்டார் சைக்கிள்",
+    threeWheelerSmall: "மூன்று சக்கர வாகனம்",
+    otherVehicle: "மற்ற வாகனம்",
+    pillionRider: "பின்னால் அமர்ந்தவர்",
+    severelyAffected: "கடுமையாக பாதிக்கப்பட்டது",
+    moderatelyAffected: "மிதமாக பாதிக்கப்பட்டது",
+    mildlyAffected: "லேசாக பாதிக்கப்பட்டது",
+    notAffected: "பாதிக்கப்படவில்லை",
+    partialRecovery: "பகுதி மீட்சி",
+    completeRecovery: "முழு மீட்சி",
+    furtherInterventions: "மேலும் தலையீடுகள்",
+    fallFromVehicleOption: "வாகனத்திலிருந்து விழுதல்",
+    animalOption: "விலங்கு",
     
     // AccidentEDA Page
     roadAccidentIntelligence: "சாலை விபத்து அறிவுத்திறன் அமைப்பு",

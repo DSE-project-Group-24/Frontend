@@ -810,7 +810,7 @@ const AccidentRecordSystem = () => {
             </div>
 
             {loadingPatients ? (
-              <p>Loading patients...</p>
+              <p>{t('loadingPatients')}</p>
             ) : (
               <div className="overflow-y-auto max-h-96">
                 {filteredPatients && filteredPatients.length > 0 ? (
@@ -846,7 +846,7 @@ const AccidentRecordSystem = () => {
                     );
                   })
                 ) : (
-                  <p className="text-gray-500">No patients found</p>
+                  <p className="text-gray-500">{t('noPatientsFound')}</p>
                 )}
               </div>
             )}
@@ -883,9 +883,9 @@ const AccidentRecordSystem = () => {
                   {val(selectedPatient, "Full Name", "full_name", "name")}
                 </h3>
                 {loadingRecords ? (
-                  <div className="text-sm">Loading…</div>
+                  <div className="text-sm">{t('loadingRecords')}</div>
                 ) : records.length === 0 ? (
-                  <div className="text-sm text-gray-500">No records yet</div>
+                  <div className="text-sm text-gray-500">{t('noRecordsYet')}</div>
                 ) : (
                   <div className="grid md:grid-cols-2 gap-3">
                     {records.map((rec) => (
@@ -1076,7 +1076,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>Approximate speed</Label>
+                          <Label>{t('approximateSpeed')}</Label>
                           <SmartSelect
                             name="approximate_speed"
                             value={model.approximate_speed}
@@ -1089,7 +1089,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>Passenger type</Label>
+                          <Label>{t('passengerType')}</Label>
                           <SmartSelect
                             name="passenger_type"
                             value={model.passenger_type}
@@ -1113,7 +1113,7 @@ const AccidentRecordSystem = () => {
                       </header>
                       <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label>Road Condition</Label>
+                          <Label>{t('roadCondition')}</Label>
                           <SmartSelect
                             name="road_condition"
                             value={model.road_condition}
@@ -1126,7 +1126,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>Road Type</Label>
+                          <Label>{t('roadType')}</Label>
                           <SmartSelect
                             name="road_type"
                             value={model.road_type}
@@ -1139,7 +1139,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>Category of Road</Label>
+                          <Label>{t('categoryOfRoad')}</Label>
                           <SmartSelect
                             name="category_of_road"
                             value={model.category_of_road}
@@ -1152,7 +1152,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>Road signals exist</Label>
+                          <Label>{t('roadSignalsExist')}</Label>
                           <SmartSelect
                             name="road_signals_exist"
                             value={model.road_signals_exist}
@@ -1166,7 +1166,7 @@ const AccidentRecordSystem = () => {
                         </div>
 
                         <div>
-                          <Label>Visibility</Label>
+                          <Label>{t('visibility')}</Label>
                           <SmartSelect
                             name="visibility"
                             value={model.visibility}
@@ -1185,12 +1185,12 @@ const AccidentRecordSystem = () => {
                     <section id="safety" className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
                         <h4 className="font-semibold text-gray-800">
-                          Substances & Safety
+                          {t('substancesSafety')}
                         </h4>
                       </header>
                       <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label>Alcohol Consumption</Label>
+                          <Label>{t('alcoholConsumption')}</Label>
                           <SmartSelect
                             name="alcohol_consumption"
                             value={model.alcohol_consumption}
@@ -1204,7 +1204,7 @@ const AccidentRecordSystem = () => {
                         </div>
                         <div>
                           <Label>
-                            Time between alcohol consumption and accident
+                            {t('timeBetweenAlcohol')}
                           </Label>
                           <SmartSelect
                             name="time_between_alcohol"
@@ -1218,7 +1218,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>Illicit Drugs</Label>
+                          <Label>{t('illicitDrugs')}</Label>
                           <SmartSelect
                             name="illicit_drugs"
                             value={model.illicit_drugs}
@@ -1231,7 +1231,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>Helmet Worn</Label>
+                          <Label>{t('helmetWorn')}</Label>
                           <SmartSelect
                             name="helmet_worn"
                             value={model.helmet_worn}
@@ -1244,7 +1244,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>Engine Capacity</Label>
+                          <Label>{t('engineCapacity')}</Label>
                           <SmartSelect
                             name="engine_capacity"
                             value={model.engine_capacity}
@@ -1263,12 +1263,12 @@ const AccidentRecordSystem = () => {
                     <section id="transport" className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
                         <h4 className="font-semibold text-gray-800">
-                          Transport to Hospital
+                          {t('transportToHospital')}
                         </h4>
                       </header>
                       <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label>Mode of transport to hospital</Label>
+                          <Label>{t('modeOfTransport')}</Label>
                           <SmartSelect
                             name="mode_of_transport"
                             value={model.mode_of_transport}
@@ -1281,7 +1281,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>Time taken to reach hospital</Label>
+                          <Label>{t('timeToHospital')}</Label>
                           <SmartSelect
                             name="time_to_hospital"
                             value={model.time_to_hospital}
@@ -1294,7 +1294,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>First aid given at scene</Label>
+                          <Label>{t('firstAidGiven')}</Label>
                           <SmartSelect
                             name="first_aid_given"
                             value={model.first_aid_given}
@@ -1313,12 +1313,12 @@ const AccidentRecordSystem = () => {
                     <section id="socio" className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
                         <h4 className="font-semibold text-gray-800">
-                          Socio-economic Impact
+                          {t('socioeconomicImpact')}
                         </h4>
                       </header>
                       <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label>Bystander expenditure per day</Label>
+                          <Label>{t('bystanderExpenditure')}</Label>
                           <SmartSelect
                             name="bystander_expenditure"
                             value={model.bystander_expenditure}
@@ -1331,7 +1331,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>Income before accident</Label>
+                          <Label>{t('incomeBeforeAccident')}</Label>
                           <SmartSelect
                             name="income_before_accident"
                             value={model.income_before_accident}
@@ -1344,7 +1344,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>Income after accident</Label>
+                          <Label>{t('incomeAfterAccident')}</Label>
                           <SmartSelect
                             name="income_after_accident"
                             value={model.income_after_accident}
@@ -1357,7 +1357,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>Family current status</Label>
+                          <Label>{t('familyStatus')}</Label>
                           <SmartSelect
                             name="family_status"
                             value={model.family_status}
@@ -1370,7 +1370,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>Vehicle insured</Label>
+                          <Label>{t('vehicleInsured')}</Label>
                           <SmartSelect
                             name="vehicle_insured"
                             value={model.vehicle_insured}
@@ -1430,7 +1430,7 @@ const AccidentRecordSystem = () => {
                               >
                                 <div className="flex items-center justify-between mb-3">
                                   <div className="font-medium text-gray-800">
-                                    Injury #{idx + 1}
+                                    {t('injury')} #{idx + 1}
                                   </div>
                                   {mode !== "view" && (
                                     <button
@@ -1443,7 +1443,7 @@ const AccidentRecordSystem = () => {
                                           : "bg-white hover:bg-gray-50"
                                       }`}
                                     >
-                                      Remove
+                                      {t('remove')}
                                     </button>
                                   )}
                                 </div>
@@ -1451,7 +1451,7 @@ const AccidentRecordSystem = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                   {/* Site of injury */}
                                   <div>
-                                    <Label>Site of injury</Label>
+                                    <Label>{t('siteOfInjury')}</Label>
                                     <SmartSelect
                                       name={`site_of_injury_${idx}`}
                                       value={inj.site_of_injury}
@@ -1465,7 +1465,7 @@ const AccidentRecordSystem = () => {
 
                                   {/* Type of injury (depends on site) */}
                                   <div>
-                                    <Label>Type of injury</Label>
+                                    <Label>{t('typeOfInjury')}</Label>
                                     <SmartSelect
                                       name={`type_of_injury_${idx}`}
                                       value={inj.type_of_injury}
@@ -1479,7 +1479,7 @@ const AccidentRecordSystem = () => {
 
                                   {/* Side */}
                                   <div>
-                                    <Label>Side</Label>
+                                    <Label>{t('side')}</Label>
                                     <SmartSelect
                                       name={`side_${idx}`}
                                       value={inj.side}
@@ -1493,7 +1493,7 @@ const AccidentRecordSystem = () => {
 
                                   {/* Investigation Done */}
                                   <div>
-                                    <Label>Investigation Done</Label>
+                                    <Label>{t('investigationDone')}</Label>
                                     <input
                                       type="text"
                                       name={`investigation_done_${idx}`}
@@ -1515,7 +1515,7 @@ const AccidentRecordSystem = () => {
 
                                   {/* Severity (ML) */}
                                   <div className="md:col-span-2">
-                                    <Label>Severity</Label>
+                                    <Label>{t('severity')}</Label>
                                     <div className="mt-1 text-sm">
                                       <span className="inline-flex items-center rounded-full px-3 py-1 border bg-gray-50 text-gray-700">
                                         {inj.severity
@@ -1523,8 +1523,7 @@ const AccidentRecordSystem = () => {
                                           : SEVERITY_LABEL}
                                       </span>
                                       <span className="ml-2 text-xs text-gray-500">
-                                        Auto-populated by ML based on site &
-                                        type.
+                                        {t('autoPopulatedBySeverity')}
                                       </span>
                                     </div>
                                   </div>
@@ -1744,12 +1743,12 @@ const AccidentRecordSystem = () => {
                     <section id="outcome" className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
                         <h4 className="font-semibold text-gray-800">
-                          Outcome & Notes
+                          {t('outcomeNotes')}
                         </h4>
                       </header>
                       <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label>Discharge Outcome</Label>
+                          <Label>{t('dischargeOutcome')}</Label>
                           <SmartSelect
                             name="discharge_outcome"
                             value={model.discharge_outcome}
@@ -1762,7 +1761,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <Label>Notes (optional)</Label>
+                          <Label>{t('notesOptional')}</Label>
                           <textarea
                             name="notes"
                             value={model.notes}
@@ -1788,7 +1787,7 @@ const AccidentRecordSystem = () => {
                     <section className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
                         <h4 className="font-semibold text-gray-800">
-                          Finalize
+                          {t('finalize')}
                         </h4>
                       </header>
                       <div className="p-4">
@@ -1803,8 +1802,7 @@ const AccidentRecordSystem = () => {
                             }
                           />
                           <Label htmlFor="completed" className="cursor-pointer">
-                            Mark as <b>Completed</b> to finalize this record (no
-                            further edits allowed)
+                            {t('markCompleted')}
                           </Label>
                         </div>
                         <div className="text-xs text-gray-500 mt-1">
