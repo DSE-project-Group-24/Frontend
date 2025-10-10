@@ -490,6 +490,40 @@ const AccidentRecordSystem = () => {
   const [completed, setCompleted] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Create translated options
+  const translatedOptions = useMemo(() => ({
+    ...OPTIONS,
+    discharge_outcome: [
+      t('partialRecovery'),
+      t('completeRecovery'),
+      t('furtherInterventions'),
+    ],
+    // Common Yes/No/Unknown options
+    road_signals_exist: [t('yes'), t('no'), t('unknown')],
+    alcohol_consumption: [t('yes'), t('no'), t('unknown')],
+    illicit_drugs: [t('yes'), t('no'), t('unknown')],
+    first_aid_given: [t('yes'), t('no'), t('unknown')],
+    vehicle_insured: [t('yes'), t('unknown'), t('no')],
+    // Vehicle types
+    mode_of_traveling: [
+      t('motorbike'),
+      t('bicycle'), 
+      t('threeWheeler'),
+      t('carVan'),
+      "Heavy Vehicle", // Keep as-is if no translation key
+      t('pedestrian'),
+      t('unknown'),
+    ],
+    // Family status options
+    family_status: [
+      t('severelyAffected'),
+      t('moderatelyAffected'),
+      t('unknown'),
+      t('mildlyAffected'),
+      t('notAffected'),
+    ],
+  }), []);
+
   // When patient changes, load records
   useEffect(() => {
     const loadRecords = async () => {
@@ -1068,7 +1102,7 @@ const AccidentRecordSystem = () => {
                             name="mode_of_traveling"
                             value={model.mode_of_traveling}
                             onChange={updateModel}
-                            options={OPTIONS.mode_of_traveling}
+                            options={translatedOptions.mode_of_traveling}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))
@@ -1157,7 +1191,7 @@ const AccidentRecordSystem = () => {
                             name="road_signals_exist"
                             value={model.road_signals_exist}
                             onChange={updateModel}
-                            options={OPTIONS.road_signals_exist}
+                            options={translatedOptions.road_signals_exist}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))
@@ -1195,7 +1229,7 @@ const AccidentRecordSystem = () => {
                             name="alcohol_consumption"
                             value={model.alcohol_consumption}
                             onChange={updateModel}
-                            options={OPTIONS.alcohol_consumption}
+                            options={translatedOptions.alcohol_consumption}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))
@@ -1223,7 +1257,7 @@ const AccidentRecordSystem = () => {
                             name="illicit_drugs"
                             value={model.illicit_drugs}
                             onChange={updateModel}
-                            options={OPTIONS.illicit_drugs}
+                            options={translatedOptions.illicit_drugs}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))
@@ -1299,7 +1333,7 @@ const AccidentRecordSystem = () => {
                             name="first_aid_given"
                             value={model.first_aid_given}
                             onChange={updateModel}
-                            options={OPTIONS.first_aid_given}
+                            options={translatedOptions.first_aid_given}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))
@@ -1362,7 +1396,7 @@ const AccidentRecordSystem = () => {
                             name="family_status"
                             value={model.family_status}
                             onChange={updateModel}
-                            options={OPTIONS.family_status}
+                            options={translatedOptions.family_status}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))
@@ -1375,7 +1409,7 @@ const AccidentRecordSystem = () => {
                             name="vehicle_insured"
                             value={model.vehicle_insured}
                             onChange={updateModel}
-                            options={OPTIONS.vehicle_insured}
+                            options={translatedOptions.vehicle_insured}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))
@@ -1753,7 +1787,7 @@ const AccidentRecordSystem = () => {
                             name="discharge_outcome"
                             value={model.discharge_outcome}
                             onChange={updateModel}
-                            options={OPTIONS.discharge_outcome}
+                            options={translatedOptions.discharge_outcome}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))
