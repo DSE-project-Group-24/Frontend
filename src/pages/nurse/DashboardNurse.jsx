@@ -518,9 +518,9 @@ export default function NurseDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex flex-col">
       <NurseNav />
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-6 flex-1">
         <div className="mb-4 sticky top-0 bg-transparent z-10">
           <h1 className="text-2xl font-bold text-gray-800">Nurse Dashboard</h1>
           <p className="text-sm text-gray-600">
