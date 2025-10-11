@@ -649,7 +649,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
         {/* Search box */}
         <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md mb-6 border border-slate-100">
           <label className="block mb-3 text-sm font-medium text-slate-700">{t('searchPatient')}:</label>
-          <div className="flex items-center gap-2">
+          <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }} className="flex items-center gap-2">
             <div className="relative flex-1">
               <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                 <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -665,7 +665,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
               />
             </div>
             <button
-              onClick={handleSearch}
+              type="submit"
               className="inline-flex items-center gap-2 bg-gradient-to-r from-sky-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:from-sky-700 hover:to-indigo-700 disabled:opacity-60"
               disabled={loading}
             >
@@ -677,7 +677,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
               ) : null}
               <span>{loading ? t('searching') : t('search')}</span>
             </button>
-          </div>
+          </form>
           <p className="text-xs text-slate-500 mt-3">{t('searchByIdNicName')}</p>
           {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
         </div>
