@@ -989,6 +989,18 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                             <div className="text-xs text-slate-500 font-medium mt-1">{t('analysis')}</div>
                           </div>
                         </div>
+
+                        {transferProbabilities[selectedAccident.accident_id].missingValues && transferProbabilities[selectedAccident.accident_id].missingValues.length > 0 && (
+                          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <h4 className="font-semibold text-yellow-800 mb-2">⚠️ {t('dataAvailabilityWarning')}</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-28 overflow-y-auto">
+                              {transferProbabilities[selectedAccident.accident_id].missingValues.map((missing, idx) => (
+                                <div key={idx} className="text-xs text-yellow-700 bg-yellow-100 px-2 py-1 rounded">{t(missing) || missing}</div>
+                              ))}
+                            </div>
+                            <p className="text-xs text-yellow-600 mt-2 italic">{t('missingFieldsNote')}</p>
+                          </div>
+                        )}
                       </div>
                     )}
 
