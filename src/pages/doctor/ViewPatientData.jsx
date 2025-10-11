@@ -165,6 +165,21 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
     return translated || label;
   };
 
+  // Helper to translate transfer prediction values into meaningful strings
+  const translateTransferPrediction = (prediction) => {
+    if (prediction === "1" || prediction === 1) {
+      return t('transferRequired') || 'Transfer Required';
+    } else if (prediction === "0" || prediction === 0) {
+      return t('noTransferRequired') || 'No Transfer Required';
+    } else if (prediction === "Yes") {
+      return t('transferRequired') || 'Transfer Required';
+    } else if (prediction === "No") {
+      return t('noTransferRequired') || 'No Transfer Required';
+    }
+    // Fallback for any other values
+    return prediction || t('unknown');
+  };
+
   const formatPercent = (prob) => {
     if (prob === null || prob === undefined || isNaN(prob)) return '-';
     try {
@@ -292,23 +307,34 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
 
     // Current Hospital Name - use available hospital data
     const hospitalName = accident?.["Hospital"] || accident?.hospital;
-    data['current_hospital_name'] = hospitalName || "DGH – Kilinochchi";
+    data['current_hospital_name'] = hospitalName;
     if (!hospitalName) {
       missingValues.push('Current Hospital Name');
     }
     
     // Family Current Status
-    data['family_current_status'] = accident?.["Family current status"] || "Moderately Affected";
+    data['family_current_status'] = accident?.["Family current status"];
     if (!accident?.["Family current status"]) {
       missingValues.push('Family Current Status');
     }
 
-    // Type of injury No 1 - Warning: Not available in current data
-    data['type_of_injury_no_1'] = "fracture"; // Default value
-    missingValues.push('Type of injury No 1 (not available in current data structure)');
+    // Type of injury No 1 - Extract from injuries array
+    const injury1 = accident?.injuries && accident.injuries[0];
+    data['type_of_injury_no_1'] = injury1?.type_of_injury 
+    if (!injury1?.type_of_injury) {
+      missingValues.push('Type of injury No 1 (no injury data available)');
+    }
+
+    // Type of Injury No 2 - Extract from injuries array
+    const injury2 = accident?.injuries && accident.injuries[1];
+    data['type_of_injury_no_2'] = injury2?.type_of_injury
+    if (!injury2?.type_of_injury) {
+      missingValues.push('Type of Injury No 2 (no secondary injury data available)');
+    }
+
 
     // Traveling Expenditure per day
-    data['traveling_expenditure_per_day'] = accident?.["Traveling Expenditure Per Day"] || "100-200";
+    data['traveling_expenditure_per_day'] = accident?.["Traveling Expenditure Per Day"];
     if (!accident?.["Traveling Expenditure Per Day"]) {
       missingValues.push('Traveling Expenditure Per Day');
     }
@@ -327,24 +353,33 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
         if (!isNaN(dob.getTime())) {
           data['date_of_birth'] = dob.toISOString().split('T')[0]; // Format as YYYY-MM-DD
         } else {
-          data['date_of_birth'] = "1990-05-15"; // Default for invalid date
+          data['date_of_birth']
           missingValues.push('Date of Birth (invalid date format)');
         }
       } catch (e) {
-        data['date_of_birth'] = "1990-05-15"; // Default for parsing error
+        data['date_of_birth']
         missingValues.push('Date of Birth (date parsing error)');
       }
     } else {
-      data['date_of_birth'] = "1990-05-15"; // Default value
+      data['date_of_birth']
       missingValues.push('Date of Birth');
     }
 
-    // Site of injury No1 - Warning: Not available in current data
-    data['site_of_injury_no1'] = "head injury"; // Default value
-    missingValues.push('Site of injury No1 (not available in current data structure)');
+    // Site of injury No1 - Extract from injuries array
+    data['site_of_injury_no1'] = injury1?.site_of_injury
+    if (!injury1?.site_of_injury) {
+      missingValues.push('Site of injury No1 (no injury data available)');
+    }
+
+    // Site of injury No 2 - Extract from injuries array
+    data['site_of_injury_no_2'] = injury2?.site_of_injury
+    if (!injury2?.site_of_injury) {
+      missingValues.push('Site of injury No 2 (no secondary injury data available)');
+    }
+
 
     // Approximate Speed
-    data['approximate_speed'] = accident?.["Approximate speed"] || "40 - 80 km/h";
+    data['approximate_speed'] = accident?.["Approximate speed"];
     if (!accident?.["Approximate speed"]) {
       missingValues.push('Approximate Speed');
     }
@@ -356,87 +391,85 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
         if (!isNaN(incidentDate.getTime())) {
           data['incident_at_time_and_date'] = incidentDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
         } else {
-          data['incident_at_time_and_date'] = "2023-10-15"; // Default for invalid date
+          data['incident_at_time_and_date']
           missingValues.push('Incident At Time and Date (invalid date format)');
         }
       } catch (e) {
-        data['incident_at_time_and_date'] = "2023-10-15"; // Default for parsing error
+        data['incident_at_time_and_date'] 
         missingValues.push('Incident At Time and Date (date parsing error)');
       }
     } else {
-      data['incident_at_time_and_date'] = "2023-10-15"; // Default value
+      data['incident_at_time_and_date']
       missingValues.push('Incident At Time and Date');
     }
 
     // Hospital Distance From Home
-    data['hospital_distance_from_home'] = accident?.["Hospital Distance From Home"] || "5-10 Km";
+    data['hospital_distance_from_home'] = accident?.["Hospital Distance From Home"];
     if (!accident?.["Hospital Distance From Home"]) {
       missingValues.push('Hospital Distance From Home');
     }
 
     // Mode of Transport to the Hospital
-    data['mode_of_transport_to_the_hospital'] = accident?.["Mode of transport to hospital"] || "Ambulance";
+    data['mode_of_transport_to_the_hospital'] = accident?.["Mode of transport to hospital"];
     if (!accident?.["Mode of transport to hospital"]) {
       missingValues.push('Mode of Transport to the Hospital');
     }
 
     // Educational Qualification
-    data['educational_qualification'] = patient?.["Education Qualification"] || "O/L or A/L";
+    data['educational_qualification'] = patient?.["Education Qualification"];
     if (!patient?.["Education Qualification"]) {
       missingValues.push('Educational Qualification');
     }
 
-    // Time Taken To Reach Hospital - Warning: Not available in current data
-    data['time_taken_to_reach_hospital'] = "Less Than 15 Minutes"; // Default value
-    missingValues.push('Time Taken To Reach Hospital (not available in current data structure)');
+    // Time Taken To Reach Hospitat
+    data['time_taken_to_reach_hospital'] = accident?.["Time taken to reach hospital"];
+    if (!accident?.["Time taken to reach hospital"]) {
+      missingValues.push('Time taken to reach hospital');
+    }
+
 
     // Any Other Hospital Admission Expenditure
-    data['any_other_hospital_admission_expenditure'] = accident?.["Any Other Hospital Admission Expenditure"] || "No Other Expenses";
+    data['any_other_hospital_admission_expenditure'] = accident?.["Any Other Hospital Admission Expenditure"];
     if (!accident?.["Any Other Hospital Admission Expenditure"]) {
       missingValues.push('Any Other Hospital Admission Expenditure');
     }
 
-    // Site of injury No 2 - Warning: Not available in current data
-    data['site_of_injury_no_2'] = "no secondary injury found"; // Default value
-    missingValues.push('Site of injury No 2 (not available in current data structure)');
-
     // Occupation
-    data['occupation'] = patient?.["Occupation"] || "Student";
+    data['occupation'] = patient?.["Occupation"];
     if (!patient?.["Occupation"]) {
       missingValues.push('Occupation');
     }
 
-    // Family Monthly Income Before Accident - Warning: Not available in current data
-    data['family_monthly_income_before_accident'] = patient?.["Family Monthly Income"] || "30000-45000";
-    if (!patient?.["Family Monthly Income"]) {
-      missingValues.push('Family Monthly Income Before Accident (using current income as approximation)');
+    // Family Monthly Income Before Accident
+    data['family_monthly_income_before_accident'] = accident?.["Family monthly income before accident"];
+    if (!accident?.["Family monthly income before accident"]) {
+      missingValues.push('Family monthly income before accident');
     }
 
     // Collision With
-    data['collision_with'] = accident?.["Collision with"] || "Motorbike";
+    data['collision_with'] = accident?.["Collision with"];
     if (!accident?.["Collision with"]) {
       missingValues.push('Collision With');
     }
 
     // Life Style
-    data['life_style'] = patient?.["Life Style"] || "Living with care givers";
+    data['life_style'] = patient?.["Life Style"];
     if (!patient?.["Life Style"]) {
       missingValues.push('Life Style');
     }
 
-    // Collision Force From - Warning: Not available in current data
-    data['collision_force_from'] = "Front"; // Default value
-    missingValues.push('Collision Force From (not available in current data structure)');
+    // Collision Force From
+    data['collision_force_from'] = accident?.["Collision force from"];
+    if (!accident?.["Collision force from"]) {
+      missingValues.push('Collision force from');
+    }
 
     // Road Type
-    data['road_type'] = accident?.["Road Type"] || "Straight";
+    data['road_type'] = accident?.["Road Type"];
     if (!accident?.["Road Type"]) {
       missingValues.push('Road Type');
     }
 
-    // Type of Injury No 2 - Warning: Not available in current data
-    data['type_of_injury_no_2'] = "abrasion"; // Default value
-    missingValues.push('Type of Injury No 2 (not available in current data structure)');
 
     // Validate and clean data before sending
     const cleanedData = {};
@@ -847,6 +880,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                       <span className="text-xs text-slate-500">{t('timeOfCollision')}</span>
                       <span className="font-medium text-sm">{acc["time of collision"]}</span>
                     </div>
+
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-slate-500">{t('completed')}</span>
                       <span className="font-medium text-sm">{acc["Completed"] ? t('yes') : t('no')}</span>
@@ -864,7 +898,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                           ) : transferProbabilities[acc.accident_id] ? (
                             <div className="mt-2">
                               <div className="text-sm text-slate-600">{t('transferProbability')}: <span className="font-bold text-sky-700">{transferProbabilities[acc.accident_id].probability}</span></div>
-                              <div className="text-sm mt-1">{t('prediction')}: <span className="font-semibold">{transferProbabilities[acc.accident_id].prediction}</span></div>
+                              <div className="text-sm mt-1">{t('prediction')}: <span className="font-semibold">{translateTransferPrediction(transferProbabilities[acc.accident_id].prediction)}</span></div>
                             </div>
                           ) : (
                             <p className="text-sm text-red-600 mt-2">{t('predictionNotAvailable')}</p>
@@ -947,7 +981,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                             <div className="text-sm text-sky-800 font-medium">{t('transferProbability')}</div>
                           </div>
                           <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                            <div className="text-xl font-bold text-purple-600">{transferProbabilities[selectedAccident.accident_id].prediction}</div>
+                            <div className="text-xl font-bold text-purple-600">{translateTransferPrediction(transferProbabilities[selectedAccident.accident_id].prediction)}</div>
                             <div className="text-sm text-purple-800 font-medium">{t('predictionOutcome')}</div>
                           </div>
                           <div className="text-center p-3 bg-white rounded-lg shadow-sm">
@@ -1014,7 +1048,8 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                     <h3 className="font-semibold text-lg mb-3 text-sky-700">{t('basicInformation')}</h3>
                     <p className="mb-2"><span className="font-medium">{t('incidentDate')}:</span> {selectedAccident["incident at date"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('timeOfCollision')}:</span> {selectedAccident["time of collision"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('severity')}:</span> {selectedAccident["Severity"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('familyMonthlyIncomeBeforeAccident')}:</span> {selectedAccident["Family monthly income before accident"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('familyMonthlyIncomeAfterAccident')}:</span> {selectedAccident["Family monthly income after accident"]}</p>
                   </div>
                   
                   <div className="bg-slate-50 p-4 rounded-lg">
@@ -1027,6 +1062,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                   
                   <div className="bg-slate-50 p-4 rounded-lg">
                     <h3 className="font-semibold text-lg mb-3 text-sky-700">{t('accidentDetails')}</h3>
+                    <p className="mb-2"><span className="font-medium">{t('severity')}:</span> {selectedAccident["Severity"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('approximateSpeed')}:</span> {selectedAccident["Approximate speed"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('modeOfTraveling')}:</span> {selectedAccident["Mode of traveling during accident"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('collisionWith')}:</span> {selectedAccident["Collision with"]}</p>
@@ -1034,6 +1070,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                     <p className="mb-2"><span className="font-medium">{t('alcoholConsumption')}:</span> {selectedAccident["Alcohol Consumption"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('illicitDrugs')}:</span> {selectedAccident["Illicit Drugs"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('helmetWorn')}:</span> {selectedAccident["Helmet Worn"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('timeTakenToReachHospital')}:</span> {selectedAccident["Time taken to reach hospital"]}</p>
                   </div>
                   
                   <div className="bg-slate-50 p-4 rounded-lg">
@@ -1047,7 +1084,62 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                     <p className="mb-2"><span className="font-medium">{t('anyOtherHospitalAdmissionExpenditure')}:</span> {selectedAccident["Any Other Hospital Admission Expenditure"]}</p>
                   </div>
 
-                  <p className="mb-2"><span className="font-medium">{t('completed')}:</span> {selectedAccident["Completed"] ? t('yes') : t('no')}</p>
+                  {/* Injury Details Section */}
+                  <div className="bg-red-50 p-4 rounded-lg mt-4">
+                    <h3 className="font-semibold text-lg mb-3 text-red-700 flex items-center">
+                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.962-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                      </svg>
+                      {t('injuryDetails')}
+                    </h3>
+                    {selectedAccident.injuries && selectedAccident.injuries.length > 0 ? (
+                      <div className="space-y-3">
+                        {selectedAccident.injuries.map((injury, index) => (
+                          <div key={index} className="bg-white p-3 rounded border border-red-200">
+                            <h4 className="font-medium text-red-800 mb-2">
+                              {t('injuryNumber')} {index + 1}
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+                              <p>
+                                <span className="font-medium text-gray-600">{t('siteOfInjury')}:</span>
+                                <br />
+                                <span className="text-gray-900">{injury.site_of_injury || '-'}</span>
+                              </p>
+                              <p>
+                                <span className="font-medium text-gray-600">{t('typeOfInjury')}:</span>
+                                <br />
+                                <span className="text-gray-900">{injury.type_of_injury || '-'}</span>
+                              </p>
+                              <p>
+                                <span className="font-medium text-gray-600">{t('severity')}:</span>
+                                <br />
+                                <span className={`font-medium ${
+                                  injury.severity === 'S' ? 'text-red-600' : 
+                                  injury.severity === 'M' ? 'text-orange-600' : 
+                                  injury.severity === 'L' ? 'text-yellow-600' : 
+                                  'text-gray-600'
+                                }`}>
+                                  {injury.severity === 'S' ? 'Serious' :
+                                   injury.severity === 'M' ? 'Medium' :
+                                   injury.severity === 'L' ? 'Light' :
+                                   injury.severity || 'Unknown'}
+                                </span>
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-4 text-gray-500">
+                        <svg className="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p className="text-sm">{t('noInjuries')}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <p className="mb-2 mt-4"><span className="font-medium">{t('completed')}:</span> {selectedAccident["Completed"] ? t('yes') : t('no')}</p>
                 </div>
                 
                 <div className="mt-6 flex justify-end">
