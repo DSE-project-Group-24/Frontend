@@ -804,37 +804,111 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
           <SkeletonPatient />
         ) : (
           filtered && (
-            <div className="bg-white p-6 rounded-xl shadow-md mb-6 border border-slate-100">
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-sky-600 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-md">
-                    {filtered["Full Name"] ? filtered["Full Name"].split(' ').map(n => n[0]).slice(0,2).join('') : 'P'}
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
+              {/* Patient Header */}
+              <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium">
+                      {filtered["Full Name"] ? filtered["Full Name"].split(' ').map(n => n[0]).slice(0,2).join('') : 'P'}
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">{filtered["Full Name"]}</h2>
+                      <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
+                        <span>ID: {filtered["patient_id"]}</span>
+                        <span>•</span>
+                        <span>{filtered["Contact Number"]}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-lg font-semibold text-slate-800">{filtered["Full Name"]}</h2>
-                    <p className="text-sm text-slate-500">{filtered["Contact Number"]}</p>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => handleCopy(filtered["patient_id"])} 
+                      className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                    >
+                      Copy ID
+                    </button>
+                    {copySuccess && <span className="text-xs text-green-600 font-medium">{copySuccess}</span>}
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button onClick={() => handleCopy(filtered["patient_id"])} className="inline-flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm hover:shadow transition">Copy ID</button>
-                  {copySuccess && <span className="text-sm text-emerald-600">{copySuccess}</span>}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-700">
-                <div className="space-y-2">
-                  <p><span className="font-medium">{t('dateOfBirth')}:</span> {filtered["Date of Birth"]} {filtered["Date of Birth"] && (<span className="text-sm text-slate-500"> ({t('age')}: {Math.floor((new Date() - new Date(filtered["Date of Birth"])) / (1000 * 60 * 60 * 24 * 365.25))})</span>)}</p>
-                  <p><span className="font-medium">{t('ethnicity')}:</span> {filtered["Ethnicity"]}</p>
-                  <p><span className="font-medium">{t('gender')}:</span> {filtered["Gender"]}</p>
-                  <p><span className="font-medium">{t('address')}:</span> {filtered["Address Street"]}</p>
-                </div>
-                <div className="space-y-2">
-                  <p><span className="font-medium">{t('lifeStyle')}:</span> {filtered["Life Style"]}</p>
-                  <p><span className="font-medium">{t('education')}:</span> {filtered["Education Qualification"]}</p>
-                  <p><span className="font-medium">{t('occupation')}:</span> {filtered["Occupation"]}</p>
-                  <p><span className="font-medium">{t('familyMonthlyIncome')}:</span> {filtered["Family Monthly Income"]}</p>
-                  <p><span className="font-medium">{t('bloodGroup')}:</span> {filtered["Blood Group"] || t('notRecorded')}</p>
-                  <p><span className="font-medium">{t('patientId')}:</span> <span className="text-sm text-slate-600">{filtered["patient_id"]}</span></p>
+              {/* Patient Details */}
+              <div className="px-6 py-5">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Demographics */}
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-2">
+                      Demographics
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start">
+                        <span className="text-sm text-gray-600 w-20 flex-shrink-0">{t('dateOfBirth')}</span>
+                        <div className="text-sm text-gray-900 text-right">
+                          <div>{filtered["Date of Birth"]}</div>
+                          {filtered["Date of Birth"] && (
+                            <div className="text-xs text-gray-500 mt-0.5">
+                              {t('age')}: {Math.floor((new Date() - new Date(filtered["Date of Birth"])) / (1000 * 60 * 60 * 24 * 365.25))} years
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600 w-20 flex-shrink-0">{t('gender')}</span>
+                        <span className="text-sm text-gray-900">{filtered["Gender"]}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600 w-20 flex-shrink-0">{t('ethnicity')}</span>
+                        <span className="text-sm text-gray-900">{filtered["Ethnicity"]}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600 w-20 flex-shrink-0">{t('bloodGroup')}</span>
+                        <span className="text-sm text-gray-900">{filtered["Blood Group"] || t('notRecorded')}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Social Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-2">
+                      Social Information
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600 w-24 flex-shrink-0">{t('occupation')}</span>
+                        <span className="text-sm text-gray-900 text-right">{filtered["Occupation"]}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600 w-24 flex-shrink-0">{t('education')}</span>
+                        <span className="text-sm text-gray-900 text-right">{filtered["Education Qualification"]}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600 w-24 flex-shrink-0">{t('lifeStyle')}</span>
+                        <span className="text-sm text-gray-900 text-right">{filtered["Life Style"]}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600 w-24 flex-shrink-0">{t('familyMonthlyIncome')}</span>
+                        <span className="text-sm text-gray-900 text-right">{filtered["Family Monthly Income"]}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Contact Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-2">
+                      Contact Information
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start">
+                        <span className="text-sm text-gray-600 w-16 flex-shrink-0">{t('address')}</span>
+                        <span className="text-sm text-gray-900 text-right">{filtered["Address Street"]}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600 w-16 flex-shrink-0">Phone</span>
+                        <span className="text-sm text-gray-900">{filtered["Contact Number"]}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
