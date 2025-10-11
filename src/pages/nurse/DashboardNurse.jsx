@@ -6,49 +6,49 @@ import { t } from "../../utils/translations";
 
 // --- Category options (unchanged from your spec) ---
 const EDUCATION = [
-  "None",
-  "Grade 5 Scholarship",
-  "OL or AL",
-  "Undergraduate",
-  "Postgraduate",
-  "Unknown",
+  t('none') || 'None',
+  t('grade5Scholarship') || 'Grade 5 Scholarship',
+  t('olOrAl') || 'OL or AL',
+  t('undergraduate') || 'Undergraduate',
+  t('postgraduate') || 'Postgraduate',
+  t('unknown') || 'Unknown',
 ];
-const ETHNICITY = ["Tamil", "Sinhalese", "Moor", "Other"];
-const GENDER = ["Male", "Female", "Other"];
+const ETHNICITY = [t('tamil') || 'Tamil', t('sinhalese') || 'Sinhalese', t('moor') || 'Moor', t('other') || 'Other'];
+const GENDER = [t('male') || 'Male', t('female') || 'Female', t('other') || 'Other'];
 const LIFESTYLE = [
-  "Living with care givers",
-  "Living with children",
-  "Living alone",
-  "Unknown",
+  t('livingWithCareGivers') || 'Living with care givers',
+  t('livingWithChildren') || 'Living with children',
+  t('livingAlone') || 'Living alone',
+  t('unknown') || 'Unknown',
 ];
 const OCCUPATION = [
-  "Unemployed",
-  "Semi-Skilled Worker",
-  "Skilled Worker",
-  "Highly Skilled Worker",
-  "Professional",
-  "Retired pensioner",
-  "Other",
-  "Unknown",
+  t('unemployed') || 'Unemployed',
+  t('semiSkilledWorker') || 'Semi-Skilled Worker',
+  t('skilledWorker') || 'Skilled Worker',
+  t('highlySkilledWorker') || 'Highly Skilled Worker',
+  t('professional') || 'Professional',
+  t('retiredPensioner') || 'Retired pensioner',
+  t('other') || 'Other',
+  t('unknown') || 'Unknown',
 ];
 const FAMILY_INCOME = [
-  "Less than 15000",
-  "15000-30000",
-  "30000-45000",
-  "45000-60000",
-  "More than 60000",
-  "Unknown",
+  t('lessThan15000') || 'Less than 15000',
+  '15000-30000',
+  '30000-45000',
+  '45000-60000',
+  t('moreThan60000') || 'More than 60000',
+  t('unknown') || 'Unknown',
 ];
 const BLOOD_GROUP = [
-  "A+",
-  "A-",
-  "B+",
-  "B-",
-  "AB+",
-  "AB-",
-  "O+",
-  "O-",
-  "Unknown",
+  'A+',
+  'A-',
+  'B+',
+  'B-',
+  'AB+',
+  'AB-',
+  'O+',
+  'O-',
+  t('unknown') || 'Unknown',
 ];
 
 const pick = (row, ...keys) => {
@@ -253,12 +253,12 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
                 value={form.contact_number}
                 onChange={onChange}
                 className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-                placeholder="07XXXXXXXX or +947XXXXXXXX"
+                placeholder={t('phoneExample')}
                 inputMode="tel"
               />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-sm font-medium">Registered Date</span>
+              <span className="text-sm font-medium">{t('registeredDate')}</span>
               <input
                 type="date"
                 name="registered_date"
@@ -271,7 +271,7 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
 
           <details className="group rounded-xl border border-gray-100 open:shadow-sm">
             <summary className="px-4 py-2 cursor-pointer list-none text-sm font-semibold">
-              More details (optional)
+              {t('moreDetailsOptional')}
             </summary>
             <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
               <label className="flex flex-col gap-1">
@@ -307,7 +307,7 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
                   value={form.address_street}
                   onChange={onChange}
                   className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-                  placeholder="e.g., 123/A, Lake Rd, Moratuwa"
+                  placeholder={t('addressExample')}
                 />
               </label>
               <label className="flex flex-col gap-1">
@@ -394,13 +394,13 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
                 </select>
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium">NIC</span>
+                <span className="text-sm font-medium">{t('nic')}</span>
                 <input
                   name="nic"
                   value={form.nic}
                   onChange={onChange}
                   className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-                  placeholder="Old or new format"
+                  placeholder={t('oldOrNewFormat')}
                 />
               </label>
             </div>
@@ -600,16 +600,16 @@ export default function NurseDashboard() {
                           {pick(p, "Full Name", "full_name")}
                         </td>
                         <td className="py-2 pr-4">
-                          {pick(p, "Gender", "gender") || "—"}
+                          {pick(p, "Gender", "gender") || t('unknown')}
                         </td>
                         <td className="py-2 pr-4">
-                          {pick(p, "Contact Number", "contact_number") || "—"}
+                          {pick(p, "Contact Number", "contact_number") || t('noContact')}
                         </td>
                         <td className="py-2 pr-4">
-                          {pick(p, "Date of Birth", "date_of_birth") || "—"}
+                          {pick(p, "Date of Birth", "date_of_birth") || t('noDob')}
                         </td>
                         <td className="py-2 pr-4">
-                          {pick(p, "Blood Group", "blood_group") || "—"}
+                          {pick(p, "Blood Group", "blood_group") || t('unknown')}
                         </td>
                         <td className="py-2 pr-4">
                           <button

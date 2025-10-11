@@ -281,14 +281,14 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
                 />
               </Field>
 
-              <Field label={t('contactNumber')} hint="07XXXXXXXX or +947XXXXXXXX">
+              <Field label={t('contactNumber')} hint={t('phoneExample')}>
                 <input
                   name="contact_number"
                   value={form.contact_number}
                   onChange={onChange}
                   className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
                   inputMode="tel"
-                  placeholder="07XXXXXXXX"
+                  placeholder={t('phoneExample')}
                 />
               </Field>
 
@@ -367,7 +367,7 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
                   name="address_street"
                   value={form.address_street}
                   onChange={onChange}
-                  placeholder="e.g., 123/A, Lake Rd, Moratuwa"
+                  placeholder={t('addressExample')}
                   className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
                 />
               </Field>
