@@ -1,52 +1,54 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import NurseNav from "../../navbars/NurseNav";
 import API from "../../utils/api";
+import Footer from "../../components/Footer";
+import { t } from "../../utils/translations";
 
 // --- Category options (unchanged from your spec) ---
 const EDUCATION = [
-  "None",
-  "Grade 5 Scholarship",
-  "OL or AL",
-  "Undergraduate",
-  "Postgraduate",
-  "Unknown",
+  t('none') || 'None',
+  t('grade5Scholarship') || 'Grade 5 Scholarship',
+  t('olOrAl') || 'OL or AL',
+  t('undergraduate') || 'Undergraduate',
+  t('postgraduate') || 'Postgraduate',
+  t('unknown') || 'Unknown',
 ];
-const ETHNICITY = ["Tamil", "Sinhalese", "Moor", "Other"];
-const GENDER = ["Male", "Female", "Other"];
+const ETHNICITY = [t('tamil') || 'Tamil', t('sinhalese') || 'Sinhalese', t('moor') || 'Moor', t('other') || 'Other'];
+const GENDER = [t('male') || 'Male', t('female') || 'Female', t('other') || 'Other'];
 const LIFESTYLE = [
-  "Living with care givers",
-  "Living with children",
-  "Living alone",
-  "Unknown",
+  t('livingWithCareGivers') || 'Living with care givers',
+  t('livingWithChildren') || 'Living with children',
+  t('livingAlone') || 'Living alone',
+  t('unknown') || 'Unknown',
 ];
 const OCCUPATION = [
-  "Unemployed",
-  "Semi-Skilled Worker",
-  "Skilled Worker",
-  "Highly Skilled Worker",
-  "Professional",
-  "Retired pensioner",
-  "Other",
-  "Unknown",
+  t('unemployed') || 'Unemployed',
+  t('semiSkilledWorker') || 'Semi-Skilled Worker',
+  t('skilledWorker') || 'Skilled Worker',
+  t('highlySkilledWorker') || 'Highly Skilled Worker',
+  t('professional') || 'Professional',
+  t('retiredPensioner') || 'Retired pensioner',
+  t('other') || 'Other',
+  t('unknown') || 'Unknown',
 ];
 const FAMILY_INCOME = [
-  "Less than 15000",
-  "15000-30000",
-  "30000-45000",
-  "45000-60000",
-  "More than 60000",
-  "Unknown",
+  t('lessThan15000') || 'Less than 15000',
+  '15000-30000',
+  '30000-45000',
+  '45000-60000',
+  t('moreThan60000') || 'More than 60000',
+  t('unknown') || 'Unknown',
 ];
 const BLOOD_GROUP = [
-  "A+",
-  "A-",
-  "B+",
-  "B-",
-  "AB+",
-  "AB-",
-  "O+",
-  "O-",
-  "Unknown",
+  'A+',
+  'A-',
+  'B+',
+  'B-',
+  'AB+',
+  'AB-',
+  'O+',
+  'O-',
+  t('unknown') || 'Unknown',
 ];
 
 const pick = (row, ...keys) => {
@@ -173,10 +175,10 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
         buildPayload()
       );
       onSaved?.(res.data);
-      setMsg("Saved ✅");
+      setMsg(t('patientSaved'));
       setTimeout(() => onClose?.(), 300);
     } catch (err) {
-      setMsg(err?.response?.data?.detail || "Failed to save ❌");
+      setMsg(err?.response?.data?.detail || t('errorSavingPatient'));
     } finally {
       setSaving(false);
     }
@@ -187,7 +189,7 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
       <div className="absolute right-0 top-0 h-full w-full max-w-xl bg-white shadow-xl p-6 overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-800">Edit Patient</h2>
+          <h2 className="text-xl font-semibold text-gray-800">{t('editPatient')}</h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -213,7 +215,7 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <label className="flex flex-col gap-1">
               <span className="text-sm font-medium">
-                Full Name <span className="text-red-500">*</span>
+                {t('fullName')} <span className="text-red-500">*</span>
               </span>
               <input
                 ref={firstInputRef}
@@ -221,13 +223,13 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
                 value={form.full_name}
                 onChange={onChange}
                 className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-                placeholder="Full name"
+                placeholder={t('fullName')}
                 required
               />
             </label>
             <label className="flex flex-col gap-1">
               <span className="text-sm font-medium">
-                Gender <span className="text-red-500">*</span>
+                {t('gender')} <span className="text-red-500">*</span>
               </span>
               <select
                 name="gender"
@@ -236,7 +238,7 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
                 className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
                 required
               >
-                <option value="">Select Gender</option>
+                <option value="">{t('selectGender')}</option>
                 {GENDER.map((g) => (
                   <option key={g} value={g}>
                     {g}
@@ -245,18 +247,18 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
               </select>
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-sm font-medium">Contact Number</span>
+              <span className="text-sm font-medium">{t('contactNumber')}</span>
               <input
                 name="contact_number"
                 value={form.contact_number}
                 onChange={onChange}
                 className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-                placeholder="07XXXXXXXX or +947XXXXXXXX"
+                placeholder={t('phoneExample')}
                 inputMode="tel"
               />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-sm font-medium">Registered Date</span>
+              <span className="text-sm font-medium">{t('registeredDate')}</span>
               <input
                 type="date"
                 name="registered_date"
@@ -269,11 +271,11 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
 
           <details className="group rounded-xl border border-gray-100 open:shadow-sm">
             <summary className="px-4 py-2 cursor-pointer list-none text-sm font-semibold">
-              More details (optional)
+              {t('moreDetailsOptional')}
             </summary>
             <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
               <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium">Date of Birth</span>
+                <span className="text-sm font-medium">{t('dateOfBirth')}</span>
                 <input
                   type="date"
                   name="date_of_birth"
@@ -283,14 +285,14 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
                 />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium">Ethnicity</span>
+                <span className="text-sm font-medium">{t('ethnicity')}</span>
                 <select
                   name="ethnicity"
                   value={form.ethnicity}
                   onChange={onChange}
                   className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
                 >
-                  <option value="">Select Ethnicity</option>
+                  <option value="">{t('selectEthnicityOption')}</option>
                   {ETHNICITY.map((e) => (
                     <option key={e} value={e}>
                       {e}
@@ -299,24 +301,24 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
                 </select>
               </label>
               <label className="flex flex-col gap-1 md:col-span-2">
-                <span className="text-sm font-medium">Address — Street</span>
+                <span className="text-sm font-medium">{t('addressStreet')}</span>
                 <input
                   name="address_street"
                   value={form.address_street}
                   onChange={onChange}
                   className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-                  placeholder="e.g., 123/A, Lake Rd, Moratuwa"
+                  placeholder={t('addressExample')}
                 />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium">Life Style</span>
+                <span className="text-sm font-medium">{t('lifeStyle')}</span>
                 <select
                   name="life_style"
                   value={form.life_style}
                   onChange={onChange}
                   className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
                 >
-                  <option value="">Select Life Style</option>
+                  <option value="">{t('selectLifeStyle')}</option>
                   {LIFESTYLE.map((l) => (
                     <option key={l} value={l}>
                       {l}
@@ -326,7 +328,7 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
               </label>
               <label className="flex flex-col gap-1">
                 <span className="text-sm font-medium">
-                  Education Qualification
+                  {t('educationQualification')}
                 </span>
                 <select
                   name="education_qualification"
@@ -334,7 +336,7 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
                   onChange={onChange}
                   className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
                 >
-                  <option value="">Select Education</option>
+                  <option value="">{t('selectEducation')}</option>
                   {EDUCATION.map((q) => (
                     <option key={q} value={q}>
                       {q}
@@ -343,14 +345,14 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
                 </select>
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium">Occupation</span>
+                <span className="text-sm font-medium">{t('occupation')}</span>
                 <select
                   name="occupation"
                   value={form.occupation}
                   onChange={onChange}
                   className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
                 >
-                  <option value="">Select Occupation</option>
+                  <option value="">{t('selectOccupation')}</option>
                   {OCCUPATION.map((o) => (
                     <option key={o} value={o}>
                       {o}
@@ -360,7 +362,7 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
               </label>
               <label className="flex flex-col gap-1">
                 <span className="text-sm font-medium">
-                  Family Monthly Income
+                  {t('familyMonthlyIncome')}
                 </span>
                 <select
                   name="family_monthly_income"
@@ -368,7 +370,7 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
                   onChange={onChange}
                   className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
                 >
-                  <option value="">Select Income Range</option>
+                  <option value="">{t('selectIncomeRange')}</option>
                   {FAMILY_INCOME.map((i) => (
                     <option key={i} value={i}>
                       {i}
@@ -377,7 +379,7 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
                 </select>
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium">Blood Group</span>
+                <span className="text-sm font-medium">{t('bloodGroup')}</span>
                 <select
                   name="blood_group"
                   value={form.blood_group}
@@ -392,13 +394,13 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
                 </select>
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-sm font-medium">NIC</span>
+                <span className="text-sm font-medium">{t('nic')}</span>
                 <input
                   name="nic"
                   value={form.nic}
                   onChange={onChange}
                   className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
-                  placeholder="Old or new format"
+                  placeholder={t('oldOrNewFormat')}
                 />
               </label>
             </div>
@@ -410,13 +412,13 @@ function EditDrawer({ open, onClose, patient, onSaved }) {
               disabled={saving}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
-              {saving ? "Saving..." : "Save"}
+              {saving ? t('saving') : t('save')}
             </button>
             <button
               onClick={onClose}
               className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200"
             >
-              Cancel
+              {t('cancel')}
             </button>
           </div>
         </div>
@@ -452,7 +454,7 @@ export default function NurseDashboard() {
         if (!ok) return;
         setPatients(pat.data || []);
       } catch (e) {
-        setErr(e?.response?.data?.detail || "Failed to load patients");
+        setErr(e?.response?.data?.detail || t('errorLoadingData'));
       } finally {
         if (ok) setLoading(false);
       }
@@ -521,9 +523,9 @@ export default function NurseDashboard() {
       <NurseNav />
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="mb-4 sticky top-0 bg-transparent z-10">
-          <h1 className="text-2xl font-bold text-gray-800">Nurse Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-800">{t('nurseDashboard')}</h1>
           <p className="text-sm text-gray-600">
-            Manage and edit patient records
+            {t('patientManagement')}
           </p>
         </div>
 
@@ -535,14 +537,14 @@ export default function NurseDashboard() {
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50 px-5 py-3 border-b border-gray-100 sticky top-0 z-10">
-            <h3 className="text-lg font-semibold text-gray-800">Patients</h3>
+            <h3 className="text-lg font-semibold text-gray-800">{t('patients')}</h3>
             <input
               value={q}
               onChange={(e) => {
                 setQ(e.target.value);
                 setPage(1);
               }}
-              placeholder="Search by name / NIC / phone"
+              placeholder={t('searchByNameNicPhoneDob')}
               className="w-72 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
             />
           </div>
@@ -558,7 +560,7 @@ export default function NurseDashboard() {
                 ))}
               </div>
             ) : filtered.length === 0 ? (
-              <div className="text-gray-500 text-sm">No patients found</div>
+              <div className="text-gray-500 text-sm">{t('noMatchingPatients')}</div>
             ) : (
               <>
                 <table className="min-w-full text-sm">
@@ -568,7 +570,7 @@ export default function NurseDashboard() {
                         className="py-2 pr-4 cursor-pointer select-none"
                         onClick={() => toggleSort("Full Name")}
                       >
-                        Name{" "}
+                        {t('fullName')}{" "}
                         <SortIcon
                           dir={sort.key === "Full Name" ? sort.dir : null}
                         />
@@ -577,15 +579,15 @@ export default function NurseDashboard() {
                         className="py-2 pr-4 cursor-pointer select-none"
                         onClick={() => toggleSort("Gender")}
                       >
-                        Gender{" "}
+                        {t('gender')}{" "}
                         <SortIcon
                           dir={sort.key === "Gender" ? sort.dir : null}
                         />
                       </th>
-                      <th className="py-2 pr-4">Phone</th>
-                      <th className="py-2 pr-4">DOB</th>
-                      <th className="py-2 pr-4">Blood</th>
-                      <th className="py-2 pr-4">Actions</th>
+                      <th className="py-2 pr-4">{t('contactNumber')}</th>
+                      <th className="py-2 pr-4">{t('dateOfBirth')}</th>
+                      <th className="py-2 pr-4">{t('bloodGroup')}</th>
+                      <th className="py-2 pr-4">{t('actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -598,16 +600,16 @@ export default function NurseDashboard() {
                           {pick(p, "Full Name", "full_name")}
                         </td>
                         <td className="py-2 pr-4">
-                          {pick(p, "Gender", "gender") || "—"}
+                          {pick(p, "Gender", "gender") || t('unknown')}
                         </td>
                         <td className="py-2 pr-4">
-                          {pick(p, "Contact Number", "contact_number") || "—"}
+                          {pick(p, "Contact Number", "contact_number") || t('noContact')}
                         </td>
                         <td className="py-2 pr-4">
-                          {pick(p, "Date of Birth", "date_of_birth") || "—"}
+                          {pick(p, "Date of Birth", "date_of_birth") || t('noDob')}
                         </td>
                         <td className="py-2 pr-4">
-                          {pick(p, "Blood Group", "blood_group") || "—"}
+                          {pick(p, "Blood Group", "blood_group") || t('unknown')}
                         </td>
                         <td className="py-2 pr-4">
                           <button
@@ -616,7 +618,7 @@ export default function NurseDashboard() {
                               setEditing({ open: true, patient: p })
                             }
                           >
-                            Edit
+                            {t('edit')}
                           </button>
                         </td>
                       </tr>
@@ -627,7 +629,7 @@ export default function NurseDashboard() {
                 {/* Pagination */}
                 <div className="flex items-center justify-between mt-4">
                   <div className="text-xs text-gray-500">
-                    Page {page} of {totalPages} • {filtered.length} patients
+                    Page {page} {t('of')} {totalPages} • {filtered.length} {t('patients')}
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -635,7 +637,7 @@ export default function NurseDashboard() {
                       disabled={page === 1}
                       className="px-3 py-1.5 rounded border disabled:opacity-50"
                     >
-                      Prev
+                      {t('previous')}
                     </button>
                     <button
                       onClick={() =>
@@ -644,7 +646,7 @@ export default function NurseDashboard() {
                       disabled={page === totalPages}
                       className="px-3 py-1.5 rounded border disabled:opacity-50"
                     >
-                      Next
+                      {t('next')}
                     </button>
                   </div>
                 </div>
@@ -660,6 +662,7 @@ export default function NurseDashboard() {
         onClose={() => setEditing({ open: false, patient: null })}
         onSaved={onRowSaved}
       />
+      <Footer />
     </div>
   );
 }
