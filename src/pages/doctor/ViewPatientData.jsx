@@ -1130,41 +1130,50 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-700">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-slate-700">
+                  {/* Incident Overview */}
                   <div className="bg-slate-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-3 text-sky-700">{t('basicInformation')}</h3>
+                    <h3 className="font-semibold text-lg mb-3 text-sky-700">{t('incidentOverview') || 'Incident Overview'}</h3>
                     <p className="mb-2"><span className="font-medium">{t('incidentDate')}:</span> {selectedAccident["incident at date"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('timeOfCollision')}:</span> {selectedAccident["time of collision"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('familyMonthlyIncomeBeforeAccident')}:</span> {selectedAccident["Family monthly income before accident"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('familyMonthlyIncomeAfterAccident')}:</span> {selectedAccident["Family monthly income after accident"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('severity')}:</span> {selectedAccident["Severity"]}</p>
                   </div>
-                  
+
+                  {/* Environmental Conditions */}
                   <div className="bg-slate-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-3 text-sky-700">{t('environmentConditions')}</h3>
+                    <h3 className="font-semibold text-lg mb-3 text-green-700">{t('environmentConditions')}</h3>
                     <p className="mb-2"><span className="font-medium">{t('visibility')}:</span> {selectedAccident["Visibility"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('roadCondition')}:</span> {selectedAccident["Road Condition"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('roadType')}:</span> {selectedAccident["Road Type"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('categoryOfRoad')}:</span> {selectedAccident["Category of Road"]}</p>
                   </div>
-                  
+
+                  {/* Vehicle & Collision Details */}
                   <div className="bg-slate-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-3 text-sky-700">{t('accidentDetails')}</h3>
-                    <p className="mb-2"><span className="font-medium">{t('severity')}:</span> {selectedAccident["Severity"]}</p>
+                    <h3 className="font-semibold text-lg mb-3 text-purple-700">{t('vehicleCollisionDetails') || 'Vehicle & Collision Details'}</h3>
                     <p className="mb-2"><span className="font-medium">{t('approximateSpeed')}:</span> {selectedAccident["Approximate speed"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('modeOfTraveling')}:</span> {selectedAccident["Mode of traveling during accident"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('collisionWith')}:</span> {selectedAccident["Collision with"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('modeOfTransportToHospital')}:</span> {selectedAccident["Mode of transport to hospital"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('helmetWorn')}:</span> {selectedAccident["Helmet Worn"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('alcoholConsumption')}:</span> {selectedAccident["Alcohol Consumption"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('illicitDrugs')}:</span> {selectedAccident["Illicit Drugs"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('helmetWorn')}:</span> {selectedAccident["Helmet Worn"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('timeTakenToReachHospital')}:</span> {selectedAccident["Time taken to reach hospital"]}</p>
                   </div>
-                  
+
+                  {/* Medical Response */}
                   <div className="bg-slate-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-3 text-sky-700">{t('medicalFinancial')}</h3>
+                    <h3 className="font-semibold text-lg mb-3 text-blue-700">{t('medicalResponse') || 'Medical Response'}</h3>
                     <p className="mb-2"><span className="font-medium">{t('firstAidGivenAtScene')}:</span> {selectedAccident["First aid given at seen"] ? t('yes') : t('no')}</p>
-                    <p className="mb-2"><span className="font-medium">{t('hospitalDistanceFromHome')}:</span> {selectedAccident["Hospital Distance From Home"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('modeOfTransportToHospital')}:</span> {selectedAccident["Mode of transport to hospital"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('timeTakenToReachHospital')}:</span> {selectedAccident["Time taken to reach hospital"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('hospital')}:</span> {localStorage.getItem('hospital_name') || selectedAccident["Hospital"] || selectedAccident?.hospital || 'Not specified'}</p>
+                    <p className="mb-2"><span className="font-medium">{t('hospitalDistanceFromHome')}:</span> {selectedAccident["Hospital Distance From Home"]}</p>
+                  </div>
+
+                  {/* Financial Impact */}
+                  <div className="bg-slate-50 p-4 rounded-lg">
+                    <h3 className="font-semibold text-lg mb-3 text-emerald-700">{t('financialImpact') || 'Financial Impact'}</h3>
+                    <p className="mb-2"><span className="font-medium">{t('familyMonthlyIncomeBeforeAccident')}:</span> {selectedAccident["Family monthly income before accident"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('familyMonthlyIncomeAfterAccident')}:</span> {selectedAccident["Family monthly income after accident"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('familyCurrentStatus')}:</span> {selectedAccident["Family current status"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('bystanderExpenditurePerDay')}:</span> {selectedAccident["Bystander expenditure per day"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('travelingExpenditurePerDay')}:</span> {selectedAccident["Traveling Expenditure Per Day"]}</p>
@@ -1225,8 +1234,6 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                       </div>
                     )}
                   </div>
-
-                  <p className="mb-2 mt-4"><span className="font-medium">{t('completed')}:</span> {selectedAccident["Completed"] ? t('yes') : t('no')}</p>
                 </div>
                 
                 <div className="mt-6 flex justify-end">
