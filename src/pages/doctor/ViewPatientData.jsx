@@ -1078,91 +1078,234 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
 
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Transfer Probability Analysis */}
-                        {transferProbabilities[selectedAccident.accident_id] && (
-                          <div className="bg-white border border-gray-200 rounded-lg p-4">
-                            <div className="flex items-center mb-3">
-                              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                                </svg>
-                              </div>
-                              <h4 className="font-semibold text-gray-900">Transfer Risk Assessment</h4>
-                            </div>
-                            <div className="space-y-3">
-                              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                <span className="text-sm font-medium text-gray-700">Transfer Probability</span>
-                                <span className="text-lg font-bold text-blue-600">{transferProbabilities[selectedAccident.accident_id].probability}</span>
-                              </div>
-                              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                <span className="text-sm font-medium text-gray-700">Recommendation</span>
-                                <span className="text-sm font-semibold text-gray-900">{translateTransferPrediction(transferProbabilities[selectedAccident.accident_id].prediction)}</span>
-                              </div>
-                              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                                <p className="text-sm text-amber-800">{transferProbabilities[selectedAccident.accident_id].message}</p>
-                              </div>
-                            </div>
-
-                            {transferProbabilities[selectedAccident.accident_id].missingValues && transferProbabilities[selectedAccident.accident_id].missingValues.length > 0 && (
-                              <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
-                                <h5 className="font-medium text-orange-900 mb-2 flex items-center">
-                                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.962-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        {transferProbabilities[selectedAccident.accident_id] && (() => {
+                          const transferData = transferProbabilities[selectedAccident.accident_id];
+                          const probabilityPercent = parseFloat(transferData.probability?.replace('%', '') || '0');
+                          const isHighRisk = probabilityPercent >= 70;
+                          const isMediumRisk = probabilityPercent >= 40 && probabilityPercent < 70;
+                          const isLowRisk = probabilityPercent < 40;
+                          
+                          const riskColors = {
+                            high: {
+                              border: 'border-red-300',
+                              bg: 'bg-red-50',
+                              icon: 'bg-red-100',
+                              iconText: 'text-red-600',
+                              probability: 'text-red-600',
+                              recommendation: 'text-red-700',
+                              accent: 'bg-red-100 border-red-200 text-red-800'
+                            },
+                            medium: {
+                              border: 'border-orange-300',
+                              bg: 'bg-orange-50',
+                              icon: 'bg-orange-100',
+                              iconText: 'text-orange-600',
+                              probability: 'text-orange-600',
+                              recommendation: 'text-orange-700',
+                              accent: 'bg-orange-100 border-orange-200 text-orange-800'
+                            },
+                            low: {
+                              border: 'border-blue-300',
+                              bg: 'bg-blue-50',
+                              icon: 'bg-blue-100',
+                              iconText: 'text-blue-600',
+                              probability: 'text-blue-600',
+                              recommendation: 'text-blue-700',
+                              accent: 'bg-blue-100 border-blue-200 text-blue-800'
+                            }
+                          };
+                          
+                          const currentRisk = isHighRisk ? riskColors.high : isMediumRisk ? riskColors.medium : riskColors.low;
+                          
+                          return (
+                            <div className={`bg-white border-2 ${currentRisk.border} rounded-lg p-4 ${currentRisk.bg} shadow-lg transition-all duration-300 hover:shadow-xl`}>
+                              <div className="flex items-center mb-3">
+                                <div className={`w-8 h-8 ${currentRisk.icon} rounded-lg flex items-center justify-center mr-3 shadow-sm`}>
+                                  <svg className={`w-4 h-4 ${currentRisk.iconText}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
                                   </svg>
-                                  Data Quality Notice
-                                </h5>
-                                <div className="max-h-20 overflow-y-auto">
-                                  <div className="flex flex-wrap gap-1">
-                                    {transferProbabilities[selectedAccident.accident_id].missingValues.slice(0, 5).map((missing, idx) => (
-                                      <span key={idx} className="inline-block text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">{t(missing) || missing}</span>
-                                    ))}
-                                    {transferProbabilities[selectedAccident.accident_id].missingValues.length > 5 && (
-                                      <span className="text-xs text-orange-700">+{transferProbabilities[selectedAccident.accident_id].missingValues.length - 5} more</span>
-                                    )}
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-gray-900">Transfer Risk Assessment</h4>
+                                  <p className={`text-xs font-medium ${currentRisk.iconText}`}>
+                                    {isHighRisk ? 'HIGH RISK' : isMediumRisk ? 'MODERATE RISK' : 'LOW RISK'}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="space-y-3">
+                                <div className={`flex justify-between items-center p-3 ${currentRisk.accent} rounded-lg border shadow-sm`}>
+                                  <span className="text-sm font-medium text-gray-700">Transfer Probability</span>
+                                  <div className="flex items-center space-x-2">
+                                    <div className={`w-16 bg-gray-200 rounded-full h-2 shadow-inner`}>
+                                      <div 
+                                        className={`h-2 rounded-full transition-all duration-1000 ${
+                                          isHighRisk ? 'bg-red-500' : isMediumRisk ? 'bg-orange-500' : 'bg-green-500'
+                                        }`} 
+                                        style={{ width: `${Math.min(probabilityPercent, 100)}%` }}
+                                      ></div>
+                                    </div>
+                                    <span className={`text-lg font-bold ${currentRisk.probability}`}>{transferData.probability}</span>
+                                  </div>
+                                </div>
+                                <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-gray-200 shadow-sm">
+                                  <span className="text-sm font-medium text-gray-700">Recommendation</span>
+                                  <span className={`text-sm font-semibold px-3 py-1 rounded-full ${currentRisk.accent}`}>
+                                    {translateTransferPrediction(transferData.prediction)}
+                                  </span>
+                                </div>
+                                <div className={`p-3 ${currentRisk.accent} rounded-lg border animate-pulse-subtle`}>
+                                  <div className="flex items-start space-x-2">
+                                    <svg className={`w-4 h-4 ${currentRisk.iconText} mt-0.5 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <p className={`text-sm ${currentRisk.recommendation} font-medium`}>{transferData.message}</p>
                                   </div>
                                 </div>
                               </div>
-                            )}
-                          </div>
-                        )}
 
-                        {/* Discharge Outcome Analysis */}
-                        {dischargeOutcomePredictions[selectedAccident.accident_id] && (
-                          <div className="bg-white border border-gray-200 rounded-lg p-4">
-                            <div className="flex items-center mb-3">
-                              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                                <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                              </div>
-                              <h4 className="font-semibold text-gray-900">Discharge Outcome Prediction</h4>
-                            </div>
-                            <div className="space-y-3">
-                              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                <span className="text-sm font-medium text-gray-700">Predicted Outcome</span>
-                                <span className="text-sm font-bold text-green-600">{dischargeOutcomePredictions[selectedAccident.accident_id].prediction}</span>
-                              </div>
-                              {dischargeOutcomePredictions[selectedAccident.accident_id].probabilities && (
-                                <div className="space-y-2">
-                                  <h5 className="text-sm font-medium text-gray-700">Probability Distribution</h5>
-                                  {Object.entries(dischargeOutcomePredictions[selectedAccident.accident_id].probabilities)
-                                    .sort(([,a], [,b]) => b - a)
-                                    .slice(0, 3)
-                                    .map(([outcome, probability]) => (
-                                    <div key={outcome} className="flex justify-between items-center">
-                                      <span className="text-xs text-gray-600">{translateOutcome(outcome)}</span>
-                                      <div className="flex items-center gap-2">
-                                        <div className="w-20 bg-gray-200 rounded-full h-1.5">
-                                          <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${Number(probability) * 100}%` }}></div>
-                                        </div>
-                                        <span className="text-xs font-medium text-gray-900 w-10">{formatPercent(probability)}</span>
-                                      </div>
+                              {transferData.missingValues && transferData.missingValues.length > 0 && (
+                                <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                  <h5 className="font-medium text-orange-900 mb-2 flex items-center">
+                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.962-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                    </svg>
+                                    Data Quality Notice
+                                  </h5>
+                                  <div className="max-h-20 overflow-y-auto">
+                                    <div className="flex flex-wrap gap-1">
+                                      {transferData.missingValues.slice(0, 5).map((missing, idx) => (
+                                        <span key={idx} className="inline-block text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">{t(missing) || missing}</span>
+                                      ))}
+                                      {transferData.missingValues.length > 5 && (
+                                        <span className="text-xs text-orange-700">+{transferData.missingValues.length - 5} more</span>
+                                      )}
                                     </div>
-                                  ))}
+                                  </div>
                                 </div>
                               )}
                             </div>
-                          </div>
-                        )}
+                          );
+                        })()}
+
+                        {/* Discharge Outcome Analysis */}
+                        {dischargeOutcomePredictions[selectedAccident.accident_id] && (() => {
+                          const dischargeData = dischargeOutcomePredictions[selectedAccident.accident_id];
+                          const prediction = dischargeData.prediction?.toLowerCase() || '';
+                          
+                          // Determine outcome type and styling
+                          const isPositiveOutcome = prediction.includes('home') || prediction.includes('routine') || prediction.includes('recovery');
+                          const isCriticalOutcome = prediction.includes('death') || prediction.includes('expired') || prediction.includes('mortality');
+                          const isTransferOutcome = prediction.includes('transfer') || prediction.includes('other');
+                          
+                          const outcomeColors = {
+                            positive: {
+                              border: 'border-green-300',
+                              bg: 'bg-green-50',
+                              icon: 'bg-green-100',
+                              iconText: 'text-green-600',
+                              prediction: 'text-green-700',
+                              accent: 'bg-green-100 border-green-200 text-green-800',
+                              gradient: 'from-green-500 to-emerald-500'
+                            },
+                            critical: {
+                              border: 'border-red-300',
+                              bg: 'bg-red-50',
+                              icon: 'bg-red-100',
+                              iconText: 'text-red-600',
+                              prediction: 'text-red-700',
+                              accent: 'bg-red-100 border-red-200 text-red-800',
+                              gradient: 'from-red-500 to-rose-500'
+                            },
+                            transfer: {
+                              border: 'border-blue-300',
+                              bg: 'bg-blue-50',
+                              icon: 'bg-blue-100',
+                              iconText: 'text-blue-600',
+                              prediction: 'text-blue-700',
+                              accent: 'bg-blue-100 border-blue-200 text-blue-800',
+                              gradient: 'from-blue-500 to-indigo-500'
+                            },
+                            default: {
+                              border: 'border-gray-300',
+                              bg: 'bg-gray-50',
+                              icon: 'bg-gray-100',
+                              iconText: 'text-gray-600',
+                              prediction: 'text-gray-700',
+                              accent: 'bg-gray-100 border-gray-200 text-gray-800',
+                              gradient: 'from-gray-500 to-slate-500'
+                            }
+                          };
+                          
+                          const currentOutcome = isCriticalOutcome ? outcomeColors.critical : 
+                                               isPositiveOutcome ? outcomeColors.positive : 
+                                               isTransferOutcome ? outcomeColors.transfer : 
+                                               outcomeColors.default;
+                          
+                          return (
+                            <div className={`bg-white border-2 ${currentOutcome.border} rounded-lg p-4 ${currentOutcome.bg} shadow-lg transition-all duration-300 hover:shadow-xl`}>
+                              <div className="flex items-center mb-3">
+                                <div className={`w-8 h-8 ${currentOutcome.icon} rounded-lg flex items-center justify-center mr-3 shadow-sm`}>
+                                  <svg className={`w-4 h-4 ${currentOutcome.iconText}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                  </svg>
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-gray-900">Discharge Outcome Prediction</h4>
+                                  <p className={`text-xs font-medium ${currentOutcome.iconText}`}>
+                                    {isCriticalOutcome ? 'CRITICAL OUTCOME' : 
+                                     isPositiveOutcome ? 'POSITIVE OUTCOME' : 
+                                     isTransferOutcome ? 'TRANSFER REQUIRED' : 
+                                     'STANDARD CARE'}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="space-y-3">
+                                <div className={`flex justify-between items-center p-3 ${currentOutcome.accent} rounded-lg border shadow-sm`}>
+                                  <span className="text-sm font-medium text-gray-700">Predicted Outcome</span>
+                                  <span className={`text-sm font-bold px-3 py-1 rounded-full bg-white shadow-sm ${currentOutcome.prediction}`}>
+                                    {dischargeData.prediction}
+                                  </span>
+                                </div>
+                                {dischargeData.probabilities && (
+                                  <div className="space-y-2">
+                                    <h5 className="text-sm font-medium text-gray-700 flex items-center">
+                                      <svg className="w-4 h-4 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                      </svg>
+                                      Probability Distribution
+                                    </h5>
+                                    {Object.entries(dischargeData.probabilities)
+                                      .sort(([,a], [,b]) => b - a)
+                                      .slice(0, 3)
+                                      .map(([outcome, probability], index) => {
+                                        const isHighest = index === 0;
+                                        return (
+                                          <div key={outcome} className={`flex justify-between items-center p-2 rounded-lg transition-all duration-300 ${
+                                            isHighest ? `${currentOutcome.accent} border shadow-sm` : 'bg-white border border-gray-200'
+                                          }`}>
+                                            <span className={`text-xs font-medium ${isHighest ? currentOutcome.prediction : 'text-gray-600'}`}>
+                                              {translateOutcome(outcome)}
+                                            </span>
+                                            <div className="flex items-center gap-2">
+                                              <div className="w-20 bg-gray-200 rounded-full h-2 shadow-inner">
+                                                <div 
+                                                  className={`h-2 rounded-full bg-gradient-to-r ${currentOutcome.gradient} transition-all duration-1000`}
+                                                  style={{ width: `${Number(probability) * 100}%` }}
+                                                ></div>
+                                              </div>
+                                              <span className={`text-xs font-bold w-10 ${isHighest ? currentOutcome.prediction : 'text-gray-900'}`}>
+                                                {formatPercent(probability)}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                   )}
