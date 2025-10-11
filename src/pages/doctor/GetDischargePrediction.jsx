@@ -185,12 +185,7 @@ const GetDischargePrediction = ({ setIsAuthenticated, setRole }) => {
                 </div>
               )}
 
-              {result.preprocessed_features && (
-                <div className="mt-4">
-                  <h3 className="font-medium">Preprocessed Features</h3>
-                  <pre className="bg-slate-50 p-3 rounded mt-2 overflow-auto text-sm">{JSON.stringify(result.preprocessed_features, null, 2)}</pre>
-                </div>
-              )}
+              {/* Preprocessed features intentionally hidden from UI to avoid exposing internal preprocessing details */}
             </div>
           )}
         </div>
