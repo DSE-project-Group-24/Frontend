@@ -1025,227 +1025,432 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
 
         {/* Modal for Accident Details */}
         {showModal && selectedAccident && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto border border-slate-100">
-              <div className="p-6">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                  <h2 className="text-2xl font-bold text-slate-800">Accident #{accidents.findIndex(acc => acc.accident_id === selectedAccident.accident_id) + 1} — {t('fullDetails')}</h2>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => {
-                        setShowModal(false);
-                        setSelectedAccident(null);
-                      }}
-                      className="inline-flex items-center justify-center w-10 h-10 rounded-md bg-slate-50 border border-slate-100 hover:bg-slate-100"
-                    >
-                      <span className="text-xl font-semibold text-slate-600">×</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Predictions in Modal for Incomplete Accidents */}
-                {!selectedAccident["Completed"] && (
-                  <div className="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    {/* Transfer Probability Prediction */}
-                    {transferProbabilities[selectedAccident.accident_id] && (
-                      <div className="p-4 rounded-lg bg-gradient-to-r from-sky-50 to-indigo-50 border border-sky-100">
-                        <h3 className="text-lg font-semibold text-sky-800 mb-3">🧠 {t('mlTransferPredictionAnalysis')}</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                          <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                            <div className="text-2xl font-bold text-sky-600">{transferProbabilities[selectedAccident.accident_id].probability}</div>
-                            <div className="text-sm text-sky-800 font-medium">{t('transferProbability')}</div>
-                          </div>
-                          <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                            <div className="text-xl font-bold text-purple-600">{translateTransferPrediction(transferProbabilities[selectedAccident.accident_id].prediction)}</div>
-                            <div className="text-sm text-purple-800 font-medium">{t('predictionOutcome')}</div>
-                          </div>
-                          <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                            <div className="text-sm text-slate-700">{transferProbabilities[selectedAccident.accident_id].message}</div>
-                            <div className="text-xs text-slate-500 font-medium mt-1">{t('analysis')}</div>
-                          </div>
-                        </div>
-
-                        {transferProbabilities[selectedAccident.accident_id].missingValues && transferProbabilities[selectedAccident.accident_id].missingValues.length > 0 && (
-                          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                            <h4 className="font-semibold text-yellow-800 mb-2">⚠️ {t('dataAvailabilityWarning')}</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-28 overflow-y-auto">
-                              {transferProbabilities[selectedAccident.accident_id].missingValues.map((missing, idx) => (
-                                <div key={idx} className="text-xs text-yellow-700 bg-yellow-100 px-2 py-1 rounded">{t(missing) || missing}</div>
-                              ))}
-                            </div>
-                            <p className="text-xs text-yellow-600 mt-2 italic">{t('missingFieldsNote')}</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Discharge Outcome Prediction */}
-                    {dischargeOutcomePredictions[selectedAccident.accident_id] && (
-                      <div className="p-4 rounded-lg bg-gradient-to-r from-emerald-50 to-emerald-100 border border-emerald-100">
-                        <h3 className="text-lg font-semibold text-emerald-800 mb-3">🏥 {t('dischargeOutcomePredictionTitle') || 'Discharge Outcome Prediction'}</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                          <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                            <div className="text-xl font-bold text-emerald-600">{dischargeOutcomePredictions[selectedAccident.accident_id].prediction}</div>
-                            <div className="text-sm text-emerald-800 font-medium">{t('predictedOutcome')}</div>
-                          </div>
-                          <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                            <div className="text-sm text-slate-700">{dischargeOutcomePredictions[selectedAccident.accident_id].modelInfo?.model_type || 'CatBoost Classifier'}</div>
-                            <div className="text-xs text-slate-500 font-medium mt-1">{t('modelType')}</div>
-                          </div>
-                        </div>
-                        {dischargeOutcomePredictions[selectedAccident.accident_id].probabilities && (
-                          <div className="bg-white rounded-lg p-3 shadow-sm">
-                            <h4 className="font-semibold text-green-800 mb-2">{t('outcomeProbabilities')}</h4>
-                            <div className="space-y-2">
-                              {Object.entries(dischargeOutcomePredictions[selectedAccident.accident_id].probabilities)
-                                .sort(([,a], [,b]) => b - a)
-                                .map(([outcome, probability]) => (
-                                <div key={outcome} className="flex justify-between items-center">
-                                  <span className="text-sm font-medium text-slate-700">{translateOutcome(outcome)}</span>
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-36 bg-gray-200 rounded-full h-2">
-                                      <div className="bg-green-600 h-2 rounded-full" style={{ width: `${Number(probability) * 100}%` }}></div>
-                                    </div>
-                                    <span className="text-sm font-bold text-green-600 w-12">{formatPercent(probability)}</span>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {dischargeOutcomePredictions[selectedAccident.accident_id].missingValues && dischargeOutcomePredictions[selectedAccident.accident_id].missingValues.length > 0 && (
-                          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                            <h4 className="font-semibold text-yellow-800 mb-2">⚠️ {t('dataAvailabilityWarning')}</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-28 overflow-y-auto">
-                              {dischargeOutcomePredictions[selectedAccident.accident_id].missingValues.map((missing, idx) => (
-                                <div key={idx} className="text-xs text-yellow-700 bg-yellow-100 px-2 py-1 rounded">{t(missing) || missing}</div>
-                              ))}
-                            </div>
-                            <p className="text-xs text-yellow-600 mt-2 italic">{t('missingFieldsNote')}</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-slate-700">
-                  {/* Incident Overview */}
-                  <div className="bg-slate-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-3 text-sky-700">{t('incidentOverview') || 'Incident Overview'}</h3>
-                    <p className="mb-2"><span className="font-medium">{t('incidentDate')}:</span> {selectedAccident["incident at date"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('timeOfCollision')}:</span> {selectedAccident["time of collision"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('severity')}:</span> {selectedAccident["Severity"]}</p>
-                  </div>
-
-                  {/* Environmental Conditions */}
-                  <div className="bg-slate-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-3 text-green-700">{t('environmentConditions')}</h3>
-                    <p className="mb-2"><span className="font-medium">{t('visibility')}:</span> {selectedAccident["Visibility"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('roadCondition')}:</span> {selectedAccident["Road Condition"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('roadType')}:</span> {selectedAccident["Road Type"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('categoryOfRoad')}:</span> {selectedAccident["Category of Road"]}</p>
-                  </div>
-
-                  {/* Vehicle & Collision Details */}
-                  <div className="bg-slate-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-3 text-purple-700">{t('vehicleCollisionDetails') || 'Vehicle & Collision Details'}</h3>
-                    <p className="mb-2"><span className="font-medium">{t('approximateSpeed')}:</span> {selectedAccident["Approximate speed"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('modeOfTraveling')}:</span> {selectedAccident["Mode of traveling during accident"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('collisionWith')}:</span> {selectedAccident["Collision with"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('helmetWorn')}:</span> {selectedAccident["Helmet Worn"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('alcoholConsumption')}:</span> {selectedAccident["Alcohol Consumption"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('illicitDrugs')}:</span> {selectedAccident["Illicit Drugs"]}</p>
-                  </div>
-
-                  {/* Medical Response */}
-                  <div className="bg-slate-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-3 text-blue-700">{t('medicalResponse') || 'Medical Response'}</h3>
-                    <p className="mb-2"><span className="font-medium">{t('firstAidGivenAtScene')}:</span> {selectedAccident["First aid given at seen"] ? t('yes') : t('no')}</p>
-                    <p className="mb-2"><span className="font-medium">{t('modeOfTransportToHospital')}:</span> {selectedAccident["Mode of transport to hospital"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('timeTakenToReachHospital')}:</span> {selectedAccident["Time taken to reach hospital"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('hospital')}:</span> {localStorage.getItem('hospital_name') || selectedAccident["Hospital"] || selectedAccident?.hospital || 'Not specified'}</p>
-                    <p className="mb-2"><span className="font-medium">{t('hospitalDistanceFromHome')}:</span> {selectedAccident["Hospital Distance From Home"]}</p>
-                  </div>
-
-                  {/* Financial Impact */}
-                  <div className="bg-slate-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-3 text-emerald-700">{t('financialImpact') || 'Financial Impact'}</h3>
-                    <p className="mb-2"><span className="font-medium">{t('familyMonthlyIncomeBeforeAccident')}:</span> {selectedAccident["Family monthly income before accident"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('familyMonthlyIncomeAfterAccident')}:</span> {selectedAccident["Family monthly income after accident"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('familyCurrentStatus')}:</span> {selectedAccident["Family current status"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('bystanderExpenditurePerDay')}:</span> {selectedAccident["Bystander expenditure per day"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('travelingExpenditurePerDay')}:</span> {selectedAccident["Traveling Expenditure Per Day"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('anyOtherHospitalAdmissionExpenditure')}:</span> {selectedAccident["Any Other Hospital Admission Expenditure"]}</p>
-                  </div>
-
-                  {/* Injury Details Section */}
-                  <div className="bg-red-50 p-4 rounded-lg mt-4">
-                    <h3 className="font-semibold text-lg mb-3 text-red-700 flex items-center">
-                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.962-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-7xl w-full max-h-[95vh] overflow-hidden border border-gray-200">
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
-                      {t('injuryDetails')}
-                    </h3>
-                    {selectedAccident.injuries && selectedAccident.injuries.length > 0 ? (
-                      <div className="space-y-3">
-                        {selectedAccident.injuries.map((injury, index) => (
-                          <div key={index} className="bg-white p-3 rounded border border-red-200">
-                            <h4 className="font-medium text-red-800 mb-2">
-                              {t('injuryNumber')} {index + 1}
-                            </h4>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
-                              <p>
-                                <span className="font-medium text-gray-600">{t('siteOfInjury')}:</span>
-                                <br />
-                                <span className="text-gray-900">{injury.site_of_injury || '-'}</span>
-                              </p>
-                              <p>
-                                <span className="font-medium text-gray-600">{t('typeOfInjury')}:</span>
-                                <br />
-                                <span className="text-gray-900">{injury.type_of_injury || '-'}</span>
-                              </p>
-                              <p>
-                                <span className="font-medium text-gray-600">{t('severity')}:</span>
-                                <br />
-                                <span className={`font-medium ${
-                                  injury.severity === 'S' ? 'text-red-600' : 
-                                  injury.severity === 'M' ? 'text-orange-600' : 
-                                  injury.severity === 'L' ? 'text-yellow-600' : 
-                                  'text-gray-600'
-                                }`}>
-                                  {injury.severity === 'S' ? 'Serious' :
-                                   injury.severity === 'M' ? 'Medium' :
-                                   injury.severity === 'L' ? 'Light' :
-                                   injury.severity || 'Unknown'}
-                                </span>
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-4 text-gray-500">
-                        <svg className="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <p className="text-sm">{t('noInjuries')}</p>
-                      </div>
-                    )}
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-semibold text-white">
+                        Medical Record - Incident #{accidents.findIndex(acc => acc.accident_id === selectedAccident.accident_id) + 1}
+                      </h2>
+                      <p className="text-blue-100 text-sm">Detailed Accident Information</p>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="mt-6 flex justify-end">
                   <button
                     onClick={() => {
                       setShowModal(false);
                       setSelectedAccident(null);
                     }}
-                    className="bg-gradient-to-r from-sky-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-sky-700 hover:to-indigo-700 transition-colors"
+                    className="text-white hover:text-blue-100 transition-colors p-2 hover:bg-white hover:bg-opacity-10 rounded-lg"
                   >
-                    {t('close')}
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
+                </div>
+              </div>
+
+              {/* Modal Body */}
+              <div className="overflow-y-auto max-h-[calc(95vh-80px)]">
+                <div className="p-6 space-y-6">
+
+                  {/* Clinical Decision Support Section */}
+                  {!selectedAccident["Completed"] && (
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-5 mb-6">
+                      <div className="flex items-center mb-4">
+                        <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">Clinical Decision Support</h3>
+                          <p className="text-sm text-gray-600">AI-powered predictions for treatment planning</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Transfer Probability Analysis */}
+                        {transferProbabilities[selectedAccident.accident_id] && (
+                          <div className="bg-white border border-gray-200 rounded-lg p-4">
+                            <div className="flex items-center mb-3">
+                              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                                </svg>
+                              </div>
+                              <h4 className="font-semibold text-gray-900">Transfer Risk Assessment</h4>
+                            </div>
+                            <div className="space-y-3">
+                              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <span className="text-sm font-medium text-gray-700">Transfer Probability</span>
+                                <span className="text-lg font-bold text-blue-600">{transferProbabilities[selectedAccident.accident_id].probability}</span>
+                              </div>
+                              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <span className="text-sm font-medium text-gray-700">Recommendation</span>
+                                <span className="text-sm font-semibold text-gray-900">{translateTransferPrediction(transferProbabilities[selectedAccident.accident_id].prediction)}</span>
+                              </div>
+                              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                <p className="text-sm text-amber-800">{transferProbabilities[selectedAccident.accident_id].message}</p>
+                              </div>
+                            </div>
+
+                            {transferProbabilities[selectedAccident.accident_id].missingValues && transferProbabilities[selectedAccident.accident_id].missingValues.length > 0 && (
+                              <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                <h5 className="font-medium text-orange-900 mb-2 flex items-center">
+                                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.962-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                  </svg>
+                                  Data Quality Notice
+                                </h5>
+                                <div className="max-h-20 overflow-y-auto">
+                                  <div className="flex flex-wrap gap-1">
+                                    {transferProbabilities[selectedAccident.accident_id].missingValues.slice(0, 5).map((missing, idx) => (
+                                      <span key={idx} className="inline-block text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">{t(missing) || missing}</span>
+                                    ))}
+                                    {transferProbabilities[selectedAccident.accident_id].missingValues.length > 5 && (
+                                      <span className="text-xs text-orange-700">+{transferProbabilities[selectedAccident.accident_id].missingValues.length - 5} more</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Discharge Outcome Analysis */}
+                        {dischargeOutcomePredictions[selectedAccident.accident_id] && (
+                          <div className="bg-white border border-gray-200 rounded-lg p-4">
+                            <div className="flex items-center mb-3">
+                              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                              </div>
+                              <h4 className="font-semibold text-gray-900">Discharge Outcome Prediction</h4>
+                            </div>
+                            <div className="space-y-3">
+                              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                <span className="text-sm font-medium text-gray-700">Predicted Outcome</span>
+                                <span className="text-sm font-bold text-green-600">{dischargeOutcomePredictions[selectedAccident.accident_id].prediction}</span>
+                              </div>
+                              {dischargeOutcomePredictions[selectedAccident.accident_id].probabilities && (
+                                <div className="space-y-2">
+                                  <h5 className="text-sm font-medium text-gray-700">Probability Distribution</h5>
+                                  {Object.entries(dischargeOutcomePredictions[selectedAccident.accident_id].probabilities)
+                                    .sort(([,a], [,b]) => b - a)
+                                    .slice(0, 3)
+                                    .map(([outcome, probability]) => (
+                                    <div key={outcome} className="flex justify-between items-center">
+                                      <span className="text-xs text-gray-600">{translateOutcome(outcome)}</span>
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-20 bg-gray-200 rounded-full h-1.5">
+                                          <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${Number(probability) * 100}%` }}></div>
+                                        </div>
+                                        <span className="text-xs font-medium text-gray-900 w-10">{formatPercent(probability)}</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Main Content Sections */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {/* Incident Overview */}
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="bg-blue-50 border-b border-blue-200 px-4 py-3">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                          <h3 className="font-semibold text-gray-900">{t('incidentOverview') || 'Incident Overview'}</h3>
+                        </div>
+                      </div>
+                      <div className="p-4 space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('incidentDate')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["incident at date"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('timeOfCollision')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["time of collision"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('severity')}</span>
+                          <span className={`text-sm font-semibold px-2 py-1 rounded-full ${
+                            selectedAccident["Severity"] === 'Serious' ? 'bg-red-100 text-red-800' :
+                            selectedAccident["Severity"] === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>{selectedAccident["Severity"]}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Environmental Conditions */}
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="bg-green-50 border-b border-green-200 px-4 py-3">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center mr-3">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                            </svg>
+                          </div>
+                          <h3 className="font-semibold text-gray-900">{t('environmentConditions')}</h3>
+                        </div>
+                      </div>
+                      <div className="p-4 space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('visibility')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Visibility"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('roadCondition')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Road Condition"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('roadType')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Road Type"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('categoryOfRoad')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Category of Road"]}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Vehicle & Collision Details */}
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="bg-purple-50 border-b border-purple-200 px-4 py-3">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center mr-3">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                          </div>
+                          <h3 className="font-semibold text-gray-900">{t('vehicleCollisionDetails') || 'Vehicle & Collision Details'}</h3>
+                        </div>
+                      </div>
+                      <div className="p-4 space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('approximateSpeed')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Approximate speed"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('modeOfTraveling')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Mode of traveling during accident"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('collisionWith')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Collision with"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('helmetWorn')}</span>
+                          <span className={`text-sm font-medium ${selectedAccident["Helmet Worn"] === 'Yes' ? 'text-green-600' : 'text-red-600'}`}>
+                            {selectedAccident["Helmet Worn"]}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('alcoholConsumption')}</span>
+                          <span className={`text-sm font-medium ${selectedAccident["Alcohol Consumption"] === 'No' ? 'text-green-600' : 'text-red-600'}`}>
+                            {selectedAccident["Alcohol Consumption"]}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('illicitDrugs')}</span>
+                          <span className={`text-sm font-medium ${selectedAccident["Illicit Drugs"] === 'No' ? 'text-green-600' : 'text-red-600'}`}>
+                            {selectedAccident["Illicit Drugs"]}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Medical Response */}
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="bg-blue-50 border-b border-blue-200 px-4 py-3">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                            </svg>
+                          </div>
+                          <h3 className="font-semibold text-gray-900">{t('medicalResponse') || 'Medical Response'}</h3>
+                        </div>
+                      </div>
+                      <div className="p-4 space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('firstAidGivenAtScene')}</span>
+                          <span className={`text-sm font-medium ${selectedAccident["First aid given at seen"] ? 'text-green-600' : 'text-red-600'}`}>
+                            {selectedAccident["First aid given at seen"] ? t('yes') : t('no')}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('modeOfTransportToHospital')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Mode of transport to hospital"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('timeTakenToReachHospital')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Time taken to reach hospital"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('hospital')}</span>
+                          <span className="text-sm text-gray-900">{localStorage.getItem('hospital_name') || selectedAccident["Hospital"] || selectedAccident?.hospital || 'Not specified'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('hospitalDistanceFromHome')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Hospital Distance From Home"]}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Financial Impact */}
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="bg-emerald-50 border-b border-emerald-200 px-4 py-3">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center mr-3">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                            </svg>
+                          </div>
+                          <h3 className="font-semibold text-gray-900">{t('financialImpact') || 'Financial Impact'}</h3>
+                        </div>
+                      </div>
+                      <div className="p-4 space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('familyMonthlyIncomeBeforeAccident')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Family monthly income before accident"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('familyMonthlyIncomeAfterAccident')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Family monthly income after accident"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('familyCurrentStatus')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Family current status"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('bystanderExpenditurePerDay')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Bystander expenditure per day"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('travelingExpenditurePerDay')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Traveling Expenditure Per Day"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('anyOtherHospitalAdmissionExpenditure')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Any Other Hospital Admission Expenditure"]}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Injury Details Section */}
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="bg-red-50 border-b border-red-200 px-4 py-3">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center mr-3">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.962-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                          </div>
+                          <h3 className="font-semibold text-gray-900">{t('injuryDetails')}</h3>
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        {selectedAccident.injuries && selectedAccident.injuries.length > 0 ? (
+                          <div className="space-y-3">
+                            {selectedAccident.injuries.map((injury, index) => (
+                              <div key={index} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                <div className="flex items-center mb-2">
+                                  <div className="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
+                                    {index + 1}
+                                  </div>
+                                  <h4 className="text-sm font-medium text-gray-900">{t('injuryNumber')} {index + 1}</h4>
+                                </div>
+                                <div className="space-y-2">
+                                  <div className="flex justify-between">
+                                    <span className="text-xs text-gray-600 font-medium">{t('siteOfInjury')}</span>
+                                    <span className="text-xs text-gray-900">{injury.site_of_injury || '-'}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-xs text-gray-600 font-medium">{t('typeOfInjury')}</span>
+                                    <span className="text-xs text-gray-900">{injury.type_of_injury || '-'}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-xs text-gray-600 font-medium">{t('severity')}</span>
+                                    <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                                      injury.severity === 'S' ? 'bg-red-100 text-red-800' : 
+                                      injury.severity === 'M' ? 'bg-yellow-100 text-yellow-800' : 
+                                      injury.severity === 'L' ? 'bg-green-100 text-green-800' : 
+                                      'bg-gray-100 text-gray-800'
+                                    }`}>
+                                      {injury.severity === 'S' ? 'Serious' :
+                                       injury.severity === 'M' ? 'Medium' :
+                                       injury.severity === 'L' ? 'Light' :
+                                       injury.severity || 'Unknown'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-6 text-gray-500">
+                            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                            </div>
+                            <p className="text-sm text-gray-600 font-medium">{t('noInjuries')}</p>
+                            <p className="text-xs text-gray-500 mt-1">No injury information recorded</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Modal Footer */}
+                  <div className="border-t border-gray-200 bg-gray-50 px-6 py-4 flex items-center justify-between">
+                    <div className="text-sm text-gray-500">
+                      Record ID: {selectedAccident.accident_id} • Last updated: {selectedAccident["incident at date"]}
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => {
+                          setShowModal(false);
+                          setSelectedAccident(null);
+                        }}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                      >
+                        {t('close')}
+                      </button>
+                      <button
+                        onClick={() => {
+                          // Add print functionality if needed
+                          window.print();
+                        }}
+                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        Print Report
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
