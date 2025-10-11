@@ -28,30 +28,30 @@ const GetPredictions = ({ setIsAuthenticated, setRole }) => {
   const [transferError, setTransferError] = useState(null);
   const [isTransferLoading, setIsTransferLoading] = useState(false);
 
-  // ---------- Discharge outcome state (from existing GetDischargePrediction.jsx) ----------
+  
   const [dischargeForm, setDischargeForm] = useState({
-    current_hospital_name: 'DGH – Kilinochchi',
-    family_current_status: 'Moderately Affected',
-    type_of_injury_no_1: 'fracture',
-    traveling_expenditure_per_day: '100-200',
-    first_hospital_name: 'DGH – Kilinochchi',
-    date_of_birth: '1990-05-15',
-    site_of_injury_no1: 'head injury',
-    approximate_speed: '40 - 80 km/h',
-    incident_at_time_and_date: '2023-10-15',
-    hospital_distance_from_home: '5-10 Km',
-    mode_of_transport_to_the_hospital: 'Ambulance',
-    educational_qualification: 'O/L or A/L',
-    time_taken_to_reach_hospital: 'Less Than 15 Minutes',
-    any_other_hospital_admission_expenditure: 'No Other Expenses',
-    site_of_injury_no_2: 'no secondary injury found',
-    occupation: 'Student',
-    family_monthly_income_before_accident: '30000-45000',
-    collision_with: 'Motorbike',
-    life_style: 'Living with care givers',
-    collision_force_from: 'Front',
-    road_type: 'Straight',
-    type_of_injury_no_2: 'abrasion'
+    current_hospital_name: '',
+    family_current_status: '',
+    type_of_injury_no_1: '',
+    traveling_expenditure_per_day: '',
+    first_hospital_name: '',
+    date_of_birth: '',
+    site_of_injury_no1: '',
+    approximate_speed: '',
+    incident_at_time_and_date: '',
+    hospital_distance_from_home: '',
+    mode_of_transport_to_the_hospital: '',
+    educational_qualification: '',
+    time_taken_to_reach_hospital: '',
+    any_other_hospital_admission_expenditure: '',
+    site_of_injury_no_2: '',
+    occupation: '',
+    family_monthly_income_before_accident: '',
+    collision_with: '',
+    life_style: '',
+    collision_force_from: '',
+    road_type: '',
+    type_of_injury_no_2: ''
   });
   const [dischargeResult, setDischargeResult] = useState(null);
   const [dischargeError, setDischargeError] = useState(null);
@@ -345,7 +345,7 @@ const GetPredictions = ({ setIsAuthenticated, setRole }) => {
                 </button>
 
                 <button type="button" onClick={() => { setDischargeForm({
-                  current_hospital_name: 'DGH – Kilinochchi', family_current_status: 'Moderately Affected', type_of_injury_no_1: 'fracture', traveling_expenditure_per_day: '100-200', first_hospital_name: 'DGH – Kilinochchi', date_of_birth: '1990-05-15', site_of_injury_no1: 'head injury', approximate_speed: '40 - 80 km/h', incident_at_time_and_date: '2023-10-15', hospital_distance_from_home: '5-10 Km', mode_of_transport_to_the_hospital: 'Ambulance', educational_qualification: 'O/L or A/L', time_taken_to_reach_hospital: 'Less Than 15 Minutes', any_other_hospital_admission_expenditure: 'No Other Expenses', site_of_injury_no_2: 'no secondary injury found', occupation: 'Student', family_monthly_income_before_accident: '30000-45000', collision_with: 'Motorbike', life_style: 'Living with care givers', collision_force_from: 'Front', road_type: 'Straight', type_of_injury_no_2: 'abrasion' }); setDischargeResult(null); setDischargeError(null); }} className="px-4 py-2 border rounded-lg">Reset</button>
+                  current_hospital_name: '', family_current_status: '', type_of_injury_no_1: '', traveling_expenditure_per_day: '', first_hospital_name: '', date_of_birth: '', site_of_injury_no1: '', approximate_speed: '', incident_at_time_and_date: '', hospital_distance_from_home: '', mode_of_transport_to_the_hospital: '', educational_qualification: '', time_taken_to_reach_hospital: '', any_other_hospital_admission_expenditure: '', site_of_injury_no_2: '', occupation: '', family_monthly_income_before_accident: '', collision_with: '', life_style: '', collision_force_from: '', road_type: '', type_of_injury_no_2: '' }); setDischargeResult(null); setDischargeError(null); }} className="px-4 py-2 border rounded-lg">Reset</button>
               </div>
             </form>
 
