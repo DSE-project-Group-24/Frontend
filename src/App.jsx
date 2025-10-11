@@ -12,6 +12,7 @@ import RecordPatientData from './pages/nurse/RecordPatientData';
 import DashboardDoctor from './pages/doctor/DashboardDoctor';
 import ViewPatientData from './pages/doctor/ViewPatientData';
 import GetPrediction from './pages/doctor/GetPrediction';
+import GetDischargePrediction from './pages/doctor/GetDischargePrediction';
 import DashboardAdmin from './pages/admin/DashboardAdmin';
 import PredictionAdmin from './pages/admin/PredictionAdmin';
 import AddStaff from './pages/admin/AddStaff';
@@ -108,6 +109,14 @@ function App() {
                 <GetPrediction setIsAuthenticated={setIsAuthenticated} setRole={setRole} /> : 
                 <Navigate to="/" />
             } 
+          />
+          <Route 
+            path="/doctor/get-discharge-prediction"
+            element={
+              isAuthenticated && role === 'doctor' ?
+                <GetDischargePrediction setIsAuthenticated={setIsAuthenticated} setRole={setRole} /> :
+                <Navigate to="/" />
+            }
           />
           
           {/* hospital_administrator Routes */}

@@ -98,6 +98,15 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
         </svg>
       ),
     },
+    {
+      path: '/doctor/get-discharge-prediction',
+      label: t('dischargeOutcomePrediction'),
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6M12 9v6M3 7h18M6 21h12a2 2 0 002-2V7a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      ),
+    },
   ];
 
   return (
