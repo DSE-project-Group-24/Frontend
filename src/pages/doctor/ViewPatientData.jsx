@@ -305,8 +305,8 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
     const data = {};
     const missingValues = []; // Track missing/null values
 
-    // Current Hospital Name - use available hospital data
-    const hospitalName = accident?.["Hospital"] || accident?.hospital;
+    // Current Hospital Name - use localStorage hospital data first, then fallback to accident data
+    const hospitalName = localStorage.getItem('hospital_name') || accident?.["Hospital"] || accident?.hospital;
     data['current_hospital_name'] = hospitalName;
     if (!hospitalName) {
       missingValues.push('Current Hospital Name');
@@ -339,8 +339,8 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
       missingValues.push('Traveling Expenditure Per Day');
     }
 
-    // First Hospital Name - use available hospital data
-    const firstHospitalName = accident?.["Hospital"] || accident?.hospital;
+    // First Hospital Name - use localStorage hospital data first, then fallback to accident data
+    const firstHospitalName = localStorage.getItem('hospital_name') || accident?.["Hospital"] || accident?.hospital;
     data['first_hospital_name'] = firstHospitalName || "DGH – Kilinochchi";
     if (!firstHospitalName) {
       missingValues.push('First Hospital Name');
@@ -1077,7 +1077,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                     <h3 className="font-semibold text-lg mb-3 text-sky-700">{t('medicalFinancial')}</h3>
                     <p className="mb-2"><span className="font-medium">{t('firstAidGivenAtScene')}:</span> {selectedAccident["First aid given at seen"] ? t('yes') : t('no')}</p>
                     <p className="mb-2"><span className="font-medium">{t('hospitalDistanceFromHome')}:</span> {selectedAccident["Hospital Distance From Home"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('hospital')}:</span> {selectedAccident["Hospital"]}</p>
+                    <p className="mb-2"><span className="font-medium">{t('hospital')}:</span> {localStorage.getItem('hospital_name') || selectedAccident["Hospital"] || selectedAccident?.hospital || 'Not specified'}</p>
                     <p className="mb-2"><span className="font-medium">{t('familyCurrentStatus')}:</span> {selectedAccident["Family current status"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('bystanderExpenditurePerDay')}:</span> {selectedAccident["Bystander expenditure per day"]}</p>
                     <p className="mb-2"><span className="font-medium">{t('travelingExpenditurePerDay')}:</span> {selectedAccident["Traveling Expenditure Per Day"]}</p>
