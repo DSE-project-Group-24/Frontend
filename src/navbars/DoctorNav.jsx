@@ -39,18 +39,42 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
 
   // Get doctor email from localStorage or token
   const getDoctorEmail = () => {
+    // First try to get from localStorage directly
+    const userEmail = localStorage.getItem("user_email");
+    if (userEmail && userEmail !== "null" && userEmail !== "undefined") {
+      return userEmail;
+    }
+
+    // Try to get from JWT token
     const token = localStorage.getItem("access_token");
     if (token) {
       try {
         // Decode JWT token to get user info
         const payload = JSON.parse(atob(token.split('.')[1]));
-        return payload.email || payload.username || "doctor@hospital.com";
+        const email = payload.email || payload.username || payload.sub;
+        if (email && email.includes('@')) {
+          return email;
+        }
       } catch (error) {
         console.error("Error decoding token:", error);
       }
     }
-    // Fallback - check if email is stored separately
-    return localStorage.getItem("user_email") || "doctor@hospital.com";
+
+    // Try other possible localStorage keys
+    const doctorData = localStorage.getItem("doctor_data");
+    if (doctorData) {
+      try {
+        const parsed = JSON.parse(doctorData);
+        if (parsed.email) {
+          return parsed.email;
+        }
+      } catch (error) {
+        console.error("Error parsing doctor data:", error);
+      }
+    }
+
+    // Fallback
+    return localStorage.getItem("username") || "doctor@hospital.com";
   };
 
   const handleLogout = () => {
@@ -153,7 +177,7 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
                   <div className="w-2 h-2 bg-green-200 rounded-full animate-pulse"></div>
                 </div>
                 <div className="text-xs hidden xl:block">
-                  <p className="font-medium text-white truncate max-w-32">{getDoctorEmail().split('@')[0]}</p>
+                  <p className="font-medium text-white truncate max-w-32">{getDoctorEmail()}</p>
                   <p className="text-blue-200">{t('online')}</p>
                 </div>
               </div>
