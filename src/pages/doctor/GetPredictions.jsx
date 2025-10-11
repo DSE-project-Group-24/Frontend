@@ -373,6 +373,158 @@ const GetPredictions = ({ setIsAuthenticated, setRole }) => {
     return options[fieldName] || null;
   };
 
+  // Get translated field labels for discharge form
+  const getDischargeFieldLabel = (fieldName) => {
+    const labelKeys = {
+      current_hospital_name: 'currentHospitalName',
+      family_current_status: 'familyCurrentStatus',
+      type_of_injury_no_1: 'typeOfInjuryNo1',
+      traveling_expenditure_per_day: 'travelingExpenditurePerDay',
+      first_hospital_name: 'firstHospitalName',
+      date_of_birth: 'dateOfBirth',
+      site_of_injury_no1: 'siteOfInjuryNo1',
+      approximate_speed: 'approximateSpeed',
+      incident_at_time_and_date: 'incidentDateTime',
+      hospital_distance_from_home: 'hospitalDistanceFromHome',
+      mode_of_transport_to_the_hospital: 'modeOfTransportToHospital',
+      educational_qualification: 'educationalQualification',
+      time_taken_to_reach_hospital: 'timeTakenToReachHospital',
+      any_other_hospital_admission_expenditure: 'otherHospitalExpenditure',
+      site_of_injury_no_2: 'siteOfInjuryNo2',
+      occupation: 'occupation',
+      family_monthly_income_before_accident: 'familyMonthlyIncome',
+      collision_with: 'collisionWith',
+      life_style: 'lifeStyle',
+      collision_force_from: 'collisionForceFrom',
+      road_type: 'roadType',
+      type_of_injury_no_2: 'typeOfInjuryNo2'
+    };
+    
+    return t(labelKeys[fieldName]) || fieldName.replace(/_/g, ' ');
+  };
+
+  // Get translated option labels
+  const getDischargeOptionLabel = (fieldName, option) => {
+    // For common options that are already translated
+    const commonTranslations = {
+      'Not Affected': t('notAffected'),
+      'Mildly Affected': t('mildlyAffected'),
+      'Moderately Affected': t('moderatelyAffected'),
+      'Severely Affected': t('severelyAffected'),
+      'Living alone': t('livingAlone'),
+      'Living with children': t('livingWithChildren'),
+      'Living with care givers': t('livingWithCaregivers'),
+      'Student': t('student'),
+      'Unemployed': t('unemployed'),
+      'No Other Expenses': t('noOtherExpenses'),
+      'Grade 5': t('grade5'),
+      'O/L or A/L': t('olOrAl'),
+      'Under Graduate': t('underGraduate'),
+      'Post Graduate': t('postGraduate'),
+      'Less Than 15 Minutes': t('lessThan15Minutes'),
+      '15 Minutes - 30 Minutes': t('minutes15To30'),
+      '30 Minutes - 1 Hour': t('minutes30To1Hour'),
+      '1 Hour - 2 Hour': t('hour1To2'),
+      'More Than 2 Hour': t('moreThan2Hours'),
+      'Ambulance': t('ambulance'),
+      'Three wheeler': t('threeWheeler'),
+      'Motor Bike': t('motorBike'),
+      'Other Vehicle': t('otherVehicle'),
+      'Unknown': t('unknown'),
+      'Less Than 40 km/h': t('lessThan40Kmh'),
+      '40 - 80 km/h': t('from40To80Kmh'),
+      '80 - 100 km/h': t('from80To100Kmh'),
+      'More Than 100 km/h': t('moreThan100Kmh'),
+      'Straight': t('straight'),
+      'Junction': t('junction'),
+      'Bend': t('bend'),
+      'Front': t('front'),
+      'Behind': t('behind'),
+      'LeftSide': t('leftSide'),
+      'RightSide': t('rightSide')
+    };
+
+    return commonTranslations[option] || option;
+  };
+
+  // Get translated placeholders for input fields
+  const getDischargeFieldPlaceholder = (fieldName) => {
+    const placeholders = {
+      date_of_birth: t('enterDateOfBirth') || 'YYYY-MM-DD',
+      incident_at_time_and_date: t('enterIncidentDateTime') || 'YYYY-MM-DD HH:MM'
+    };
+    
+    return placeholders[fieldName] || '';
+  };
+
+  // Get organized sections for discharge form
+  const getDischargeSections = () => [
+    {
+      title: t("hospitalInformation"),
+      icon: <Building className="w-6 h-6" />,
+      fields: ['current_hospital_name', 'first_hospital_name'],
+      fieldIcons: {
+        current_hospital_name: <Building className="w-4 h-4" />,
+        first_hospital_name: <Building className="w-4 h-4" />
+      }
+    },
+    {
+      title: t("personalInformation"),
+      icon: <User className="w-6 h-6" />,
+      fields: ['date_of_birth', 'occupation', 'educational_qualification', 'life_style'],
+      fieldIcons: {
+        date_of_birth: <User className="w-4 h-4" />,
+        occupation: <User className="w-4 h-4" />,
+        educational_qualification: <User className="w-4 h-4" />,
+        life_style: <Home className="w-4 h-4" />
+      }
+    },
+    {
+      title: t("accidentDetails"),
+      icon: <AlertCircle className="w-6 h-6" />,
+      fields: ['incident_at_time_and_date', 'approximate_speed', 'collision_with', 'collision_force_from', 'road_type'],
+      fieldIcons: {
+        incident_at_time_and_date: <AlertCircle className="w-4 h-4" />,
+        approximate_speed: <Activity className="w-4 h-4" />,
+        collision_with: <AlertCircle className="w-4 h-4" />,
+        collision_force_from: <Activity className="w-4 h-4" />,
+        road_type: <MapPin className="w-4 h-4" />
+      }
+    },
+    {
+      title: t("medicalInformation"),
+      icon: <Activity className="w-6 h-6" />,
+      fields: ['type_of_injury_no_1', 'site_of_injury_no1', 'type_of_injury_no_2', 'site_of_injury_no_2'],
+      fieldIcons: {
+        type_of_injury_no_1: <Activity className="w-4 h-4" />,
+        site_of_injury_no1: <Activity className="w-4 h-4" />,
+        type_of_injury_no_2: <Activity className="w-4 h-4" />,
+        site_of_injury_no_2: <Activity className="w-4 h-4" />
+      }
+    },
+    {
+      title: t("transportAndTiming"),
+      icon: <MapPin className="w-6 h-6" />,
+      fields: ['hospital_distance_from_home', 'mode_of_transport_to_the_hospital', 'time_taken_to_reach_hospital'],
+      fieldIcons: {
+        hospital_distance_from_home: <MapPin className="w-4 h-4" />,
+        mode_of_transport_to_the_hospital: <MapPin className="w-4 h-4" />,
+        time_taken_to_reach_hospital: <MapPin className="w-4 h-4" />
+      }
+    },
+    {
+      title: t("financialInformation"),
+      icon: <DollarSign className="w-6 h-6" />,
+      fields: ['family_current_status', 'family_monthly_income_before_accident', 'traveling_expenditure_per_day', 'any_other_hospital_admission_expenditure'],
+      fieldIcons: {
+        family_current_status: <Users className="w-4 h-4" />,
+        family_monthly_income_before_accident: <DollarSign className="w-4 h-4" />,
+        traveling_expenditure_per_day: <DollarSign className="w-4 h-4" />,
+        any_other_hospital_admission_expenditure: <DollarSign className="w-4 h-4" />
+      }
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <DoctorNav setIsAuthenticated={setIsAuthenticated} setRole={setRole} />
@@ -383,7 +535,7 @@ const GetPredictions = ({ setIsAuthenticated, setRole }) => {
             <Stethoscope className="w-8 h-8 text-blue-600" />
             <h1 className="text-4xl font-bold text-gray-800">{t('medicalTransferPrediction')} &amp; {t('dischargeOutcomePredictionTitle')}</h1>
           </div>
-          <p className="text-gray-600 text-lg">Use either panel below to generate ML predictions. Both forms are independent and post to their respective endpoints.</p>
+          <p className="text-gray-600 text-lg">{t('predictionFormsDescription')}</p>
         </div>
 
         {/* Tabs */}
@@ -447,36 +599,57 @@ const GetPredictions = ({ setIsAuthenticated, setRole }) => {
 
         {activeTab === 'discharge' && (
           <div>
-            <form onSubmit={handleDischargeSubmit} className="bg-white p-6 rounded-xl shadow-md border border-slate-100">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.keys(dischargeForm).map(key => {
-                  const fieldOptions = getDischargeFieldOptions(key);
-                  return (
-                    <div key={key} className="space-y-1">
-                      <label className="block text-sm font-medium text-slate-700">{key.replace(/_/g, ' ')}</label>
-                      {fieldOptions ? (
-                        <select name={key} value={dischargeForm[key]} onChange={handleDischargeChange} className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                          <option value="">Select an option</option>
-                          {fieldOptions.map((option, idx) => (
-                            <option key={idx} value={option}>{option}</option>
-                          ))}
-                        </select>
-                      ) : (
-                        <input name={key} value={dischargeForm[key]} onChange={handleDischargeChange} className="w-full p-2 border border-gray-200 rounded-lg" />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+            <form onSubmit={handleDischargeSubmit} className="space-y-8">
+              {getDischargeSections().map((section, index) => (
+                <div key={index} className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                  <div className="flex items-center gap-3 mb-6 pb-3 border-b border-gray-200">
+                    <div className="p-2 bg-blue-100 rounded-lg">{section.icon}</div>
+                    <h3 className="text-xl font-semibold text-gray-800">{section.title}</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {section.fields.map(key => {
+                      const fieldOptions = getDischargeFieldOptions(key);
+                      const fieldLabel = getDischargeFieldLabel(key);
+                      return (
+                        <div key={key} className="space-y-2">
+                          <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                            {section.fieldIcons[key] || <Activity className="w-4 h-4" />}
+                            {fieldLabel}
+                          </label>
+                          {fieldOptions ? (
+                            <select name={key} value={dischargeForm[key]} onChange={handleDischargeChange} className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white">
+                              <option value="">{t('selectAnOption')}</option>
+                              {fieldOptions.map((option, idx) => (
+                                <option key={idx} value={option}>{getDischargeOptionLabel(key, option)}</option>
+                              ))}
+                            </select>
+                          ) : (
+                            <input 
+                              name={key} 
+                              value={dischargeForm[key]} 
+                              onChange={handleDischargeChange} 
+                              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                              placeholder={getDischargeFieldPlaceholder(key)}
+                              type={key.includes('date') ? 'date' : 'text'}
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
 
-              <div className="mt-4 flex items-center gap-3">
-                <button type="submit" disabled={isDischargeLoading} className="inline-flex items-center gap-2 bg-gradient-to-r from-sky-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:from-sky-700 hover:to-indigo-700 disabled:opacity-60">
-                  {isDischargeLoading ? (<svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8z"></path></svg>) : null}
-                  <span>{isDischargeLoading ? t('processingPrediction') : t('dischargeOutcomePrediction')}</span>
+              <div className="flex justify-center gap-4 mt-8">
+                <button type="submit" disabled={isDischargeLoading} className="px-8 py-4 bg-gradient-to-r from-sky-600 to-indigo-600 text-white font-semibold rounded-lg hover:from-sky-700 hover:to-indigo-700 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 text-lg shadow-lg">
+                  {isDischargeLoading ? (<><Loader2 className="w-5 h-5 animate-spin" />{t('processingPrediction')}</>) : (<><Activity className="w-5 h-5" />{t('dischargeOutcomePrediction')}</>)}
                 </button>
 
                 <button type="button" onClick={() => { setDischargeForm({
-                  current_hospital_name: '', family_current_status: '', type_of_injury_no_1: '', traveling_expenditure_per_day: '', first_hospital_name: '', date_of_birth: '', site_of_injury_no1: '', approximate_speed: '', incident_at_time_and_date: '', hospital_distance_from_home: '', mode_of_transport_to_the_hospital: '', educational_qualification: '', time_taken_to_reach_hospital: '', any_other_hospital_admission_expenditure: '', site_of_injury_no_2: '', occupation: '', family_monthly_income_before_accident: '', collision_with: '', life_style: '', collision_force_from: '', road_type: '', type_of_injury_no_2: '' }); setDischargeResult(null); setDischargeError(null); }} className="px-4 py-2 border rounded-lg">Reset</button>
+                  current_hospital_name: '', family_current_status: '', type_of_injury_no_1: '', traveling_expenditure_per_day: '', first_hospital_name: '', date_of_birth: '', site_of_injury_no1: '', approximate_speed: '', incident_at_time_and_date: '', hospital_distance_from_home: '', mode_of_transport_to_the_hospital: '', educational_qualification: '', time_taken_to_reach_hospital: '', any_other_hospital_admission_expenditure: '', site_of_injury_no_2: '', occupation: '', family_monthly_income_before_accident: '', collision_with: '', life_style: '', collision_force_from: '', road_type: '', type_of_injury_no_2: '' }); setDischargeResult(null); setDischargeError(null); }} className="px-8 py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  {t('reset')}
+                </button>
               </div>
             </form>
 
