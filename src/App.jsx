@@ -11,8 +11,7 @@ import RecordAccidentData from './pages/nurse/RecordAccidentData';
 import RecordPatientData from './pages/nurse/RecordPatientData';
 import DashboardDoctor from './pages/doctor/DashboardDoctor';
 import ViewPatientData from './pages/doctor/ViewPatientData';
-import GetPrediction from './pages/doctor/GetPrediction';
-import GetDischargePrediction from './pages/doctor/GetDischargePrediction';
+import GetPredictions from './pages/doctor/GetPredictions';
 import DashboardAdmin from './pages/admin/DashboardAdmin';
 import PredictionAdmin from './pages/admin/PredictionAdmin';
 import AddStaff from './pages/admin/AddStaff';
@@ -103,20 +102,21 @@ function App() {
             } 
           />
           <Route 
-            path="/doctor/get-prediction" 
+            path="/doctor/predictions" 
             element={
               isAuthenticated && role === 'doctor' ? 
-                <GetPrediction setIsAuthenticated={setIsAuthenticated} setRole={setRole} /> : 
+                <GetPredictions setIsAuthenticated={setIsAuthenticated} setRole={setRole} /> : 
                 <Navigate to="/" />
             } 
           />
+          {/* Legacy routes redirect to combined page */}
+          <Route 
+            path="/doctor/get-prediction" 
+            element={<Navigate to="/doctor/predictions" replace />}
+          />
           <Route 
             path="/doctor/get-discharge-prediction"
-            element={
-              isAuthenticated && role === 'doctor' ?
-                <GetDischargePrediction setIsAuthenticated={setIsAuthenticated} setRole={setRole} /> :
-                <Navigate to="/" />
-            }
+            element={<Navigate to="/doctor/predictions" replace />}
           />
           
           {/* hospital_administrator Routes */}
