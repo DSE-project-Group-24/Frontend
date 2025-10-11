@@ -1985,6 +1985,26 @@ const translations = {
   // Intro text for the View Patient Data page
   searchPatientsIntro: "நோயாளி ஐடி, தேசிய அடையாள அட்டை அல்லது முழு பெயர் மூலம் நோயாளிகளைத் தேடவும் மற்றும் விபத்து பதிவுகளை ML முன்னறிவிப்புகளுடன் பார்க்கவும்.",
 
+  // Discharge outcome / model UI
+  dischargeOutcomePredictionTitle: "வெளியேற்ற முடிவு முன்னறிவு",
+  dischargeOutcomePrediction: "வெளியேற்ற முடிவு முன்னறிவு",
+  predictedOutcome: "முன்கணிக்கப்பட்ட முடிவு",
+  modelType: "மாதிரி வகை",
+  outcomeProbabilities: "முடிவுகளின் சாத்தியக்கூறுகள்",
+  dataAvailabilityWarning: "தரவு கிடைப்பில் எச்சரிக்கை",
+  missingFieldsNote: "சில புலங்கள் தற்போதைய தரவு அமைப்பில் கிடைக்கவில்லை; முன்னிருப்புகள் பயன்படுத்தப்பட்டன.",
+  // Missing-field labels
+  "Current Hospital Name": "தற்போதைய மருத்துவமனை பெயர்",
+  "Type of injury No 1 (not available in current data structure)": "காயம் வகை №1 (தற்போதைய தரவு அமைப்பில் இல்லை)",
+  "First Hospital Name": "முதலாவது மருத்துவமனை பெயர்",
+  "Site of injury No1 (not available in current data structure)": "காயத்தின் இடம் №1 (தற்போதைய தரவு அமைப்பில் இல்லை)",
+  "Time Taken To Reach Hospital (not available in current data structure)": "மருத்துவமனை சென்றடைய எடுத்த நேரம் (தற்போதைய தரவு அமைப்பில் இல்லை)",
+  "Site of injury No 2 (not available in current data structure)": "காயத்தின் இடம் №2 (தற்போதைய தரவு அமைப்பில் இல்லை)",
+  "Collision Force From (not available in current data structure)": "மோதல் சக்தி வரும் திசை (தற்போதைய தரவு அமைப்பில் இல்லை)",
+  "Type of Injury No 2 (not available in current data structure)": "காயம் வகை №2 (தற்போதைய தரவு அமைப்பில் இல்லை)",
+  // Model name
+  "CatBoost Classifier": "CatBoost வகைப்பாடு",
+
     // Nurse Forms
     patientQuickIntake: "நோயாளி — விரைவு அனுமதி",
     essentials: "அத்தியாவசியம்",
