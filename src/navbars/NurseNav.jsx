@@ -101,7 +101,7 @@ const NurseNav = ({ setIsAuthenticated, setRole }) => {
   ];
 
   return (
-    <nav ref={mobileMenuRef} className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 text-white overflow-hidden sticky top-0 z-50 shadow-2xl">
+  <nav ref={mobileMenuRef} className="bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 text-white overflow-visible sticky top-0 z-50 shadow-2xl">
       
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -translate-y-32 translate-x-32"></div>
@@ -119,7 +119,7 @@ const NurseNav = ({ setIsAuthenticated, setRole }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4M8 12h8" />
               </svg>
             </div>
-            <div className="hidden xs:block sm:block">
+            <div className="hidden sm:block">
               <h1 className="text-lg sm:text-xl font-bold text-white">{t('roadAccidentCareSystem')}</h1>
               <p className="text-xs sm:text-sm text-blue-200">{t('nursePortal')}</p>
             </div>
@@ -192,9 +192,9 @@ const NurseNav = ({ setIsAuthenticated, setRole }) => {
       </div>
 
       {/* Mobile Menu */}
-      {isMobileMenuOpen && (
+        {isMobileMenuOpen && (
         <div className="md:hidden">
-          <div className="absolute inset-x-0 top-full bg-gradient-to-br from-slate-900/95 via-indigo-900/95 to-slate-900/95 backdrop-blur-xl border-t border-slate-700/50 shadow-2xl">
+          <div className="absolute inset-x-0 top-full z-50 bg-gradient-to-br from-slate-900/95 via-indigo-900/95 to-slate-900/95 backdrop-blur-xl border-t border-slate-700/50 shadow-2xl">
             <div className="px-2 py-4 space-y-2">
               {navItems.map((item) => (
                 <Link
