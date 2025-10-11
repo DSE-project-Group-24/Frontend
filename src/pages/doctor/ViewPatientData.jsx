@@ -1439,8 +1439,222 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                       </button>
                       <button
                         onClick={() => {
-                          // Add print functionality if needed
-                          window.print();
+                          const printContent = `
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                              <title>Medical Report - ${filtered["Full Name"]}</title>
+                              <style>
+                                @media print { @page { margin: 1in; } }
+                                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+                                .header { text-align: center; border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
+                                .hospital-name { color: #2563eb; font-size: 24px; font-weight: bold; margin-bottom: 5px; }
+                                .report-title { font-size: 20px; font-weight: 600; color: #1f2937; }
+                                .report-date { color: #6b7280; font-size: 14px; }
+                                .section { margin-bottom: 25px; }
+                                .section-title { background: #f3f4f6; padding: 10px 15px; border-left: 4px solid #2563eb; font-weight: 600; color: #1f2937; margin-bottom: 15px; }
+                                .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
+                                .info-item { display: flex; padding: 8px 12px; border-bottom: 1px solid #e5e7eb; }
+                                .info-label { font-weight: 600; color: #374151; min-width: 150px; }
+                                .info-value { color: #1f2937; }
+                                .accident-header { background: #fef3c7; padding: 12px 15px; border-left: 4px solid #f59e0b; margin: 20px 0 15px 0; }
+                                .prediction-box { background: #dbeafe; border: 1px solid #93c5fd; padding: 15px; border-radius: 8px; margin: 10px 0; }
+                                .prediction-title { font-weight: 600; color: #1e40af; margin-bottom: 8px; }
+                                .injury-item { background: #fef2f2; border: 1px solid #fecaca; padding: 12px; border-radius: 6px; margin: 8px 0; }
+                                .severity-serious { background: #fee2e2; color: #991b1b; }
+                                .severity-medium { background: #fef3c7; color: #92400e; }
+                                .severity-light { background: #dcfce7; color: #15803d; }
+                                .footer { text-align: center; border-top: 1px solid #d1d5db; padding-top: 20px; margin-top: 40px; color: #6b7280; font-size: 12px; }
+                              </style>
+                            </head>
+                            <body>
+                              <div class="header">
+                                <div class="hospital-name">${localStorage.getItem('hospital_name') || 'Medical Center'}</div>
+                                <div class="report-title">Patient Medical Report</div>
+                                <div class="report-date">Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</div>
+                              </div>
+
+                              <div class="section">
+                                <div class="section-title">Patient Information</div>
+                                <div class="info-grid">
+                                  <div class="info-item">
+                                    <span class="info-label">Full Name:</span>
+                                    <span class="info-value">${filtered["Full Name"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Patient ID:</span>
+                                    <span class="info-value">${filtered["patient_id"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Date of Birth:</span>
+                                    <span class="info-value">${filtered["Date of Birth"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Age:</span>
+                                    <span class="info-value">${Math.floor((new Date() - new Date(filtered["Date of Birth"])) / (1000 * 60 * 60 * 24 * 365.25))} years</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Gender:</span>
+                                    <span class="info-value">${filtered["Gender"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Blood Group:</span>
+                                    <span class="info-value">${filtered["Blood Group"] || 'Not recorded'}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Contact Number:</span>
+                                    <span class="info-value">${filtered["Contact Number"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Address:</span>
+                                    <span class="info-value">${filtered["Address Street"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Occupation:</span>
+                                    <span class="info-value">${filtered["Occupation"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Education:</span>
+                                    <span class="info-value">${filtered["Education Qualification"]}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div class="accident-header">
+                                <strong>ACCIDENT RECORD - Incident #${accidents.findIndex(acc => acc.accident_id === selectedAccident.accident_id) + 1}</strong>
+                              </div>
+
+                              <div class="section">
+                                <div class="section-title">Incident Overview</div>
+                                <div class="info-grid">
+                                  <div class="info-item">
+                                    <span class="info-label">Incident Date:</span>
+                                    <span class="info-value">${selectedAccident["incident at date"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Time of Collision:</span>
+                                    <span class="info-value">${selectedAccident["time of collision"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Severity:</span>
+                                    <span class="info-value">${selectedAccident["Severity"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Completed:</span>
+                                    <span class="info-value">${selectedAccident["Completed"] ? 'Yes' : 'No'}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              ${!selectedAccident["Completed"] && transferProbabilities[selectedAccident.accident_id] ? `
+                              <div class="prediction-box">
+                                <div class="prediction-title">AI Transfer Risk Assessment</div>
+                                <div class="info-item">
+                                  <span class="info-label">Transfer Probability:</span>
+                                  <span class="info-value">${transferProbabilities[selectedAccident.accident_id].probability}</span>
+                                </div>
+                                <div class="info-item">
+                                  <span class="info-label">Recommendation:</span>
+                                  <span class="info-value">${translateTransferPrediction(transferProbabilities[selectedAccident.accident_id].prediction)}</span>
+                                </div>
+                              </div>
+                              ` : ''}
+
+                              ${!selectedAccident["Completed"] && dischargeOutcomePredictions[selectedAccident.accident_id] ? `
+                              <div class="prediction-box">
+                                <div class="prediction-title">AI Discharge Outcome Prediction</div>
+                                <div class="info-item">
+                                  <span class="info-label">Predicted Outcome:</span>
+                                  <span class="info-value">${dischargeOutcomePredictions[selectedAccident.accident_id].prediction}</span>
+                                </div>
+                              </div>
+                              ` : ''}
+
+                              <div class="section">
+                                <div class="section-title">Medical Response</div>
+                                <div class="info-grid">
+                                  <div class="info-item">
+                                    <span class="info-label">First Aid at Scene:</span>
+                                    <span class="info-value">${selectedAccident["First aid given at seen"] ? 'Yes' : 'No'}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Transport to Hospital:</span>
+                                    <span class="info-value">${selectedAccident["Mode of transport to hospital"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Time to Hospital:</span>
+                                    <span class="info-value">${selectedAccident["Time taken to reach hospital"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Hospital:</span>
+                                    <span class="info-value">${localStorage.getItem('hospital_name') || selectedAccident["Hospital"] || 'Not specified'}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              ${selectedAccident.injuries && selectedAccident.injuries.length > 0 ? `
+                              <div class="section">
+                                <div class="section-title">Injury Details</div>
+                                ${selectedAccident.injuries.map((injury, index) => `
+                                  <div class="injury-item">
+                                    <strong>Injury ${index + 1}:</strong><br>
+                                    <span class="info-label">Site:</span> ${injury.site_of_injury || 'Not specified'}<br>
+                                    <span class="info-label">Type:</span> ${injury.type_of_injury || 'Not specified'}<br>
+                                    <span class="info-label">Severity:</span> 
+                                    <span class="severity-${injury.severity === 'S' ? 'serious' : injury.severity === 'M' ? 'medium' : 'light'}">
+                                      ${injury.severity === 'S' ? 'Serious' : injury.severity === 'M' ? 'Medium' : injury.severity === 'L' ? 'Light' : 'Unknown'}
+                                    </span>
+                                  </div>
+                                `).join('')}
+                              </div>
+                              ` : ''}
+
+                              <div class="section">
+                                <div class="section-title">Environmental & Vehicle Details</div>
+                                <div class="info-grid">
+                                  <div class="info-item">
+                                    <span class="info-label">Visibility:</span>
+                                    <span class="info-value">${selectedAccident["Visibility"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Road Condition:</span>
+                                    <span class="info-value">${selectedAccident["Road Condition"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Approximate Speed:</span>
+                                    <span class="info-value">${selectedAccident["Approximate speed"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Mode of Travel:</span>
+                                    <span class="info-value">${selectedAccident["Mode of traveling during accident"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Helmet Worn:</span>
+                                    <span class="info-value">${selectedAccident["Helmet Worn"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Alcohol Consumption:</span>
+                                    <span class="info-value">${selectedAccident["Alcohol Consumption"]}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div class="footer">
+                                <p>This report was generated electronically by the Medical Information System</p>
+                                <p>Record ID: ${selectedAccident.accident_id} | Generated by: ${localStorage.getItem('user_name') || 'Medical Staff'}</p>
+                              </div>
+                            </body>
+                            </html>
+                          `;
+                          
+                          const printWindow = window.open('', '_blank');
+                          printWindow.document.write(printContent);
+                          printWindow.document.close();
+                          printWindow.focus();
+                          setTimeout(() => {
+                            printWindow.print();
+                            printWindow.close();
+                          }, 250);
                         }}
                         className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center"
                       >
