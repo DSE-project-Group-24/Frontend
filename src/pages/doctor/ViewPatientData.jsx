@@ -93,6 +93,89 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
     }
   };
 
+  // Small skeleton components to display while loading
+  const SkeletonPatient = () => (
+    <div className="bg-white p-6 rounded-xl shadow-md mb-6 border border-slate-100 animate-pulse">
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-gray-200 rounded-xl" />
+          <div className="space-y-2">
+            <div className="w-48 h-4 bg-gray-200 rounded" />
+            <div className="w-32 h-3 bg-gray-200 rounded" />
+          </div>
+        </div>
+        <div className="w-24 h-8 bg-gray-200 rounded" />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-700">
+        <div className="space-y-2">
+          <div className="w-40 h-3 bg-gray-200 rounded" />
+          <div className="w-32 h-3 bg-gray-200 rounded" />
+          <div className="w-48 h-3 bg-gray-200 rounded" />
+          <div className="w-56 h-3 bg-gray-200 rounded" />
+        </div>
+        <div className="space-y-2">
+          <div className="w-44 h-3 bg-gray-200 rounded" />
+          <div className="w-36 h-3 bg-gray-200 rounded" />
+          <div className="w-28 h-3 bg-gray-200 rounded" />
+          <div className="w-40 h-3 bg-gray-200 rounded" />
+        </div>
+      </div>
+    </div>
+  );
+
+  const SkeletonAccidentCard = () => (
+    <article className="group bg-white rounded-xl border border-slate-100 p-4 shadow-sm animate-pulse">
+      <div className="flex items-start justify-between mb-3">
+        <div className="space-y-2">
+          <div className="w-32 h-4 bg-gray-200 rounded" />
+          <div className="w-24 h-3 bg-gray-200 rounded" />
+        </div>
+        <div className="w-12 h-6 bg-gray-200 rounded" />
+      </div>
+
+      <div className="space-y-2 text-slate-700">
+        <div className="flex items-center justify-between">
+          <div className="w-20 h-3 bg-gray-200 rounded" />
+          <div className="w-24 h-3 bg-gray-200 rounded" />
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="w-28 h-3 bg-gray-200 rounded" />
+          <div className="w-20 h-3 bg-gray-200 rounded" />
+        </div>
+
+        <div className="mt-3 space-y-2">
+          <div className="p-3 bg-gray-100 rounded-lg">
+            <div className="w-full h-3 bg-gray-200 rounded" />
+            <div className="w-3/4 h-3 bg-gray-200 rounded mt-2" />
+          </div>
+        </div>
+      </div>
+
+      <p className="mt-3 text-xs text-slate-400">&nbsp;</p>
+    </article>
+  );
+
+  // Helper to translate model outcome labels (fallback to the original label)
+  const translateOutcome = (label) => {
+    if (!label) return label;
+    // Create a safe key (convert spaces and punctuation to camel-case-like keys used in translations)
+    const key = label.replace(/[^a-zA-Z0-9]+/g, ' ').trim().split(' ').map((w, i) => i === 0 ? w.toLowerCase() : w[0].toUpperCase() + w.slice(1).toLowerCase()).join('');
+    const translated = t(key);
+    return translated || label;
+  };
+
+  const formatPercent = (prob) => {
+    if (prob === null || prob === undefined || isNaN(prob)) return '-';
+    try {
+      const pct = Number(prob) * 100;
+      // use Intl for nicer formatting
+      return new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 }).format(pct) + '%';
+    } catch (e) {
+      return (prob * 100).toFixed(1) + '%';
+    }
+  };
+
   const getPredictionForAccident = async (accident, patientData) => {
     setLoadingPredictions(prev => ({ ...prev, [accident.accident_id]: true }));
     
@@ -643,7 +726,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
           <h1 className="text-3xl sm:text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-sky-700 to-indigo-600">
             {t('viewPatientData')}
           </h1>
-          <p className="mt-1 text-sm text-slate-500">Search patients by Patient ID, NIC or full name and view accident records with ML predictions.</p>
+          <p className="mt-1 text-sm text-slate-500">{t('searchPatientsIntro')}</p>
         </header>
 
         {/* Search box */}
@@ -683,45 +766,56 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
         </div>
 
         {/* Patient info */}
-        {filtered && (
-          <div className="bg-white p-6 rounded-xl shadow-md mb-6 border border-slate-100">
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-sky-600 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-md">
-                  {filtered["Full Name"] ? filtered["Full Name"].split(' ').map(n => n[0]).slice(0,2).join('') : 'P'}
+        {loading ? (
+          <SkeletonPatient />
+        ) : (
+          filtered && (
+            <div className="bg-white p-6 rounded-xl shadow-md mb-6 border border-slate-100">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-sky-600 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-md">
+                    {filtered["Full Name"] ? filtered["Full Name"].split(' ').map(n => n[0]).slice(0,2).join('') : 'P'}
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-slate-800">{filtered["Full Name"]}</h2>
+                    <p className="text-sm text-slate-500">{filtered["Contact Number"]}</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-800">{filtered["Full Name"]}</h2>
-                  <p className="text-sm text-slate-500">{filtered["Contact Number"]}</p>
+                <div className="flex items-center gap-3">
+                  <button onClick={() => handleCopy(filtered["patient_id"])} className="inline-flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm hover:shadow transition">Copy ID</button>
+                  {copySuccess && <span className="text-sm text-emerald-600">{copySuccess}</span>}
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <button onClick={() => handleCopy(filtered["patient_id"])} className="inline-flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm hover:shadow transition">Copy ID</button>
-                {copySuccess && <span className="text-sm text-emerald-600">{copySuccess}</span>}
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-700">
-              <div className="space-y-2">
-                <p><span className="font-medium">{t('dateOfBirth')}:</span> {filtered["Date of Birth"]} {filtered["Date of Birth"] && (<span className="text-sm text-slate-500"> ({t('age')}: {Math.floor((new Date() - new Date(filtered["Date of Birth"])) / (1000 * 60 * 60 * 24 * 365.25))})</span>)}</p>
-                <p><span className="font-medium">{t('ethnicity')}:</span> {filtered["Ethnicity"]}</p>
-                <p><span className="font-medium">{t('gender')}:</span> {filtered["Gender"]}</p>
-                <p><span className="font-medium">{t('address')}:</span> {filtered["Address Street"]}</p>
-              </div>
-              <div className="space-y-2">
-                <p><span className="font-medium">{t('lifeStyle')}:</span> {filtered["Life Style"]}</p>
-                <p><span className="font-medium">{t('education')}:</span> {filtered["Education Qualification"]}</p>
-                <p><span className="font-medium">{t('occupation')}:</span> {filtered["Occupation"]}</p>
-                <p><span className="font-medium">{t('familyMonthlyIncome')}:</span> {filtered["Family Monthly Income"]}</p>
-                <p><span className="font-medium">{t('bloodGroup')}:</span> {filtered["Blood Group"] || t('notRecorded')}</p>
-                <p><span className="font-medium">{t('patientId')}:</span> <span className="text-sm text-slate-600">{filtered["patient_id"]}</span></p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-700">
+                <div className="space-y-2">
+                  <p><span className="font-medium">{t('dateOfBirth')}:</span> {filtered["Date of Birth"]} {filtered["Date of Birth"] && (<span className="text-sm text-slate-500"> ({t('age')}: {Math.floor((new Date() - new Date(filtered["Date of Birth"])) / (1000 * 60 * 60 * 24 * 365.25))})</span>)}</p>
+                  <p><span className="font-medium">{t('ethnicity')}:</span> {filtered["Ethnicity"]}</p>
+                  <p><span className="font-medium">{t('gender')}:</span> {filtered["Gender"]}</p>
+                  <p><span className="font-medium">{t('address')}:</span> {filtered["Address Street"]}</p>
+                </div>
+                <div className="space-y-2">
+                  <p><span className="font-medium">{t('lifeStyle')}:</span> {filtered["Life Style"]}</p>
+                  <p><span className="font-medium">{t('education')}:</span> {filtered["Education Qualification"]}</p>
+                  <p><span className="font-medium">{t('occupation')}:</span> {filtered["Occupation"]}</p>
+                  <p><span className="font-medium">{t('familyMonthlyIncome')}:</span> {filtered["Family Monthly Income"]}</p>
+                  <p><span className="font-medium">{t('bloodGroup')}:</span> {filtered["Blood Group"] || t('notRecorded')}</p>
+                  <p><span className="font-medium">{t('patientId')}:</span> <span className="text-sm text-slate-600">{filtered["patient_id"]}</span></p>
+                </div>
               </div>
             </div>
-          </div>
+          )
         )}
 
         {/* Accident Summary */}
-        {filtered && accidents.length > 0 && (
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonAccidentCard key={i} />
+            ))}
+          </div>
+        ) : (
+          filtered && accidents.length > 0 && (
           <section className="mb-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold text-slate-800">{t('accidentRecords')} <span className="text-sm text-slate-500">({accidents.length})</span></h2>
@@ -791,8 +885,8 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                                 <div className="text-xs text-slate-600 mt-1">
                                   {Object.entries(dischargeOutcomePredictions[acc.accident_id].probabilities).map(([outcome, prob]) => (
                                     <div key={outcome} className="flex justify-between">
-                                      <span>{outcome}</span>
-                                      <span className="font-semibold">{(prob * 100).toFixed(1)}%</span>
+                                      <span>{translateOutcome(outcome)}</span>
+                                      <span className="font-semibold">{formatPercent(prob)}</span>
                                     </div>
                                   ))}
                                 </div>
@@ -811,7 +905,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
               ))}
             </div>
           </section>
-        )}
+        ))}
 
         {filtered && accidents.length === 0 && (
           <div className="bg-white p-6 rounded-lg shadow-md">
@@ -886,12 +980,12 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                                 .sort(([,a], [,b]) => b - a)
                                 .map(([outcome, probability]) => (
                                 <div key={outcome} className="flex justify-between items-center">
-                                  <span className="text-sm font-medium text-slate-700">{outcome}</span>
+                                  <span className="text-sm font-medium text-slate-700">{translateOutcome(outcome)}</span>
                                   <div className="flex items-center gap-2">
                                     <div className="w-36 bg-gray-200 rounded-full h-2">
-                                      <div className="bg-green-600 h-2 rounded-full" style={{ width: `${probability * 100}%` }}></div>
+                                      <div className="bg-green-600 h-2 rounded-full" style={{ width: `${Number(probability) * 100}%` }}></div>
                                     </div>
-                                    <span className="text-sm font-bold text-green-600 w-12">{(probability * 100).toFixed(1)}%</span>
+                                    <span className="text-sm font-bold text-green-600 w-12">{formatPercent(probability)}</span>
                                   </div>
                                 </div>
                               ))}
@@ -904,7 +998,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                             <h4 className="font-semibold text-yellow-800 mb-2">⚠️ {t('dataAvailabilityWarning')}</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-28 overflow-y-auto">
                               {dischargeOutcomePredictions[selectedAccident.accident_id].missingValues.map((missing, idx) => (
-                                <div key={idx} className="text-xs text-yellow-700 bg-yellow-100 px-2 py-1 rounded">{missing}</div>
+                                <div key={idx} className="text-xs text-yellow-700 bg-yellow-100 px-2 py-1 rounded">{t(missing) || missing}</div>
                               ))}
                             </div>
                             <p className="text-xs text-yellow-600 mt-2 italic">{t('missingFieldsNote')}</p>

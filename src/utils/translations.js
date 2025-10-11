@@ -117,9 +117,13 @@ const translations = {
     searchPatient: "Search Patient",
     enterPatientIdNicOrName: "Enter Patient ID, NIC, or Full Name",
     searchByIdNicName: "You can search by Patient ID, NIC, or Full Name",
+  // Intro text for the View Patient Data page
+  searchPatientsIntro: "Search patients by Patient ID, NIC or full name and view accident records with ML predictions.",
     pleaseEnterSearchTerm: "Please enter a Patient ID, NIC, or Full Name",
     noPatientFound: "No patient found with that Patient ID, NIC, or Full Name.",
     searching: "Searching...",
+
+  // Intro text for the View Patient Data page (Sinhala/Tamil keys will be placed below in the 'si' and 'ta' sections)
     
     // Accidents
     accidentRecords: "Accident Records",
@@ -898,6 +902,25 @@ const translations = {
     // Tooltip texts
     supportTooltip: "How often a pattern must appear in the data (higher = more common patterns only)",
     confidenceTooltip: "How reliable the pattern prediction must be (higher = more trustworthy patterns)",
+  // Discharge outcome / model UI
+  dischargeOutcomePredictionTitle: "Discharge Outcome Prediction",
+  dischargeOutcomePrediction: "Discharge Outcome Prediction",
+  predictedOutcome: "Predicted Outcome",
+  modelType: "Model Type",
+  outcomeProbabilities: "Outcome Probabilities",
+  dataAvailabilityWarning: "Data availability warning",
+  missingFieldsNote: "Some fields were not available in the current data structure and defaults were used.",
+  // Missing-field labels (used when preparing model input)
+  "Current Hospital Name": "Current Hospital Name",
+  "Type of injury No 1 (not available in current data structure)": "Type of injury No 1 (not available in current data structure)",
+  "First Hospital Name": "First Hospital Name",
+  "Site of injury No1 (not available in current data structure)": "Site of injury No1 (not available in current data structure)",
+  "Time Taken To Reach Hospital (not available in current data structure)": "Time Taken To Reach Hospital (not available in current data structure)",
+  "Site of injury No 2 (not available in current data structure)": "Site of injury No 2 (not available in current data structure)",
+  "Collision Force From (not available in current data structure)": "Collision Force From (not available in current data structure)",
+  "Type of Injury No 2 (not available in current data structure)": "Type of Injury No 2 (not available in current data structure)",
+  // Model names / outcomes (examples)
+  "CatBoost Classifier": "CatBoost Classifier",
     
     // Alert messages
     selectBothCategoryValue: "Please select both category and value for the specific target.",
@@ -977,6 +1000,8 @@ const translations = {
     pleaseEnterSearchTerm: "කරුණාකර රෝගී හැඳුනුම්පත, ජාතික හැඳුනුම්පත, හෝ සම්පූර්ණ නම ඇතුළත් කරන්න",
     noPatientFound: "එම රෝගී හැඳුනුම්පත, ජාතික හැඳුනුම්පත, හෝ සම්පූර්ණ නම සහිත රෝගියෙකු නොමැත.",
     searching: "සොයමින්...",
+  // Intro text for the View Patient Data page
+  searchPatientsIntro: "රෝගී හැඳුනුම්පත, ජාතික හැඳුනුම්පත හෝ සම්පූර්ණ නම මගින් රෝගීන් සෙවීම සහ අනතුරු වාර්තා ML පුරෝකථන සමඟ බලන්න.",
 
     // Nurse Forms
     patientQuickIntake: "රෝගියා — ඉක්මන් ප්‍රවේශය",
@@ -1098,6 +1123,25 @@ const translations = {
     patient: "රෝගියා",
     close: "වසන්න",
     save: "සුරකින්න",
+  // Discharge outcome / model UI (Sinhala)
+  dischargeOutcomePredictionTitle: "රෝහලෙන් පිටවීමේ ප්‍රතිඵල අනාවැකිය",
+  dischargeOutcomePrediction: "රෝහලෙන් පිටවීමේ ප්‍රතිඵල අනාවැකිය",
+  predictedOutcome: "අනුමානිත ප්‍රතිඵල",
+  modelType: "මොඩලයේ වර්ගය",
+  outcomeProbabilities: "ප්‍රතිඵල ප්‍රවාහිතයන්",
+  dataAvailabilityWarning: "දත්ත ලබාගැනීම සීමිතයි",
+  missingFieldsNote: "වර්තමාන දත්ත ව්‍යුහයේ ඇති නොමැති ක්ෂේත්‍ර සඳහා පෙරනිමියන් භාවිතා කරන ලදී.",
+  // Missing-field labels (Sinhala)
+  "Current Hospital Name": "වත්මන් රෝහල් නාමය",
+  "Type of injury No 1 (not available in current data structure)": "ආබාධ වර්ගය අංක 1 (වර්තමාන දත්ත ව්‍යුහයේ නොපවතී)",
+  "First Hospital Name": "පලමු රෝහලේ නම",
+  "Site of injury No1 (not available in current data structure)": "ආබාධ ස්ථානය අංක 1 (වර්තමාන දත්ත ව්‍යුහයේ නොපවතී)",
+  "Time Taken To Reach Hospital (not available in current data structure)": "රෝහලට ළඟා වීමට ගත් කාලය (දත්ත ව්‍යුහයේ නොපවතී)",
+  "Site of injury No 2 (not available in current data structure)": "ආබාධ ස්ථානය අංක 2 (වර්තමාන දත්ත ව්‍යුහයේ නොපවතී)",
+  "Collision Force From (not available in current data structure)": "ඝැටීමේ බලය ආරම්භය (දත්ත ව්‍යුහයේ නොපවතී)",
+  "Type of Injury No 2 (not available in current data structure)": "ආබාධ වර්ගය අංක 2 (වර්තමාන දත්ත ව්‍යුහයේ නොපවතී)",
+  // Model names / outcomes (Sinhala examples)
+  "CatBoost Classifier": "CatBoost Classifier",
     saving: "සුරකිමින්…",
     cancel: "අවලංගු කරන්න",
     readOnlyRecord: "මෙම වාර්තාව කියවීමට පමණයි (සම්පූර්ණ කර ඇත හෝ වෙනත් හෙදියෙකු විසින් කළමනාකරණය කරනු ලැබේ).",
@@ -1195,14 +1239,14 @@ const translations = {
     fullDetails: "සම්පූර්ණ විස්තර",
     
     // Predictions
-    mlTransferPrediction: "ML මාරු කිරීමේ පුරෝකථනය",
+    mlTransferPrediction: "රෝහලෙන් මාරු කිරීමේ පුරෝකථනය",
     calculatingPrediction: "පුරෝකථනය ගණනය කරමින්...",
     transferProbability: "මාරු කිරීමේ සම්භාවිතාව",
     prediction: "පුරෝකථනය",
     predictionOutcome: "පුරෝකථන ප්‍රතිඵලය",
     analysis: "විශ්ලේෂණය",
     predictionNotAvailable: "පුරෝකථනය ලබා ගත නොහැක",
-    mlTransferPredictionAnalysis: "ML මාරු කිරීමේ පුරෝකථන විශ්ලේෂණය",
+    mlTransferPredictionAnalysis: "රෝහලෙන් මාරු කිරීමේ පුරෝකථන විශ්ලේෂණය",
     
     // Accident Details
     basicInformation: "මූලික තොරතුරු",
@@ -1938,6 +1982,8 @@ const translations = {
     pleaseEnterSearchTerm: "தயவுசெய்து நோயாளி அடையாள எண், தேசிய அடையாள எண், அல்லது முழுப் பெயரை உள்ளிடவும்",
     noPatientFound: "அந்த நோயாளி அடையாள எண், தேசிய அடையாள எண், அல்லது முழுப் பெயருடன் எந்த நோயாளியும் கிடைக்கவில்லை.",
     searching: "தேடுகிறது...",
+  // Intro text for the View Patient Data page
+  searchPatientsIntro: "நோயாளி ஐடி, தேசிய அடையாள அட்டை அல்லது முழு பெயர் மூலம் நோயாளிகளைத் தேடவும் மற்றும் விபத்து பதிவுகளை ML முன்னறிவிப்புகளுடன் பார்க்கவும்.",
 
     // Nurse Forms
     patientQuickIntake: "நோயாளி — விரைவு அனுமதி",
