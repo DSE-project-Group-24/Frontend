@@ -254,6 +254,125 @@ const GetPredictions = ({ setIsAuthenticated, setRole }) => {
   const totalFields = Object.keys(formData).length;
   const progressPercentage = (completedFields / totalFields) * 100;
 
+  // Discharge form field options based on actual model data
+  const getDischargeFieldOptions = (fieldName) => {
+    const options = {
+      current_hospital_name: [
+        'DGH – Kilinochchi', 'DGH – Vavuniya', 'Base Hospital (A) -Tellipalai',
+        'Teaching hospital - Jaffna (THJ)', 'DGH – Mullaithivu',
+        'Base Hospital (B) - Chavakachcheri', 'DGH – Mannar',
+        'Base Hospital (A) - Point Pedro'
+      ],
+      family_current_status: [
+        'Not Affected', 'Mildly Affected', 'Moderately Affected', 'Severely Affected'
+      ],
+      type_of_injury_no_1: [
+        'nerve_lesion', 'contusion', 'fracture', 'laceration', 'dislocation',
+        'abrasion', 'ligament_injury', 'pericardial_effusion', 'amputation',
+        'spinal_injury', 'ich', 'sdh', 'kidney_injury', 'spleen_injury',
+        'pneumothorax', 'bowel_injury', 'lung_injury'
+      ],
+      traveling_expenditure_per_day: [
+        '0-100', '100-200', '200-300', '300-400', '400-500', 'More than 500'
+      ],
+      first_hospital_name: [
+        'DGH – Kilinochchi', 'DGH – Vavuniya', 'Base Hospital (A) -Tellipalai',
+        'Teaching hospital - Jaffna (THJ)', 'DH,Atchuveli', 'DH,Velanai',
+        'DGH – Mullaithivu', 'Base Hospital (B) - Puthukudiyiruppu',
+        'Base Hospital (B) - Chavakachcheri', 'DH,Poonakary', 'DH, Poovarasankulam',
+        'DH,Nedunkerny', 'Base Hospital (A) - Point Pedro', 'DH,Vaddakachchi',
+        'DH,Tharmapuram', 'DH,Akkarayankulam', 'DH, Puliyankulam', 'DH,Kopay',
+        'DH, Sithamparapuram', 'Base Hospital (B) - Mallavi', 'DH,Palai',
+        'DH,Alavedddy', 'Base Hospital (B) - Mulankavil', 'DGH – Mannar',
+        'DH,Chankanai', 'Base Hospital (A) - Mankulam', 'DH,Adampan',
+        'DH,Sampathnuwara', 'DH,Oddusuddan', 'BH,Mallavi(TypeB)',
+        'Base Hospital (B) - Cheddikulam', 'DH,Erukalampitti', 'DH,Pungudutivu',
+        'Base Hospital (B) - Kayts', 'DH,Pesalai', 'DH,Vidathaltivu', 'DH,Kokulai',
+        'Base Hospital (B) - Murunkan', 'DH,Uruthirapuram', 'DH,Alampil',
+        'BH,Mankulam(TypeA)', 'DH,Nanattan', 'DH,Vankalai', 'DH,Valvettithurai',
+        'BH,Chavakachcheri(TypeB)', 'DH,Veravil', 'DH,Karainagar',
+        'BH,Puthukudijiruppu(TypeB)', 'DGH,Kilinochchi', 'BH,Murungan (TypeB)'
+      ],
+      site_of_injury_no1: [
+        'nee', 'ead_injury', 'houlder__lavicle', 'lbow__egion', 'oot',
+        'houlder__njury', 'umerus__egion', 'orearm', 'head_face', 'and', 'leg_tibia',
+        'issing__ata', 'hest__njury', 'acial__njury', 'eg', 'orearm___adius___lna',
+        'eg__ibia', 'orearm__lna', 'orearm__adius', 'oot_tarsals', 'ye__njury',
+        'hest_rib', 'high__emur', 'o__njury__ound', 'high', 'ervical', 'horacic',
+        'orearm_ulna', 'acrum', 'nee_patella', 'hand', 'umbar', 'and_phalanges',
+        'eg___ibia___ibula', 'and__halanges', 'bdomen', 'nee__atella',
+        'oot__halanges', 'elvis', 'leg_fibula', 'lavicle', 'emur', 'oot__etatarsals',
+        'eg__ibula', 'oot_phalanges', 'orearm__radius___lna', 'leg_tibia_fibula',
+        'oot__arsals', 'elvis_ilium', 'thigh'
+      ],
+      approximate_speed: [
+        'Less Than 40 km/h', '40 - 80 km/h', '80 - 100 km/h', 'More Than 100 km/h'
+      ],
+      hospital_distance_from_home: [
+        "Victim doesn't have knowledge on distance/ Not willing to share/ Unable to respond/  Early Discharge",
+        'Less than 5 Km', '5-10 Km', '10-15 Km', '15-20 Km', '20-25 Km',
+        '25-30 Km', '25-30 km', '30-50 Km', '50-100 Km', '100-150 Km', '150-200 Km'
+      ],
+      mode_of_transport_to_the_hospital: [
+        'Ambulance', 'Three wheeler', 'Motor Bike', 'Other Vehicle', 'Unknown'
+      ],
+      educational_qualification: [
+        'Grade 5', 'O/L or A/L', 'Under Graduate', 'Post Graduate'
+      ],
+      time_taken_to_reach_hospital: [
+        'Less Than 15 Minutes', '15 Minutes - 30 Minutes', '30 Minutes - 1 Hour',
+        '1 Hour - 2 Hour', 'More Than 2 Hour',
+        'Victim not aware about the time/ not willing to share/ Unable to respond/  Early Discharge'
+      ],
+      any_other_hospital_admission_expenditure: [
+        'No Other Expenses', 'Broad arm sling', 'Medical Appliances',
+        'Thoraco lumbar support', 'Cervical collar', 'Prosthesis', 'Armsling',
+        'Bone cement'
+      ],
+      site_of_injury_no_2: [
+        'ot__ecessary', 'o__econdary__njury__ound', 'nee', 'ead_injury', 'umerus__egion', 'high',
+        'lbow__egion', 'oot', 'orearm', 'eg', 'hest__ib', 'acial__njury', 'and',
+        'ervical', 'horacic', 'nee_patella', 'hest__njury', 'houlder', 'eg___ibia___ibula',
+        'houlder__njury', 'umbar', 'bdomen', 'ye__njury', 'ight_houlder', 'orearm_radius',
+        'oot__halanges', 'leg_tibia', 'hand', 'hest_rib', 'high__emur', 'orearm__lna',
+        'nee__atella', 'eg__ibia', 'shoulder', 'and__halanges', 'leg_fibula',
+        'orearm__adius', 'oot__etatarsals', 'ight_eg', 'head_face', 'eg__ibula',
+        'oot_tarsals', 'houlder__lavicle', 'oot_phalanges', 'umerus__ead', 'elvis',
+        'orearm_ulna', 'thigh', 'elvis_ilium', 'leg_tibia_fibula'
+      ],
+      occupation: [
+        'Student', 'Professionals', 'Skilled Workers', 'Unemployed',
+        'Semi-Skilled Workers', 'Business', 'Retired pensioners', 'Driver', 'Forces',
+        'Others', 'Highly Skilled Workers', 'NGO', 'Religious Sevice',
+        'Road and Field', 'Road and field'
+      ],
+      family_monthly_income_before_accident: [
+        '0-15000', '15000-30000', '30000-45000', '45000-60000', 'More than 60000'
+      ],
+      collision_with: [
+        'Animal', 'Fall From Vehicle', 'Motorbike', 'Unknown', 'Pedestrian',
+        'Bicycle', 'Three Wheeler', 'Fixed Object', 'Heavy Vehicle', 'Fixed object',
+        'Slipped', 'Car or Van', 'Others', 'Ambulance', 'Train'
+      ],
+      life_style: [
+        'Living alone', 'Living with children', 'Living with care givers'
+      ],
+      collision_force_from: [
+        'Front', 'Behind', 'LeftSide', 'RightSide'
+      ],
+      road_type: [
+        'Straight', 'Junction', 'Bend'
+      ],
+      type_of_injury_no_2: [
+        'abrasion', 'contusion', 'dislocation', 'laceration', 'ligament_injury',
+        'fracture', 'pneumothorax', 'nerve_lesion', 'kidney_injury', 'bowel_injury',
+        'amputation', 'spleen_injury'
+      ]
+    };
+    
+    return options[fieldName] || null;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <DoctorNav setIsAuthenticated={setIsAuthenticated} setRole={setRole} />
@@ -330,12 +449,24 @@ const GetPredictions = ({ setIsAuthenticated, setRole }) => {
           <div>
             <form onSubmit={handleDischargeSubmit} className="bg-white p-6 rounded-xl shadow-md border border-slate-100">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.keys(dischargeForm).map(key => (
-                  <div key={key} className="space-y-1">
-                    <label className="block text-sm font-medium text-slate-700">{key.replace(/_/g, ' ')}</label>
-                    <input name={key} value={dischargeForm[key]} onChange={handleDischargeChange} className="w-full p-2 border border-gray-200 rounded-lg" />
-                  </div>
-                ))}
+                {Object.keys(dischargeForm).map(key => {
+                  const fieldOptions = getDischargeFieldOptions(key);
+                  return (
+                    <div key={key} className="space-y-1">
+                      <label className="block text-sm font-medium text-slate-700">{key.replace(/_/g, ' ')}</label>
+                      {fieldOptions ? (
+                        <select name={key} value={dischargeForm[key]} onChange={handleDischargeChange} className="w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                          <option value="">Select an option</option>
+                          {fieldOptions.map((option, idx) => (
+                            <option key={idx} value={option}>{option}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input name={key} value={dischargeForm[key]} onChange={handleDischargeChange} className="w-full p-2 border border-gray-200 rounded-lg" />
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="mt-4 flex items-center gap-3">
