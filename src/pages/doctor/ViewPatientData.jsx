@@ -658,7 +658,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
       missingValues.push(`Ethnicity (value: "${patient?.["Ehinicity"]}")`);
     }
 
-    // Hospital one-hot
+    // Hospital one-hot - use localStorage hospital data first, then fallback to accident data
     const hospital_options = [
       "BH, Tellipalai(Type A)",
       "BH,Chavakachcheri(TypeB)",
@@ -730,12 +730,13 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
     hospital_options.forEach(opt => {
       data["First Hospital Name_" + opt] = 0;
     });
-    if (accident?.hospital) {
-      data["First Hospital Name_" + accident.hospital] = 1;
+    
+    // Use localStorage hospital data first, then fallback to accident hospital data
+    const hospitalName = localStorage.getItem('hospital_name') || accident?.hospital;
+    if (hospitalName) {
+      data["First Hospital Name_" + hospitalName] = 1;
     } else {
-      missingValues.push(`Hospital (value: "${accident?.hospital}")`);
-      // Default to DGH – Vavuniya if no hospital specified
-      data["First Hospital Name_DGH – Vavuniya"] = 1;
+      missingValues.push(`Hospital (localStorage: "${localStorage.getItem('hospital_name')}", accident: "${accident?.hospital}")`);
     }
 
     // Log missing values for debugging
