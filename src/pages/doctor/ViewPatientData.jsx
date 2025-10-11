@@ -915,103 +915,290 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
           )
         )}
 
-        {/* Accident Summary */}
+        {/* Medical Records Overview */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
               <SkeletonAccidentCard key={i} />
             ))}
           </div>
         ) : (
           filtered && accidents.length > 0 && (
-          <section className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-slate-800">{t('accidentRecords')} <span className="text-sm text-slate-500">({accidents.length})</span></h2>
+          <section className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">{t('accidentRecords')}</h2>
+                  <p className="text-sm text-gray-600">Clinical incident documentation and analysis</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                  {accidents.length} {accidents.length === 1 ? 'Record' : 'Records'}
+                </span>
+              </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {accidents.map((acc, index) => (
-                <article
-                  key={acc.accident_id}
-                  onClick={() => {
-                    setSelectedAccident(acc);
-                    setShowModal(true);
-                  }}
-                  className="group bg-white rounded-xl border border-slate-100 p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="text-sm font-semibold text-slate-800">Accident #{index + 1}</h3>
-                      <p className="text-xs text-slate-500">{acc["incident at date"]} • {acc["time of collision"]}</p>
-                    </div>
-                    {!acc["Completed"] && (
-                      <div className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-xs font-medium bg-amber-100 text-amber-800">
-                        {t('incomplete')}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {accidents.map((acc, index) => {
+                // Calculate dynamic severity styling
+                const severity = acc["Severity"];
+                const isHighSeverity = severity === 'Serious';
+                const isMediumSeverity = severity === 'Medium';
+                const isLowSeverity = severity === 'Light' || severity === 'Minor';
+                
+                const severityColors = {
+                  high: { border: 'border-l-red-500', bg: 'bg-red-50', text: 'text-red-700', badge: 'bg-red-100 text-red-800' },
+                  medium: { border: 'border-l-orange-500', bg: 'bg-orange-50', text: 'text-orange-700', badge: 'bg-orange-100 text-orange-800' },
+                  low: { border: 'border-l-green-500', bg: 'bg-green-50', text: 'text-green-700', badge: 'bg-green-100 text-green-800' },
+                  default: { border: 'border-l-gray-500', bg: 'bg-gray-50', text: 'text-gray-700', badge: 'bg-gray-100 text-gray-800' }
+                };
+                
+                const currentSeverity = isHighSeverity ? severityColors.high : 
+                                      isMediumSeverity ? severityColors.medium : 
+                                      isLowSeverity ? severityColors.low : 
+                                      severityColors.default;
+
+                return (
+                  <article
+                    key={acc.accident_id}
+                    onClick={() => {
+                      setSelectedAccident(acc);
+                      setShowModal(true);
+                    }}
+                    className={`group bg-white border border-gray-200 ${currentSeverity.border} border-l-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden`}
+                  >
+                    {/* Card Header */}
+                    <div className={`${currentSeverity.bg} px-4 py-3 border-b border-gray-100`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">
+                            <span className="text-sm font-bold text-gray-700">#{index + 1}</span>
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-semibold text-gray-900">Medical Incident {index + 1}</h3>
+                            <p className="text-xs text-gray-600">{acc["incident at date"]}</p>
+                          </div>
+                        </div>
                       </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-2 text-slate-700">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-500">{t('timeOfCollision')}</span>
-                      <span className="font-medium text-sm">{acc["time of collision"]}</span>
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-500">{t('completed')}</span>
-                      <span className="font-medium text-sm">{acc["Completed"] ? t('yes') : t('no')}</span>
-                    </div>
-
-                    {!acc["Completed"] && (
-                      <div className="mt-3 space-y-2">
-                        <div className="p-3 bg-gradient-to-r from-sky-50 to-indigo-50 rounded-lg border border-sky-100">
-                          <h4 className="text-xs font-semibold text-sky-700">{t('mlTransferPrediction')}</h4>
-                          {loadingPredictions[acc.accident_id] ? (
-                            <div className="flex items-center gap-2 text-sky-600 mt-2">
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-sky-600"></div>
-                              <span className="text-sm">{t('calculatingPrediction')}</span>
-                            </div>
-                          ) : transferProbabilities[acc.accident_id] ? (
-                            <div className="mt-2">
-                              <div className="text-sm text-slate-600">{t('transferProbability')}: <span className="font-bold text-sky-700">{transferProbabilities[acc.accident_id].probability}</span></div>
-                              <div className="text-sm mt-1">{t('prediction')}: <span className="font-semibold">{translateTransferPrediction(transferProbabilities[acc.accident_id].prediction)}</span></div>
-                            </div>
-                          ) : (
-                            <p className="text-sm text-red-600 mt-2">{t('predictionNotAvailable')}</p>
-                          )}
+                    {/* Card Body */}
+                    <div className="px-4 py-4">
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div className="flex flex-col">
+                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Time</span>
+                            <span className="font-medium text-gray-900 mt-1">{acc["time of collision"]}</span>
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Status</span>
+                            <span className={`font-medium mt-1 ${acc["Completed"] ? 'text-green-600' : 'text-orange-600'}`}>
+                              {acc["Completed"] ? 'Complete' : 'In Progress'}
+                            </span>
+                          </div>
                         </div>
 
-                        <div className="p-3 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-100">
-                          <h4 className="text-xs font-semibold text-emerald-700">{t('dischargeOutcomePrediction') /* intentional key label */}</h4>
-                          {loadingDischargeOutcome[acc.accident_id] ? (
-                            <div className="flex items-center gap-2 text-emerald-600 mt-2">
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-600"></div>
-                              <span className="text-sm">{t('calculatingPrediction')}</span>
+                        {/* Dynamic ML Predictions Section */}
+                        {!acc["Completed"] && (
+                          <div className="mt-4 space-y-3 border-t border-gray-100 pt-4">
+                            <div className="flex items-center space-x-2 mb-3">
+                              <div className="w-5 h-5 bg-blue-600 rounded flex items-center justify-center">
+                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                </svg>
+                              </div>
+                              <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Clinical Decision Support</h4>
                             </div>
-                          ) : dischargeOutcomePredictions[acc.accident_id] ? (
-                            <div className="mt-2 text-sm">
-                              <div className="font-bold text-emerald-700">{dischargeOutcomePredictions[acc.accident_id].prediction}</div>
-                              {dischargeOutcomePredictions[acc.accident_id].probabilities && (
-                                <div className="text-xs text-slate-600 mt-1">
-                                  {Object.entries(dischargeOutcomePredictions[acc.accident_id].probabilities).map(([outcome, prob]) => (
-                                    <div key={outcome} className="flex justify-between">
-                                      <span>{translateOutcome(outcome)}</span>
-                                      <span className="font-semibold">{formatPercent(prob)}</span>
+
+                            {/* Transfer Risk Assessment */}
+                            {loadingPredictions[acc.accident_id] ? (
+                              <div className="flex items-center justify-center p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                                <span className="ml-3 text-sm text-gray-600">Analyzing transfer risk...</span>
+                              </div>
+                            ) : transferProbabilities[acc.accident_id] ? (() => {
+                              const transferData = transferProbabilities[acc.accident_id];
+                              const probabilityPercent = parseFloat(transferData.probability?.replace('%', '') || '0');
+                              const isHighRisk = probabilityPercent >= 70;
+                              const isMediumRisk = probabilityPercent >= 40 && probabilityPercent < 70;
+                              
+                              const riskStyle = {
+                                high: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', accent: 'bg-red-600', indicator: 'bg-red-500' },
+                                medium: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', accent: 'bg-orange-600', indicator: 'bg-orange-500' },
+                                low: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', accent: 'bg-green-600', indicator: 'bg-green-500' }
+                              };
+                              
+                              const currentRisk = isHighRisk ? riskStyle.high : isMediumRisk ? riskStyle.medium : riskStyle.low;
+                              const riskLevel = isHighRisk ? 'HIGH' : isMediumRisk ? 'MODERATE' : 'LOW';
+                              
+                              return (
+                                <div className={`${currentRisk.bg} border ${currentRisk.border} rounded-lg p-3`}>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center space-x-2">
+                                      <div className={`w-3 h-3 ${currentRisk.indicator} rounded-full`}></div>
+                                      <span className="text-xs font-medium text-gray-600">Transfer Risk</span>
                                     </div>
-                                  ))}
+                                    <span className={`text-xs font-bold px-2 py-1 rounded ${currentRisk.text} bg-white`}>
+                                      {riskLevel} RISK
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm font-semibold text-gray-800">{transferData.probability}</span>
+                                    <div className="flex-1 mx-3">
+                                      <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                        <div 
+                                          className={`h-1.5 rounded-full ${currentRisk.indicator} transition-all duration-1000`} 
+                                          style={{ width: `${Math.min(probabilityPercent, 100)}%` }}
+                                        ></div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <p className={`text-xs ${currentRisk.text} font-medium`}>
+                                    {translateTransferPrediction(transferData.prediction)}
+                                  </p>
                                 </div>
-                              )}
-                            </div>
-                          ) : (
-                            <p className="text-sm text-red-600 mt-2">{t('predictionNotAvailable')}</p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                              );
+                            })() : (
+                              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                                  <span className="text-xs text-gray-600">Transfer risk analysis unavailable</span>
+                                </div>
+                              </div>
+                            )}
 
-                  <p className="mt-3 text-xs text-sky-600 group-hover:underline">{t('clickToViewFullDetails')}</p>
-                </article>
-              ))}
+                            {/* Discharge Outcome Prediction */}
+                            {loadingDischargeOutcome[acc.accident_id] ? (
+                              <div className="flex items-center justify-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600"></div>
+                                <span className="ml-3 text-sm text-blue-600">Predicting discharge outcome...</span>
+                              </div>
+                            ) : dischargeOutcomePredictions[acc.accident_id] ? (() => {
+                              const dischargeData = dischargeOutcomePredictions[acc.accident_id];
+                              const prediction = dischargeData.prediction?.toLowerCase() || '';
+                              
+                              const isPositive = prediction.includes('home') || prediction.includes('routine');
+                              const isCritical = prediction.includes('death') || prediction.includes('expired');
+                              const isTransfer = prediction.includes('transfer') || prediction.includes('other');
+                              
+                              const outcomeStyle = {
+                                positive: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', indicator: 'bg-green-500' },
+                                critical: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', indicator: 'bg-red-500' },
+                                transfer: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', indicator: 'bg-blue-500' },
+                                default: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', indicator: 'bg-blue-500' }
+                              };
+                              
+                              const currentOutcome = isCritical ? outcomeStyle.critical : 
+                                                   isPositive ? outcomeStyle.positive : 
+                                                   isTransfer ? outcomeStyle.transfer : 
+                                                   outcomeStyle.default;
+                              
+                              // Get the highest probability percentage for the progress bar
+                              const probabilities = dischargeData.probabilities || {};
+                              const highestProbability = Math.max(...Object.values(probabilities).map(p => Number(p) * 100));
+                              const confidenceLevel = highestProbability >= 80 ? 'HIGH' : highestProbability >= 60 ? 'MODERATE' : 'LOW';
+                              
+                              return (
+                                <div className={`${currentOutcome.bg} border ${currentOutcome.border} rounded-lg p-3`}>
+                                  <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center space-x-2">
+                                      <div className={`w-3 h-3 ${currentOutcome.indicator} rounded-full`}></div>
+                                      <span className="text-xs font-medium text-blue-600">Discharge Outcome</span>
+                                    </div>
+                                    <span className={`text-xs font-bold px-2 py-1 rounded ${currentOutcome.text} bg-white`}>
+                                      {confidenceLevel} CONFIDENCE
+                                    </span>
+                                  </div>
+                                  <p className={`text-xs ${currentOutcome.text} font-medium mb-3`}>
+                                    {dischargeData.prediction}
+                                  </p>
+                                  {dischargeData.probabilities && (
+                                    <div className="space-y-2">
+                                      {Object.entries(dischargeData.probabilities)
+                                        .sort(([,a], [,b]) => b - a)
+                                        .map(([outcome, probability]) => {
+                                          const probabilityPercent = Number(probability) * 100;
+                                          const isHighest = probabilityPercent === highestProbability;
+                                          
+                                          // Dynamic color based on probability and outcome type
+                                          const getProgressColor = () => {
+                                            if (outcome.toLowerCase().includes('recovery') && outcome.toLowerCase().includes('complete')) {
+                                              return 'bg-green-500';
+                                            } else if (outcome.toLowerCase().includes('recovery') && outcome.toLowerCase().includes('partial')) {
+                                              return 'bg-blue-500';
+                                            } else if (outcome.toLowerCase().includes('intervention')) {
+                                              return 'bg-orange-500';
+                                            } else if (probabilityPercent >= 70) {
+                                              return 'bg-red-500';
+                                            } else if (probabilityPercent >= 40) {
+                                              return 'bg-yellow-500';
+                                            } else {
+                                              return 'bg-blue-500';
+                                            }
+                                          };
+                                          
+                                          return (
+                                            <div key={outcome} className={`flex items-center justify-between p-2 rounded-lg transition-all duration-300 ${
+                                              isHighest ? 'bg-white border border-blue-300 shadow-sm' : 'bg-white bg-opacity-60'
+                                            }`}>
+                                              <div className="flex items-center space-x-2 flex-1">
+                                                <span className={`text-xs font-medium ${isHighest ? 'text-blue-900' : 'text-blue-700'} min-w-0 flex-1`}>
+                                                  {translateOutcome(outcome)}
+                                                </span>
+                                                <div className="flex items-center space-x-2">
+                                                  <div className="w-12 bg-blue-200 rounded-full h-1.5 shadow-inner">
+                                                    <div 
+                                                      className={`h-1.5 rounded-full ${getProgressColor()} transition-all duration-1000`}
+                                                      style={{ width: `${Math.min(probabilityPercent, 100)}%` }}
+                                                    ></div>
+                                                  </div>
+                                                  <span className={`text-xs font-bold ${isHighest ? 'text-blue-900' : 'text-blue-700'} min-w-fit`}>
+                                                    {formatPercent(probability)}
+                                                  </span>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })() : (
+                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+                                  <span className="text-xs text-blue-600">Discharge prediction unavailable</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Card Footer */}
+                    <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500">
+                          Record ID: {acc.accident_id?.toString().slice(-6) || 'N/A'}
+                        </span>
+                        <span className="text-xs text-blue-600 font-medium group-hover:text-blue-800 flex items-center">
+                          View Details
+                          <svg className="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </span>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </section>
         ))}
@@ -1028,7 +1215,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg shadow-xl max-w-7xl w-full max-h-[95vh] overflow-hidden border border-gray-200">
               {/* Modal Header */}
-              <div className="bg-gradient-to-r from-blue-900 to-blue-400 px-6 py-4 border-b border-gray-200">
+              <div className="bg-gradient-to-r from-blue-900 to-blue-500 px-6 py-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
