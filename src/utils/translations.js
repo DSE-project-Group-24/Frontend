@@ -117,9 +117,13 @@ const translations = {
     searchPatient: "Search Patient",
     enterPatientIdNicOrName: "Enter Patient ID, NIC, or Full Name",
     searchByIdNicName: "You can search by Patient ID, NIC, or Full Name",
+  // Intro text for the View Patient Data page
+  searchPatientsIntro: "Search patients by Patient ID, NIC or full name and view accident records with ML predictions.",
     pleaseEnterSearchTerm: "Please enter a Patient ID, NIC, or Full Name",
     noPatientFound: "No patient found with that Patient ID, NIC, or Full Name.",
     searching: "Searching...",
+
+  // Intro text for the View Patient Data page (Sinhala/Tamil keys will be placed below in the 'si' and 'ta' sections)
     
     // Accidents
     accidentRecords: "Accident Records",
@@ -898,6 +902,83 @@ const translations = {
     // Tooltip texts
     supportTooltip: "How often a pattern must appear in the data (higher = more common patterns only)",
     confidenceTooltip: "How reliable the pattern prediction must be (higher = more trustworthy patterns)",
+  // Discharge outcome / model UI
+  dischargeOutcomePredictionTitle: "Discharge Outcome Prediction",
+  dischargeOutcomePrediction: "Discharge Outcome Prediction",
+  predictedOutcome: "Predicted Outcome",
+  modelType: "Model Type",
+  outcomeProbabilities: "Outcome Probabilities",
+  dataAvailabilityWarning: "Data availability warning",
+  missingFieldsNote: "Some fields were not available in the current data structure and defaults were used.",
+  
+  // Discharge form field labels
+  currentHospitalName: "Current Hospital Name",
+  typeOfInjuryNo1: "Type of Injury No 1",
+  firstHospitalName: "First Hospital Name",
+  dateOfBirth: "Date of Birth",
+  siteOfInjuryNo1: "Site of Injury No 1",
+  approximateSpeed: "Approximate Speed",
+  incidentDateTime: "Incident Date and Time",
+  modeOfTransportToHospital: "Mode of Transport to Hospital",
+  timeTakenToReachHospital: "Time Taken to Reach Hospital",
+  otherHospitalExpenditure: "Other Hospital Admission Expenditure",
+  siteOfInjuryNo2: "Site of Injury No 2",
+  familyMonthlyIncome: "Family Monthly Income Before Accident",
+  collisionWith: "Collision With",
+  collisionForceFrom: "Collision Force From",
+  roadType: "Road Type",
+  typeOfInjuryNo2: "Type of Injury No 2",
+  
+  // Additional field options
+  student: "Student",
+  unemployed: "Unemployed",
+  grade5: "Grade 5",
+  olOrAl: "O/L or A/L",
+  underGraduate: "Under Graduate",
+  postGraduate: "Post Graduate",
+  lessThan15Minutes: "Less Than 15 Minutes",
+  minutes15To30: "15 Minutes - 30 Minutes",
+  minutes30To1Hour: "30 Minutes - 1 Hour",
+  hour1To2: "1 Hour - 2 Hour",
+  moreThan2Hours: "More Than 2 Hour",
+  threeWheeler: "Three Wheeler",
+  motorBike: "Motor Bike",
+  otherVehicle: "Other Vehicle",
+  lessThan40Kmh: "Less Than 40 km/h",
+  from40To80Kmh: "40 - 80 km/h",
+  from80To100Kmh: "80 - 100 km/h",
+  moreThan100Kmh: "More Than 100 km/h",
+  straight: "Straight",
+  junction: "Junction",
+  bend: "Bend",
+  front: "Front",
+  behind: "Behind",
+  leftSide: "Left Side",
+  rightSide: "Right Side",
+  
+  // Placeholders
+  enterDateOfBirth: "Enter date of birth (YYYY-MM-DD)",
+  enterIncidentDateTime: "Enter incident date and time",
+  
+  // Page descriptions
+  predictionFormsDescription: "Use either panel below to generate ML predictions. Both forms are independent and post to their respective endpoints.",
+  
+  // Section titles
+  hospitalInformation: "Hospital Information",
+  accidentDetails: "Accident Details",
+  medicalInformation: "Medical Information",
+  transportAndTiming: "Transport & Timing",
+  // Missing-field labels (used when preparing model input)
+  "Current Hospital Name": "Current Hospital Name",
+  "Type of injury No 1 (not available in current data structure)": "Type of injury No 1 (not available in current data structure)",
+  "First Hospital Name": "First Hospital Name",
+  "Site of injury No1 (not available in current data structure)": "Site of injury No1 (not available in current data structure)",
+  "Time Taken To Reach Hospital (not available in current data structure)": "Time Taken To Reach Hospital (not available in current data structure)",
+  "Site of injury No 2 (not available in current data structure)": "Site of injury No 2 (not available in current data structure)",
+  "Collision Force From (not available in current data structure)": "Collision Force From (not available in current data structure)",
+  "Type of Injury No 2 (not available in current data structure)": "Type of Injury No 2 (not available in current data structure)",
+  // Model names / outcomes (examples)
+  "CatBoost Classifier": "CatBoost Classifier",
     
     // Alert messages
     selectBothCategoryValue: "Please select both category and value for the specific target.",
@@ -977,6 +1058,8 @@ const translations = {
     pleaseEnterSearchTerm: "කරුණාකර රෝගී හැඳුනුම්පත, ජාතික හැඳුනුම්පත, හෝ සම්පූර්ණ නම ඇතුළත් කරන්න",
     noPatientFound: "එම රෝගී හැඳුනුම්පත, ජාතික හැඳුනුම්පත, හෝ සම්පූර්ණ නම සහිත රෝගියෙකු නොමැත.",
     searching: "සොයමින්...",
+  // Intro text for the View Patient Data page
+  searchPatientsIntro: "රෝගී හැඳුනුම්පත, ජාතික හැඳුනුම්පත හෝ සම්පූර්ණ නම මගින් රෝගීන් සෙවීම සහ අනතුරු වාර්තා ML පුරෝකථන සමඟ බලන්න.",
 
     // Nurse Forms
     patientQuickIntake: "රෝගියා — ඉක්මන් ප්‍රවේශය",
@@ -1098,6 +1181,83 @@ const translations = {
     patient: "රෝගියා",
     close: "වසන්න",
     save: "සුරකින්න",
+  // Discharge outcome / model UI (Sinhala)
+  dischargeOutcomePredictionTitle: "රෝහලෙන් පිටවීමේ ප්‍රතිඵල අනාවැකිය",
+  dischargeOutcomePrediction: "රෝහලෙන් පිටවීමේ ප්‍රතිඵල අනාවැකිය",
+  predictedOutcome: "අනුමානිත ප්‍රතිඵල",
+  modelType: "මොඩලයේ වර්ගය",
+  outcomeProbabilities: "ප්‍රතිඵල ප්‍රවාහිතයන්",
+  
+  // Discharge form field labels (Sinhala)
+  currentHospitalName: "වර්තමාන රෝහල් නාමය",
+  typeOfInjuryNo1: "ආබාධ වර්ගය අංක 1",
+  firstHospitalName: "පළමු රෝහල් නාමය",
+  dateOfBirth: "උපන් දිනය",
+  siteOfInjuryNo1: "ආබාධ ස්ථානය අංක 1",
+  approximateSpeed: "ආසන්න වේගය",
+  incidentDateTime: "සිදුවීමේ දිනය සහ වේලාව",
+  modeOfTransportToHospital: "රෝහලට ප්‍රවාහන ක්‍රමය",
+  timeTakenToReachHospital: "රෝහලට ළඟා වීමට ගත් කාලය",
+  otherHospitalExpenditure: "අනෙකුත් රෝහල් ප්‍රවේශන වියදම්",
+  siteOfInjuryNo2: "ආබාධ ස්ථානය අංක 2",
+  familyMonthlyIncome: "අනතුරට පෙර පවුලේ මාසික ආදායම",
+  collisionWith: "ගැටෙන ලද්දේ",
+  collisionForceFrom: "ගැටීමේ බලය වෙතින්",
+  roadType: "පාර වර්ගය",
+  typeOfInjuryNo2: "ආබාධ වර්ගය අංක 2",
+  
+  // Additional field options (Sinhala)
+  student: "ශිෂ්‍යයා",
+  unemployed: "රැකියා නැති",
+  grade5: "5 ශ්‍රේණිය",
+  olOrAl: "සා.පෙ. හෝ පෙරනිමි පෙළ",
+  underGraduate: "උපාධි අපේක්ෂකයා",
+  postGraduate: "පශ්චාත් උපාධිධාරීන්",
+  lessThan15Minutes: "මිනිත්තු 15 ට වඩා අඩු",
+  minutes15To30: "මිනිත්තු 15 - 30",
+  minutes30To1Hour: "මිනිත්තු 30 - පැය 1",
+  hour1To2: "පැය 1 - 2",
+  moreThan2Hours: "පැය 2 ට වඩා වැඩි",
+  threeWheeler: "ත්‍රිරෝද රථය",
+  motorBike: "යතුරුපැදිය",
+  otherVehicle: "අනෙකුත් වාහනය",
+  lessThan40Kmh: "කිලෝමීටර 40 ට වඩා අඩු",
+  from40To80Kmh: "කිලෝමීටර 40 - 80",
+  from80To100Kmh: "කිලෝමීටර 80 - 100",
+  moreThan100Kmh: "කිලෝමීටර 100 ට වඩා වැඩි",
+  straight: "කෙළින්",
+  junction: "හන්දිය",
+  bend: "වංගුව",
+  front: "ඉදිරිපස",
+  behind: "පිටුපස",
+  leftSide: "වම් පැත්ත",
+  rightSide: "දකුණු පැත්ත",
+  
+  // Placeholders (Sinhala)
+  enterDateOfBirth: "උපන් දිනය ඇතුළත් කරන්න (වර්ෂ-මාස-දින)",
+  enterIncidentDateTime: "සිදුවීමේ දිනය සහ වේලාව ඇතුළත් කරන්න",
+  
+  // Page descriptions (Sinhala)
+  predictionFormsDescription: "ML අනාවැකි ජනනය කිරීම සඳහා පහත පැනලයක් භාවිතා කරන්න. දෙවන ෆෝර්ම් ස්වාධීන වන අතර ඒවායේ අදාළ endpoint වලට post කරයි.",
+  
+  // Section titles (Sinhala)
+  hospitalInformation: "රෝහල් තොරතුරු",
+  accidentDetails: "අනතුරු විස්තර",
+  medicalInformation: "වෛද්‍ය තොරතුරු",
+  transportAndTiming: "ප්‍රවාහනය සහ කාලසටහන",
+  dataAvailabilityWarning: "දත්ත ලබාගැනීම සීමිතයි",
+  missingFieldsNote: "වර්තමාන දත්ත ව්‍යුහයේ ඇති නොමැති ක්ෂේත්‍ර සඳහා පෙරනිමියන් භාවිතා කරන ලදී.",
+  // Missing-field labels (Sinhala)
+  "Current Hospital Name": "වත්මන් රෝහල් නාමය",
+  "Type of injury No 1 (not available in current data structure)": "ආබාධ වර්ගය අංක 1 (වර්තමාන දත්ත ව්‍යුහයේ නොපවතී)",
+  "First Hospital Name": "පලමු රෝහලේ නම",
+  "Site of injury No1 (not available in current data structure)": "ආබාධ ස්ථානය අංක 1 (වර්තමාන දත්ත ව්‍යුහයේ නොපවතී)",
+  "Time Taken To Reach Hospital (not available in current data structure)": "රෝහලට ළඟා වීමට ගත් කාලය (දත්ත ව්‍යුහයේ නොපවතී)",
+  "Site of injury No 2 (not available in current data structure)": "ආබාධ ස්ථානය අංක 2 (වර්තමාන දත්ත ව්‍යුහයේ නොපවතී)",
+  "Collision Force From (not available in current data structure)": "ඝැටීමේ බලය ආරම්භය (දත්ත ව්‍යුහයේ නොපවතී)",
+  "Type of Injury No 2 (not available in current data structure)": "ආබාධ වර්ගය අංක 2 (වර්තමාන දත්ත ව්‍යුහයේ නොපවතී)",
+  // Model names / outcomes (Sinhala examples)
+  "CatBoost Classifier": "CatBoost Classifier",
     saving: "සුරකිමින්…",
     cancel: "අවලංගු කරන්න",
     readOnlyRecord: "මෙම වාර්තාව කියවීමට පමණයි (සම්පූර්ණ කර ඇත හෝ වෙනත් හෙදියෙකු විසින් කළමනාකරණය කරනු ලැබේ).",
@@ -1195,14 +1355,14 @@ const translations = {
     fullDetails: "සම්පූර්ණ විස්තර",
     
     // Predictions
-    mlTransferPrediction: "ML මාරු කිරීමේ පුරෝකථනය",
+    mlTransferPrediction: "රෝහලෙන් මාරු කිරීමේ පුරෝකථනය",
     calculatingPrediction: "පුරෝකථනය ගණනය කරමින්...",
     transferProbability: "මාරු කිරීමේ සම්භාවිතාව",
     prediction: "පුරෝකථනය",
     predictionOutcome: "පුරෝකථන ප්‍රතිඵලය",
     analysis: "විශ්ලේෂණය",
     predictionNotAvailable: "පුරෝකථනය ලබා ගත නොහැක",
-    mlTransferPredictionAnalysis: "ML මාරු කිරීමේ පුරෝකථන විශ්ලේෂණය",
+    mlTransferPredictionAnalysis: "රෝහලෙන් මාරු කිරීමේ පුරෝකථන විශ්ලේෂණය",
     
     // Accident Details
     basicInformation: "මූලික තොරතුරු",
@@ -1938,6 +2098,86 @@ const translations = {
     pleaseEnterSearchTerm: "தயவுசெய்து நோயாளி அடையாள எண், தேசிய அடையாள எண், அல்லது முழுப் பெயரை உள்ளிடவும்",
     noPatientFound: "அந்த நோயாளி அடையாள எண், தேசிய அடையாள எண், அல்லது முழுப் பெயருடன் எந்த நோயாளியும் கிடைக்கவில்லை.",
     searching: "தேடுகிறது...",
+  // Intro text for the View Patient Data page
+  searchPatientsIntro: "நோயாளி ஐடி, தேசிய அடையாள அட்டை அல்லது முழு பெயர் மூலம் நோயாளிகளைத் தேடவும் மற்றும் விபத்து பதிவுகளை ML முன்னறிவிப்புகளுடன் பார்க்கவும்.",
+
+  // Discharge outcome / model UI
+  dischargeOutcomePredictionTitle: "வெளியேற்ற முடிவு முன்னறிவு",
+  dischargeOutcomePrediction: "வெளியேற்ற முடிவு முன்னறிவு",
+  predictedOutcome: "முன்கணிக்கப்பட்ட முடிவு",
+  modelType: "மாதிரி வகை",
+  outcomeProbabilities: "முடிவுகளின் சாத்தியக்கூறுகள்",
+  dataAvailabilityWarning: "தரவு கிடைப்பில் எச்சரிக்கை",
+  missingFieldsNote: "சில புலங்கள் தற்போதைய தரவு அமைப்பில் கிடைக்கவில்லை; முன்னிருப்புகள் பயன்படுத்தப்பட்டன.",
+  
+  // Discharge form field labels (Tamil)
+  currentHospitalName: "தற்போதைய மருத்துவமனை பெயர்",
+  typeOfInjuryNo1: "காயம் வகை எண் 1",
+  firstHospitalName: "முதலாவது மருத்துவமனை பெயர்",
+  dateOfBirth: "பிறந்த தேதி",
+  siteOfInjuryNo1: "காயத்தின் இடம் எண் 1",
+  approximateSpeed: "தோராயமான வேகம்",
+  incidentDateTime: "சம்பவத்தின் தேதி மற்றும் நேரம்",
+  modeOfTransportToHospital: "மருத்துவமனைக்கு செல்லும் போக்குவரத்து முறை",
+  timeTakenToReachHospital: "மருத்துவமனை அடைய எடுத்த நேரம்",
+  otherHospitalExpenditure: "மற்ற மருத்துவமனை சேர்க்கை செலவுகள்",
+  siteOfInjuryNo2: "காயத்தின் இடம் எண் 2",
+  familyMonthlyIncome: "விபத்துக்கு முன் குடும்ப மாதவருமானம்",
+  collisionWith: "மோதிய பொருள்",
+  collisionForceFrom: "மோதல் விசை திசை",
+  roadType: "சாலை வகை",
+  typeOfInjuryNo2: "காயம் வகை எண் 2",
+  
+  // Additional field options (Tamil)
+  student: "மாணவர்",
+  unemployed: "வேலையில்லாத",
+  grade5: "5 ஆம் வகுப்பு",
+  olOrAl: "சா.போ. அல்லது உயர்நிலை",
+  underGraduate: "இளங்கலை மாணவர்",
+  postGraduate: "முதுகலைப் பட்டதாரி",
+  lessThan15Minutes: "15 நிமிடங்களுக்கும் குறைவாக",
+  minutes15To30: "15 - 30 நிமிடங்கள்",
+  minutes30To1Hour: "30 நிமிடங்கள் - 1 மணி நேரம்",
+  hour1To2: "1 - 2 மணி நேரம்",
+  moreThan2Hours: "2 மணி நேரத்திற்கும் மேல்",
+  threeWheeler: "மூன்று சக்கர வாகனம்",
+  motorBike: "மோட்டார் சைக்கிள்",
+  otherVehicle: "மற்ற வாகனங்கள்",
+  lessThan40Kmh: "40 கிமீ/மணிக்கும் குறைவாக",
+  from40To80Kmh: "40 - 80 கிமீ/மணி",
+  from80To100Kmh: "80 - 100 கிமீ/மணி",
+  moreThan100Kmh: "100 கிமீ/மணிக்கும் மேல்",
+  straight: "நேராக",
+  junction: "சந்திப்பு",
+  bend: "வளைவு",
+  front: "முன்பக்கம்",
+  behind: "பின்பக்கம்",
+  leftSide: "இடது பக்கம்",
+  rightSide: "வலது பக்கம்",
+  
+  // Placeholders (Tamil)
+  enterDateOfBirth: "பிறந்த தேதியை உள்ளிடவும் (ஆண்டு-மாதம்-தேதி)",
+  enterIncidentDateTime: "சம்பவத்தின் தேதி மற்றும் நேரத்தை உள்ளிடவும்",
+  
+  // Page descriptions (Tamil)
+  predictionFormsDescription: "ML முன்னறிவிப்புகளை உருவாக்க கீழே உள்ள பேனல்களில் ஒன்றைப் பயன்படுத்தவும். இரண்டு படிவங்களும் சுயாதீனமானவை மற்றும் அந்தந்த endpoints க்கு அனுப்பப்படுகின்றன.",
+  
+  // Section titles (Tamil)
+  hospitalInformation: "மருத்துவமனை தகவல்கள்",
+  accidentDetails: "விபத்து விவரங்கள்",
+  medicalInformation: "மருத்துவ தகவல்கள்",
+  transportAndTiming: "போக்குவரத்து மற்றும் நேரம்",
+  // Missing-field labels
+  "Current Hospital Name": "தற்போதைய மருத்துவமனை பெயர்",
+  "Type of injury No 1 (not available in current data structure)": "காயம் வகை №1 (தற்போதைய தரவு அமைப்பில் இல்லை)",
+  "First Hospital Name": "முதலாவது மருத்துவமனை பெயர்",
+  "Site of injury No1 (not available in current data structure)": "காயத்தின் இடம் №1 (தற்போதைய தரவு அமைப்பில் இல்லை)",
+  "Time Taken To Reach Hospital (not available in current data structure)": "மருத்துவமனை சென்றடைய எடுத்த நேரம் (தற்போதைய தரவு அமைப்பில் இல்லை)",
+  "Site of injury No 2 (not available in current data structure)": "காயத்தின் இடம் №2 (தற்போதைய தரவு அமைப்பில் இல்லை)",
+  "Collision Force From (not available in current data structure)": "மோதல் சக்தி வரும் திசை (தற்போதைய தரவு அமைப்பில் இல்லை)",
+  "Type of Injury No 2 (not available in current data structure)": "காயம் வகை №2 (தற்போதைய தரவு அமைப்பில் இல்லை)",
+  // Model name
+  "CatBoost Classifier": "CatBoost வகைப்பாடு",
 
     // Nurse Forms
     patientQuickIntake: "நோயாளி — விரைவு அனுமதி",
