@@ -504,16 +504,36 @@ const AccidentRecordSystem = () => {
     illicit_drugs: [t('yes'), t('no'), t('unknown')],
     first_aid_given: [t('yes'), t('no'), t('unknown')],
     vehicle_insured: [t('yes'), t('unknown'), t('no')],
-    // Vehicle types
+    helmet_worn: [t('yes'), t('no'), t('notNecessary'), t('unknown')],
+    // Vehicle types and collision details
     mode_of_traveling: [
       t('motorbike'),
       t('bicycle'), 
       t('threeWheeler'),
       t('carVan'),
-      "Heavy Vehicle", // Keep as-is if no translation key
+      t('heavyVehicle'),
+      t('pedestrian'),
+      t('others'),
+      t('unknown'),
+    ],
+    collision_with: [
+      t('heavyVehicle'),
+      t('motorbike'),
+      t('fallFromVehicle'),
+      t('animal'),
+      t('threeWheeler'),
+      t('others'),
+      t('carVan'),
+      t('bicycle'),
       t('pedestrian'),
       t('unknown'),
     ],
+    collision_force_from: [t('front'), t('rightSide'), t('leftSide'), t('behind'), t('unknown')],
+    // Visibility and road conditions
+    visibility: [t('adequate'), t('poor'), t('unknown')],
+    road_condition: [t('poor'), t('good'), t('unknown')],
+    road_type: [t('junction'), t('unknown'), t('bend'), t('straight')],
+    category_of_road: [t('sideRoad'), t('unknown'), t('highway'), t('pathOrField')],
     // Family status options
     family_status: [
       t('severelyAffected'),
@@ -521,6 +541,39 @@ const AccidentRecordSystem = () => {
       t('unknown'),
       t('mildlyAffected'),
       t('notAffected'),
+    ],
+    // Speed ranges (partial translation available)
+    approximate_speed: [
+      t('lessThan40'),
+      t('unknown'),
+      t('from40To80'),
+      "More Than 80 km/h", // No translation available
+    ],
+    // Passenger types (partial translation available)
+    passenger_type: [
+      "Driver", // No translation available
+      t('unknown'),
+      t('pillionRider'),
+      "PassengerFallingOfVehicle", // No translation available
+      "N/A", // No translation available
+      "FrontSeatPassenger", // No translation available
+      "RearSeatPassenger", // No translation available
+    ],
+    // Transport to hospital (partial translation available)
+    mode_of_transport: [
+      t('threeWheeler'),
+      t('motorBike'),
+      t('unknown'),
+      "Ambulance", // No translation available
+      t('otherVehicle'),
+    ],
+    // Bystander expenditure (partial translation available)
+    bystander_expenditure: [
+      t('expenditure500to1000'),
+      "Less Than 500", // No translation available
+      t('notNecessary'),
+      t('moreThan1000'),
+      t('unknown'),
     ],
   }), []);
 
@@ -1076,7 +1129,7 @@ const AccidentRecordSystem = () => {
                             name="collision_force_from"
                             value={model.collision_force_from}
                             onChange={updateModel}
-                            options={OPTIONS.collision_force_from}
+                            options={translatedOptions.collision_force_from}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))
@@ -1089,7 +1142,7 @@ const AccidentRecordSystem = () => {
                             name="collision_with"
                             value={model.collision_with}
                             onChange={updateModel}
-                            options={OPTIONS.collision_with}
+                            options={translatedOptions.collision_with}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))
@@ -1115,7 +1168,7 @@ const AccidentRecordSystem = () => {
                             name="approximate_speed"
                             value={model.approximate_speed}
                             onChange={updateModel}
-                            options={OPTIONS.approximate_speed}
+                            options={translatedOptions.approximate_speed}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))
@@ -1128,7 +1181,7 @@ const AccidentRecordSystem = () => {
                             name="passenger_type"
                             value={model.passenger_type}
                             onChange={updateModel}
-                            options={OPTIONS.passenger_type}
+                            options={translatedOptions.passenger_type}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))
@@ -1152,7 +1205,7 @@ const AccidentRecordSystem = () => {
                             name="road_condition"
                             value={model.road_condition}
                             onChange={updateModel}
-                            options={OPTIONS.road_condition}
+                            options={translatedOptions.road_condition}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))
@@ -1165,7 +1218,7 @@ const AccidentRecordSystem = () => {
                             name="road_type"
                             value={model.road_type}
                             onChange={updateModel}
-                            options={OPTIONS.road_type}
+                            options={translatedOptions.road_type}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))
@@ -1178,7 +1231,7 @@ const AccidentRecordSystem = () => {
                             name="category_of_road"
                             value={model.category_of_road}
                             onChange={updateModel}
-                            options={OPTIONS.category_of_road}
+                            options={translatedOptions.category_of_road}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))
@@ -1205,7 +1258,7 @@ const AccidentRecordSystem = () => {
                             name="visibility"
                             value={model.visibility}
                             onChange={updateModel}
-                            options={OPTIONS.visibility}
+                            options={translatedOptions.visibility}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))
@@ -1270,7 +1323,7 @@ const AccidentRecordSystem = () => {
                             name="helmet_worn"
                             value={model.helmet_worn}
                             onChange={updateModel}
-                            options={OPTIONS.helmet_worn}
+                            options={translatedOptions.helmet_worn}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))
@@ -1307,7 +1360,7 @@ const AccidentRecordSystem = () => {
                             name="mode_of_transport"
                             value={model.mode_of_transport}
                             onChange={updateModel}
-                            options={OPTIONS.mode_of_transport}
+                            options={translatedOptions.mode_of_transport}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))
@@ -1357,7 +1410,7 @@ const AccidentRecordSystem = () => {
                             name="bystander_expenditure"
                             value={model.bystander_expenditure}
                             onChange={updateModel}
-                            options={OPTIONS.bystander_expenditure}
+                            options={translatedOptions.bystander_expenditure}
                             disabled={
                               mode === "view" ||
                               (mode === "edit" && !canEdit(current))

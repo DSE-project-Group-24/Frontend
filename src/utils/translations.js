@@ -984,7 +984,7 @@ const translations = {
     hospitalLabel: "රෝහල:",
 
     // Nurse Dashboard
-    nurseDashboard: "නර්ස් උපකරණ පුවරුව",
+    nurseDashboard: "හෙද උපකරණ පුවරුව",
     patientManagement: "රෝගී කළමනාකරණය",
     quickActions: "ඉක්මන් ක්‍රියාමාර්ග",
     recentPatients: "මෑත රෝගීන්",
