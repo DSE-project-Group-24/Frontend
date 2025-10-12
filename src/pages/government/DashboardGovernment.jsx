@@ -19,7 +19,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Phone, Building2, Filter, X, Hospital, Activity, Users, TrendingUp } from 'lucide-react';
 import GovernmentNav from '../../navbars/GovernmentNav';
 import HospitalsMap from '../../components/HospitalsMap';
-import AccidentEDA_Gov from '../../components/AccidentEDA_Gov';
+
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
