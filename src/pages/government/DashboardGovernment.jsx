@@ -20,8 +20,7 @@ import { Search, MapPin, Phone, Building2, Filter, X, Hospital, Activity, Users,
 import GovernmentNav from '../../navbars/GovernmentNav';
 import Footer from '../../components/Footer';
 import HospitalsMap from '../../components/HospitalsMap';
-import AccidentEDA_Gov from '../../components/AccidentEDA_Gov';
-import { t } from '../../utils/translations';
+
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
