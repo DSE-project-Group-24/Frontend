@@ -982,7 +982,37 @@ const translations = {
     
     // Alert messages
     selectBothCategoryValue: "Please select both category and value for the specific target.",
-    analysisFailed: "Analysis failed. Please try again."
+    analysisFailed: "Analysis failed. Please try again.",
+    ComprehensiveAccidentAnalysis:"Comprehensive Accident Analysis",
+    temporalAnalytics:"Temporal Analytics",
+     loading: "Loading...",
+    noData: "No Data Available",
+    analyze: "Analyze",
+    totalAccidents: "Total Accidents",
+    severityFilter: "Severity Filter",
+    categories: "Categories",
+    allSeverities: "All Severities",
+    severe: "Severe (S)",
+    moderate: "Moderate (M)",
+    startDate: "Start Date",
+    endDate: "End Date",
+    exportData: "Export Data",
+    viewDetails: "View All Details",
+    totalCases: "Total Cases",
+    noDataCategory: "No data available for this category.",
+    errorFetch: "Failed to fetch data. Please try again.",
+    selectParameters: 'Select your analysis parameters and click "Analyze" to view comprehensive accident statistics',
+
+    failedFetchData: "Failed to fetch data. Please try again.",
+    noDataAvailableCategory: "No data available for this category.",
+    total: "total",
+    viewAllDetails: "View All Details",
+    totalCases: "Total Cases",
+    close: "Close",
+    comprehensiveAccidentAnalysis: "Comprehensive Accident Analysis",
+    accidentAnalysisDescription: "Analyze road accident patterns across North Province with temporal and severity filters"
+
+  
   },
   
   si: {
@@ -2022,7 +2052,26 @@ const translations = {
     
     // Alert messages
     selectBothCategoryValue: "කරුණාකර විශේෂිත ඉලක්කය සඳහා කාණ්ඩය සහ අගය යන දෙකම තෝරන්න.",
-    analysisFailed: "විශ්ලේෂණය අසාර්ථක විය. කරුණාකර නැවත උත්සාහ කරන්න."
+    analysisFailed: "විශ්ලේෂණය අසාර්ථක විය. කරුණාකර නැවත උත්සාහ කරන්න.",
+    ComprehensiveAccidentAnalysis:"සම්පූර්ණ අනතුරු විශ්ලේෂණය",
+    temporalAnalytics:"කාලානුක්‍රම විශ්ලේෂණය.",
+        loading: "පූරණය කරමින්...",
+    noData: "දත්ත නොමැත",
+    analyze: "විශ්ලේෂණය කරන්න",
+    totalAccidents: "මුළු අනතුරු",
+    severityFilter: "ගැටලු තත්ත්වය",
+    categories: "කාර්ග",
+    allSeverities: "සියලු තත්ත්වයන්",
+    severe: "ඉතා ගැටලු (S)",
+    moderate: "මධ්‍යම ගැටලු (M)",
+    startDate: "ආරම්භක දිනය",
+    endDate: "අවසන් දිනය",
+    exportData: "දත්ත අපනයනය කරන්න",
+    viewDetails: "සියලු විස්තර බලන්න",
+    totalCases: "මුළු නඩු",
+    noDataCategory: "මෙම කාණ්ඩයට දත්ත නොමැත.",
+    errorFetch: "දත්ත ලබා ගැනීමට අසමත් විය. කරුණාකර නැවත උත්සාහ කරන්න.",
+    selectParameters: 'ඔබේ විශ්ලේෂණ පරාමිතීන් තෝරන්න සහ "විශ්ලේෂණය කරන්න" ක්ලික් කරන්න'
   },
   
   ta: {
@@ -2938,7 +2987,35 @@ const translations = {
     
     // Alert messages
     selectBothCategoryValue: "குறிப்பிட்ட இலக்கிற்கு வகை மற்றும் மதிப்பு இரண்டையும் தேர்ந்தெடுக்கவும்.",
-    analysisFailed: "பகுப்பாய்வு தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்."
+    analysisFailed: "பகுப்பாய்வு தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்.",
+
+    //Updates
+    
+    temporalAnalytics:"காலத்திற்கான பகுப்பாய்வு",
+  
+    ComprehensiveAccidentAnalysis:"கூர்மையான விபத்து பகுப்பாய்வு",
+
+     loading: "ஏற்றுகிறது...",
+    noData: "தரவு கிடைக்கவில்லை",
+    analyze: "விசாரணை செய்",
+    totalAccidents: "மொத்த விபத்துகள்",
+    severityFilter: "தீவிரத்தன்மை நிலை",
+    categories: "வகைகள்",
+    allSeverities: "அனைத்து தீவிரங்கள்",
+    severe: "கடுமையான (S)",
+    moderate: "நடுத்தர (M)",
+    startDate: "தொடக்க தேதி",
+    endDate: "முடிவு தேதி",
+    exportData: "தரவை ஏற்றுமதி செய்",
+    viewDetails: "அனைத்து விவரங்களையும் காண்க",
+    totalCases: "மொத்த வழக்குகள்",
+    noDataCategory: "இந்த வகைக்கான தரவு கிடைக்கவில்லை.",
+    errorFetch: "தரவை பெற முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
+    selectParameters: 'உங்கள் விசாரணை அளவுருக்களைத் தேர்ந்தெடுத்து "விசாரணை செய்" கிளிக் செய்யவும்'
+    
+
+
+    
   }
 };
 
