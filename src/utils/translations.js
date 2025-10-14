@@ -309,6 +309,7 @@ const translations = {
     
     // Predictions
     mlTransferPrediction: "Hospital Transfer Prediction",
+  transferProbabilityPrediction: "Transfer Probability Prediction",
     mlTransferPredictionAnalysis: "Hospital Transfer Prediction Analysis",
     calculatingPrediction: "Calculating prediction...",
     transferProbability: "Transfer Probability",
@@ -1376,6 +1377,7 @@ const translations = {
     
     // Predictions
     mlTransferPrediction: "රෝහලෙන් මාරු කිරීමේ පුරෝකථනය",
+  transferProbabilityPrediction: "හුවමාරු ප්‍රාබලතාව අනාවැකි",
     calculatingPrediction: "පුරෝකථනය ගණනය කරමින්...",
     transferProbability: "මාරු කිරීමේ සම්භාවිතාව",
     prediction: "පුරෝකථනය",
@@ -2127,8 +2129,8 @@ const translations = {
   searchPatientsIntro: "நோயாளி ஐடி, தேசிய அடையாள அட்டை அல்லது முழு பெயர் மூலம் நோயாளிகளைத் தேடவும் மற்றும் விபத்து பதிவுகளை ML முன்னறிவிப்புகளுடன் பார்க்கவும்.",
 
   // Discharge outcome / model UI
-  dischargeOutcomePredictionTitle: "வெளியேற்ற முடிவு முன்னறிவு",
-  dischargeOutcomePrediction: "வெளியேற்ற முடிவு முன்னறிவு",
+  dischargeOutcomePredictionTitle: "வெளியேற்ற முடிவு முன்னறிவிப்பு",
+  dischargeOutcomePrediction: "வெளியேற்ற முடிவு முன்னறிவிப்பு",
   predictedOutcome: "முன்கணிக்கப்பட்ட முடிவு",
   modelType: "மாதிரி வகை",
   outcomeProbabilities: "முடிவுகளின் சாத்தியக்கூறுகள்",
@@ -2506,7 +2508,7 @@ const translations = {
     years: "வருடங்கள்",
     
     // Footer translations
-    emergencyCareExcellence: "அவசர சிகிச்சை சிறப்பு",
+    emergencyCareExcellence: "சிறந்த அவசர சிகிச்சை",
     comprehensiveEmergencyManagement: "மேம்பட்ட விபத்து பதிலளிப்பு மற்றும் நோயாளி பராமரிப்பு ஒருங்கிணைப்புக்காக மருத்துவமனைகள், அரசு நிறுவனங்கள் மற்றும் மருத்துவ வல்லுநர்களை இணைக்கும் விரிவான அவசர மேலாண்மை தளம்.",
     emergencyHotline: "அவசர ஹாட்லைன்",
     systemStatus: "கணினி நிலை",
@@ -2514,7 +2516,7 @@ const translations = {
     allRightsReserved: "அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை",
     licensedHealthcarePlatform: "உரிமம் பெற்ற சுகாதார மேலாண்மை தளம் - HIPAA கீழ் நோயாளி தரவு பாதுகாக்கப்படுகிறது",
     builtBy: "உருவாக்கியது",
-    groupDataScienceEngineering: "குழு 24 - தரவு அறிவியல் பொறியியல்",
+    groupDataScienceEngineering: "குழு 24 - தரவு அறிவியல் பொறியியல் - மோரட்டுவா",
     
     // Chart titles
     medicalOutcomesDistribution: "மருத்துவ முடிவுகள் விநியோகம்",
@@ -2557,6 +2559,7 @@ const translations = {
     
     // Predictions
     mlTransferPrediction: "ML இடமாற்ற முன்கணிப்பு",
+  transferProbabilityPrediction: "பரிமாற்ற சாத்தியத் தீர்வு",
     mlTransferPredictionAnalysis: "ML இடமாற்ற முன்கணிப்பு பகுப்பாய்வு",
     calculatingPrediction: "முன்கணிப்பு கணக்கிடப்படுகிறது...",
     transferProbability: "இடமாற்ற நிகழ்தகவு",

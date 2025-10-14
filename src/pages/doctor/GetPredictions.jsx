@@ -540,7 +540,7 @@ const GetPredictions = ({ setIsAuthenticated, setRole }) => {
 
         {/* Tabs */}
         <div className="mb-6 flex items-center justify-center gap-3">
-          <button onClick={() => setActiveTab('transfer')} className={`px-4 py-2 rounded-lg ${activeTab==='transfer' ? 'bg-white shadow-lg' : 'bg-white/60'}`}>{t('getPredictionAnalysis')}</button>
+          <button onClick={() => setActiveTab('transfer')} className={`px-4 py-2 rounded-lg ${activeTab==='transfer' ? 'bg-white shadow-lg' : 'bg-white/60'}`}>{t('transferProbabilityPrediction')}</button>
           <button onClick={() => setActiveTab('discharge')} className={`px-4 py-2 rounded-lg ${activeTab==='discharge' ? 'bg-white shadow-lg' : 'bg-white/60'}`}>{t('dischargeOutcomePrediction')}</button>
         </div>
 

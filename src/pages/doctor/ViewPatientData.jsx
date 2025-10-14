@@ -1477,7 +1477,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {/* Transfer Probability Analysis */}
                         {transferProbabilities[selectedAccident.accident_id] && (() => {
                           const transferData = transferProbabilities[selectedAccident.accident_id];
