@@ -1248,10 +1248,10 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                                 <div className="mt-3 bg-indigo-50 border border-indigo-200 rounded-lg p-3">
                                   <div className="flex items-center justify-between mb-2">
                                     <div className="flex items-center space-x-2">
-                                      <div className="w-3 h-3 bg-indigo-500 rounded-full"></div>
-                                      <span className="text-xs font-medium text-indigo-700">Hospital Stay Prediction</span>
-                                    </div>
-                                    <span className="text-xs font-semibold text-indigo-800 bg-white px-2 py-1 rounded">{formatHospitalStayPrediction(top)}</span>
+                                        <div className="w-3 h-3 bg-indigo-500 rounded-full"></div>
+                                        <span className="text-xs font-medium text-indigo-700">{t('hospitalStayTitleCompact')}</span>
+                                      </div>
+                                      <span className="text-xs font-semibold text-indigo-800 bg-white px-2 py-1 rounded">{formatHospitalStayPrediction(top)}</span>
                                   </div>
                                   {Object.keys(probs).length > 0 ? (
                                     <div className="space-y-2">
@@ -1263,16 +1263,16 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                                       ))}
                                     </div>
                                   ) : (
-                                    <div className="text-xs text-indigo-600">No probability distribution returned</div>
+                                      <div className="text-xs text-indigo-600">{t('noHospitalStayProbabilitiesCompact')}</div>
                                   )}
 
                                   {hs.missingValues && hs.missingValues.length > 0 && (
                                     <div className="mt-3 p-2 bg-orange-50 border border-orange-200 rounded">
-                                      <div className="text-xs text-orange-800 font-medium">Data Quality: missing or defaulted fields</div>
+                                        <div className="text-xs text-orange-800 font-medium">{t('missingDefaultedFieldsCompact')}</div>
                                       <div className="flex flex-wrap gap-1 mt-2">
-                                        {hs.missingValues.slice(0,5).map((m,i) => (
-                                          <span key={i} className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">{m}</span>
-                                        ))}
+                                          {hs.missingValues.slice(0,5).map((m,i) => (
+                                            <span key={i} className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">{t(m) || m}</span>
+                                          ))}
                                         {hs.missingValues.length > 5 && <span className="text-xs text-orange-700">+{hs.missingValues.length - 5} more</span>}
                                       </div>
                                     </div>

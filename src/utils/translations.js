@@ -343,11 +343,15 @@ const translations = {
   viewDetails: "View Details",
   aiPredictionsForTreatment: "AI-powered predictions for treatment planning",
   // Hospital stay prediction panel
-  hospitalStayTitle: "Hospital Stay Prediction",
-  hospitalStaySubtitle: "Estimated length of stay and probabilities",
-  predictedStay: "Predicted Stay",
-  noHospitalStayProbabilities: "No probabilities returned by the model.",
-  missingDefaultedFields: "Missing / Defaulted Fields",
+  hospitalStayTitle: "හෝස්පිටල් නවාතැන් සමීකරණය",
+  hospitalStaySubtitle: "නවාතැන් කාලය සහ සම්භාවිතා",
+  predictedStay: "අනුමානිත නවාතැන්",
+  noHospitalStayProbabilities: "මාදිලිගෙන් ප්‍රබලතා ලබා නොදී ඇත.",
+  missingDefaultedFields: "නැති/මුදලදී පරීක්ෂාවන්",
+  // compact / card versions
+  hospitalStayTitleCompact: "හෝස්පිටල් නවාතැන්",
+  noHospitalStayProbabilitiesCompact: "ප්‍රබලතා බෙදාහැරීම නොමැත",
+  missingDefaultedFieldsCompact: "දත්ත ගුණාත්මකභාවය: නැති හෝ පූරණ කළ ක්ෂේත්‍ර",
     
     // Modal/General UI
     basicInformation: "Basic Information",
@@ -2220,6 +2224,16 @@ const translations = {
   positiveOutcome: "ந positrive முடிவு",
   transferRequired: "நிலையாற்றல் தேவை",
   standardCare: "மாநில சிகிச்சை",
+  // Hospital stay prediction panel
+  hospitalStayTitle: "மருத்துவமனை தங்கும் காலம் முன்னறிவிப்பு",
+  hospitalStaySubtitle: "தங்கும் காலம் மற்றும் சாத்தியக்கூறுகள்",
+  predictedStay: "முன்கணிக்கப்பட்ட தங்கல்",
+  noHospitalStayProbabilities: "மாடலால் எந்த சாத்தியக்கூறுகளும் மீட்டெடுக்கப்படவில்லை",
+  missingDefaultedFields: "தர தரநிலை: இல்லை அல்லது இயல்பாக நிரலிடப்பட்ட புலங்கள்",
+  // compact / card versions
+  hospitalStayTitleCompact: "மருத்துவமனை தங்கல்",
+  noHospitalStayProbabilitiesCompact: "சாத்தியக்கூறு பகிர்வு கிடைக்கவில்லை",
+  missingDefaultedFieldsCompact: "தரத் தகுதி: இல்லை அல்லது இயல்பாக்கப்பட்ட புலங்கள்",
   
   // Discharge form field labels (Tamil)
   currentHospitalName: "தற்போதைய மருத்துவமனை பெயர்",
