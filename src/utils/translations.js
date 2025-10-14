@@ -342,6 +342,12 @@ const translations = {
   recordIdShort: "Record ID: {id}",
   viewDetails: "View Details",
   aiPredictionsForTreatment: "AI-powered predictions for treatment planning",
+  // Hospital stay prediction panel
+  hospitalStayTitle: "Hospital Stay Prediction",
+  hospitalStaySubtitle: "Estimated length of stay and probabilities",
+  predictedStay: "Predicted Stay",
+  noHospitalStayProbabilities: "No probabilities returned by the model.",
+  missingDefaultedFields: "Missing / Defaulted Fields",
     
     // Modal/General UI
     basicInformation: "Basic Information",

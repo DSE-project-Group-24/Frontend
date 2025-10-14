@@ -1721,14 +1721,14 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                                   <svg className="w-4 h-4 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v4a1 1 0 001 1h3m10 0h3a1 1 0 001-1V7M3 7a2 2 0 012-2h14a2 2 0 012 2M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7" /></svg>
                                 </div>
                                 <div>
-                                  <h4 className="font-semibold text-gray-900">Hospital Stay Prediction</h4>
-                                  <p className="text-xs text-indigo-600">Estimated length of stay and probabilities</p>
+                                  <h4 className="font-semibold text-gray-900">{t('hospitalStayTitle')}</h4>
+                                  <p className="text-xs text-indigo-600">{t('hospitalStaySubtitle')}</p>
                                 </div>
                               </div>
 
                               <div className="space-y-3">
                                 <div className="flex justify-between items-center p-3 bg-indigo-50 rounded-lg border border-indigo-100">
-                                  <span className="text-sm font-medium text-gray-700">Predicted Stay</span>
+                                  <span className="text-sm font-medium text-gray-700">{t('predictedStay')}</span>
                                   <span className="text-sm font-bold text-indigo-800">{formatHospitalStayPrediction(top)}</span>
                                 </div>
 
@@ -1742,15 +1742,15 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                                     ))}
                                   </div>
                                 ) : (
-                                  <div className="text-sm text-gray-600">No probabilities returned by the model.</div>
+                                  <div className="text-sm text-gray-600">{t('noHospitalStayProbabilities')}</div>
                                 )}
 
                                 {hs.missingValues && hs.missingValues.length > 0 && (
                                   <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded">
-                                    <div className="text-sm font-medium text-orange-800">Missing / Defaulted Fields</div>
+                                    <div className="text-sm font-medium text-orange-800">{t('missingDefaultedFields')}</div>
                                     <div className="mt-2 flex flex-wrap gap-1">
                                       {hs.missingValues.map((m,i) => (
-                                        <span key={i} className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">{m}</span>
+                                        <span key={i} className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">{t(m) || m}</span>
                                       ))}
                                     </div>
                                   </div>
