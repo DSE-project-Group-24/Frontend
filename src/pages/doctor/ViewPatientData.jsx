@@ -1094,7 +1094,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-gray-900">{t('accidentRecords')}</h2>
-                  <p className="text-sm text-gray-600">Clinical incident documentation and analysis</p>
+                  <p className="text-sm text-gray-600">{t('clinicalIncidentIntro')}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
@@ -1151,14 +1151,14 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                     <div className="px-4 py-4">
                       <div className="space-y-3">
                         <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div className="flex flex-col">
-                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Time</span>
+                            <div className="flex flex-col">
+                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t('time')}</span>
                             <span className="font-medium text-gray-900 mt-1">{acc["time of collision"]}</span>
                           </div>
                           <div className="flex flex-col">
-                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Status</span>
+                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t('status')}</span>
                             <span className={`font-medium mt-1 ${acc["Completed"] ? 'text-green-600' : 'text-orange-600'}`}>
-                              {acc["Completed"] ? 'Complete' : 'In Progress'}
+                              {acc["Completed"] ? t('complete') : t('inProgress')}
                             </span>
                           </div>
                         </div>
@@ -1172,7 +1172,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                                 </svg>
                               </div>
-                              <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Clinical Decision Support</h4>
+                              <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{t('clinicalDecisionSupport')}</h4>
                             </div>
 
                             {/* Transfer Risk Assessment */}
@@ -1199,12 +1199,12 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                               return (
                                 <div className={`${currentRisk.bg} border ${currentRisk.border} rounded-lg p-3`}>
                                   <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center space-x-2">
+                                      <div className="flex items-center space-x-2">
                                       <div className={`w-3 h-3 ${currentRisk.indicator} rounded-full`}></div>
-                                      <span className="text-xs font-medium text-gray-600">Transfer Risk</span>
+                                      <span className="text-xs font-medium text-gray-600">{t('transferRisk')}</span>
                                     </div>
                                     <span className={`text-xs font-bold px-2 py-1 rounded ${currentRisk.text} bg-white`}>
-                                      {riskLevel} RISK
+                                      {isHighRisk ? t('highRisk') : isMediumRisk ? t('moderateRisk') : t('lowRisk')}
                                     </span>
                                   </div>
                                   <div className="flex items-center justify-between mb-2">
@@ -1439,9 +1439,9 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                     </div>
                     <div>
                       <h2 className="text-xl font-semibold text-white">
-                        Medical Record - Incident #{accidents.findIndex(acc => acc.accident_id === selectedAccident.accident_id) + 1}
+                        {t('medicalRecordIncident')} #{accidents.findIndex(acc => acc.accident_id === selectedAccident.accident_id) + 1}
                       </h2>
-                      <p className="text-blue-100 text-sm">Detailed Accident Information</p>
+                      <p className="text-blue-100 text-sm">{t('detailedAccidentInfo')}</p>
                     </div>
                   </div>
                   <button
@@ -1651,18 +1651,18 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                                   </svg>
                                 </div>
                                 <div>
-                                  <h4 className="font-semibold text-gray-900">Discharge Outcome Prediction</h4>
+                                              <h4 className="font-semibold text-gray-900">{t('dischargeOutcomePredictionTitle')}</h4>
                                   <p className={`text-xs font-medium ${currentOutcome.iconText}`}>
-                                    {isCriticalOutcome ? 'CRITICAL OUTCOME' : 
-                                     isPositiveOutcome ? 'POSITIVE OUTCOME' : 
-                                     isTransferOutcome ? 'TRANSFER REQUIRED' : 
-                                     'STANDARD CARE'}
+                                    {isCriticalOutcome ? t('criticalOutcome') : 
+                                     isPositiveOutcome ? t('positiveOutcome') : 
+                                     isTransferOutcome ? t('transferRequired') : 
+                                     t('standardCare')}
                                   </p>
                                 </div>
                               </div>
                               <div className="space-y-3">
                                 <div className={`flex justify-between items-center p-3 ${currentOutcome.accent} rounded-lg border shadow-sm`}>
-                                  <span className="text-sm font-medium text-gray-700">Predicted Outcome</span>
+                                  <span className="text-sm font-medium text-gray-700">{t('predictedOutcome')}</span>
                                   <span className={`text-sm font-bold px-3 py-1 rounded-full bg-white shadow-sm ${currentOutcome.prediction}`}>
                                     {dischargeData.prediction}
                                   </span>
