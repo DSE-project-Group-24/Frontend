@@ -986,7 +986,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                       onClick={() => handleCopy(filtered["patient_id"])} 
                       className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                     >
-                      Copy ID
+                      {t('copyId')}
                     </button>
                     {copySuccess && <span className="text-xs text-green-600 font-medium">{copySuccess}</span>}
                   </div>
@@ -999,7 +999,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                   {/* Demographics */}
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-2">
-                      Demographics
+                      {t('demographics')}
                     </h3>
                     <div className="space-y-3">
                       <div className="flex justify-between items-start">
@@ -1031,7 +1031,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                   {/* Social Information */}
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-2">
-                      Social Information
+                      {t('socialInformation')}
                     </h3>
                     <div className="space-y-3">
                       <div className="flex justify-between">
@@ -1056,7 +1056,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                   {/* Contact Information */}
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-2">
-                      Contact Information
+                      {t('contactInformation')}
                     </h3>
                     <div className="space-y-3">
                       <div className="flex justify-between items-start">
