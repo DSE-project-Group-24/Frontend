@@ -318,6 +318,39 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
     }
   };
 
+  // Helper to format the hospital-stay model prediction responses like
+  // "[array(['2–3 days'], dtype=object)]" into a readable string "2–3 days".
+  const formatHospitalStayPrediction = (raw) => {
+    if (!raw && raw !== 0) return '';
+    // If it's already a string label, return it
+    if (typeof raw === 'string') {
+      // Some responses are strings like "[array(['2–3 days'], dtype=object)]" or "['2–3 days']"
+      // Try to extract the inner quoted text
+      const m = raw.match(/['"]([^'"]+)['"]/);
+      if (m && m[1]) return m[1];
+      // If it's a JSON-like array, try parse
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return String(parsed[0]);
+      } catch (e) {
+        // ignore
+      }
+      return raw;
+    }
+
+    // If it's an array-like object (e.g., returned already parsed), handle common shapes
+    try {
+      // e.g., ['2–3 days']
+      if (Array.isArray(raw) && raw.length > 0) return String(raw[0]);
+      // e.g., object with array inside
+      if (raw && raw[0] && Array.isArray(raw[0])) return String(raw[0][0]);
+    } catch (e) {
+      // fallback
+    }
+
+    return String(raw);
+  };
+
   const getPredictionForAccident = async (accident, patientData) => {
     setLoadingPredictions(prev => ({ ...prev, [accident.accident_id]: true }));
     
@@ -1218,7 +1251,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                                       <div className="w-3 h-3 bg-indigo-500 rounded-full"></div>
                                       <span className="text-xs font-medium text-indigo-700">Hospital Stay Prediction</span>
                                     </div>
-                                    <span className="text-xs font-semibold text-indigo-800 bg-white px-2 py-1 rounded">{String(top)}</span>
+                                    <span className="text-xs font-semibold text-indigo-800 bg-white px-2 py-1 rounded">{formatHospitalStayPrediction(top)}</span>
                                   </div>
                                   {Object.keys(probs).length > 0 ? (
                                     <div className="space-y-2">
@@ -1696,7 +1729,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                               <div className="space-y-3">
                                 <div className="flex justify-between items-center p-3 bg-indigo-50 rounded-lg border border-indigo-100">
                                   <span className="text-sm font-medium text-gray-700">Predicted Stay</span>
-                                  <span className="text-sm font-bold text-indigo-800">{String(top)}</span>
+                                  <span className="text-sm font-bold text-indigo-800">{formatHospitalStayPrediction(top)}</span>
                                 </div>
 
                                 {Object.keys(probs).length > 0 ? (
