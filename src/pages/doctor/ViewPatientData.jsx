@@ -1140,7 +1140,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                             <span className="text-sm font-bold text-gray-700">#{index + 1}</span>
                           </div>
                           <div>
-                            <h3 className="text-sm font-semibold text-gray-900">Medical Incident {index + 1}</h3>
+                            <h3 className="text-sm font-semibold text-gray-900">{t('medicalIncident')} {index + 1}</h3>
                             <p className="text-xs text-gray-600">{acc["incident at date"]}</p>
                           </div>
                         </div>
