@@ -1,24 +1,31 @@
 import React from 'react';
+import { t } from '../utils/translations';
 
 const Footer = ({ 
-  title = "Road Accident Care System",
-  description = "Comprehensive emergency management platform connecting hospitals, government agencies, and medical professionals for enhanced accident response and patient care coordination.",
+  title = null,
+  description = null,
   sections = [],
-  quickLinks = [
-    { label: "Emergency Hotline", value: "911", icon: "phone" },
-    { label: "System Status", value: "All Systems Operational", icon: "status", color: "green" },
-    { label: "Last Updated", value: new Date().toLocaleString(), icon: "clock" }
-  ],
+  quickLinks = null,
   socialLinks = [
     // { platform: "Twitter", url: "https://twitter.com/RoadAccidentCare", handle: "@RoadAccidentCare" },
     { platform: "LinkedIn", url: "https://linkedin.com/company/road-accident-care-system-group24", handle: "road-accident-care-system-group24" },
     { platform: "Email", url: "mailto:contact@roadaccidentcare.org", handle: "contact@roadaccidentcare.org" }
   ],
   showSystemStatus = true,
-  copyright = "Road Accident Care System",
-  poweredBy = "Group 24 - Data Science Engineering",
+  copyright = null,
+  poweredBy = null,
   className = ""
 }) => {
+  // Use translations with fallbacks
+  const footerTitle = title || t('roadAccidentCareSystem');
+  const footerDescription = description || t('comprehensiveEmergencyManagement');
+  const footerQuickLinks = quickLinks || [
+    { label: t('emergencyHotline'), value: "911", icon: "phone" },
+    { label: t('systemStatus'), value: t('allSystemsOperational'), icon: "status", color: "green" },
+    { label: t('lastUpdated'), value: new Date().toLocaleString(), icon: "clock" }
+  ];
+  const footerCopyright = copyright || t('roadAccidentCareSystem');
+  const footerPoweredBy = poweredBy || t('groupDataScienceEngineering');
   return (
     <footer className={`bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 text-white relative overflow-hidden ${className}`}>
       {/* Background Pattern */}
@@ -39,17 +46,17 @@ const Footer = ({
                 </svg>
               </div>
               <div>
-                <h3 className="text-xl font-bold">{title}</h3>
-                <p className="text-blue-200 text-sm">Emergency Care Excellence</p>
+                <h3 className="text-xl font-bold">{footerTitle}</h3>
+                <p className="text-blue-200 text-sm">{t('emergencyCareExcellence')}</p>
               </div>
             </div>
             <p className="text-gray-300 text-sm leading-relaxed mb-6">
-              {description}
+              {footerDescription}
             </p>
             
             {/* Quick Contact */}
             <div className="flex flex-wrap gap-8 lg:gap-12">
-              {quickLinks.map((link, index) => (
+              {footerQuickLinks.map((link, index) => (
                 <div key={index} className="flex items-center space-x-3">
                   {link.icon === 'phone' && (
                     <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
@@ -109,10 +116,10 @@ const Footer = ({
             {/* Copyright */}
             <div className="text-center lg:text-left">
               <p className="text-sm text-gray-300">
-                © {new Date().getFullYear()} {copyright}. All rights reserved.
+                © {new Date().getFullYear()} {footerCopyright}. {t('allRightsReserved')}.
               </p>
               <p className="text-xs text-gray-400 mt-1">
-                Licensed healthcare management platform - Patient data protected under HIPAA
+                {t('licensedHealthcarePlatform')}
               </p>
             </div>
             
@@ -138,7 +145,7 @@ const Footer = ({
                 <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                <span className="text-xs text-gray-300">Built by {poweredBy}</span>
+                <span className="text-xs text-gray-300">{t('builtBy')} {footerPoweredBy}</span>
               </div>
             </div>
           </div>
