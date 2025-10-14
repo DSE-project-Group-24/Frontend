@@ -21,6 +21,7 @@ import GetPredictions from "./pages/doctor/GetPredictions";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import PredictionAdmin from "./pages/admin/PredictionAdmin";
 import AddStaff from "./pages/admin/AddStaff";
+import ApproveTransfers from "./pages/admin/ApproveTransfers";
 import DashboardGovernment from "./pages/government/DashboardGovernment";
 import PredictionGovernment from "./pages/government/PredictionGovernment";
 import ReportsGovernment from "./pages/government/ReportsGovernment";
@@ -219,7 +220,19 @@ function App() {
               )
             }
           />
-
+          <Route
+            path="/hospital_administrator/approve-transfers"
+            element={
+              isAuthenticated && role === "hospital_administrator" ? (
+                <ApproveTransfers
+                  setIsAuthenticated={setIsAuthenticated}
+                  setRole={setRole}
+                />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
           {/* Government Routes */}
           <Route
             path="/government_personnel/dashboard"
