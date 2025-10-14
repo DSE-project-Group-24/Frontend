@@ -343,7 +343,7 @@ const translations = {
   viewDetails: "View Details",
   aiPredictionsForTreatment: "AI-powered predictions for treatment planning",
   // Hospital stay prediction panel
-  hospitalStayTitle: "හෝස්පිටල් නවාතැන් සමීකරණය",
+  hospitalStayTitle: "හෝස්පිටල් නවාතැන් සම්භාවිතා",
   hospitalStaySubtitle: "නවාතැන් කාලය සහ සම්භාවිතා",
   predictedStay: "අනුමානිත නවාතැන්",
   noHospitalStayProbabilities: "මාදිලිගෙන් ප්‍රබලතා ලබා නොදී ඇත.",
@@ -356,7 +356,11 @@ const translations = {
     // Modal/General UI
     basicInformation: "Basic Information",
     environmentConditions: "Environment Conditions",
-    medicalFinancial: "Medical & Financial",
+  medicalFinancial: "Medical & Financial",
+  incidentOverview: "Incident Overview",
+  vehicleCollisionDetails: "Vehicle & Collision Details",
+  medicalResponse: "Medical Response",
+  financialImpact: "Financial Impact",
 
     // Guide Page
     guide: "User Guide",
@@ -1258,6 +1262,11 @@ const translations = {
   transferRisk: "ප්‍රවාහන අවදානම",
   transferRiskAssessment: "ප්‍රවාහන අවදානම් ඇස්තමේන්තුව",
   highRisk: "ඉහළ අවදානම",
+  // Newly added UI labels
+  incidentOverview: "සිදුවීම් සාරාංශය",
+  vehicleCollisionDetails: "වාහන හා විස්තර",
+  medicalResponse: "මූලික වෛද්‍ය ප්‍රතිචාර",
+  financialImpact: "මාර්ගික සහිත අවදානම",
   moderateRisk: "මධ්‍යස්ථ අවදානම",
   lowRisk: "අඩු අවදානම",
   criticalOutcome: "ගැටළු සහිත ප්‍රතිඵල",
@@ -2218,6 +2227,11 @@ const translations = {
   transferRisk: "நிலையாற்றல் அபாயம்",
   transferRiskAssessment: "நிலையாற்றல் அபாய மதிப்பீடு",
   highRisk: "உயர்ந்த அபாயம்",
+  // Newly added UI labels (Tamil)
+  incidentOverview: "சம்பவ சுருக்கம்",
+  vehicleCollisionDetails: "வாகனம் & மோதல் விவரங்கள்",
+  medicalResponse: " மருத்துவ பதில்",
+  financialImpact: "நிதி தாக்கம்",
   moderateRisk: "மிதமான அபாயம்",
   lowRisk: "குறைந்த அபாயம்",
   criticalOutcome: "கடுமையான முடிவு",
