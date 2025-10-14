@@ -1472,8 +1472,8 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                           </svg>
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900">Clinical Decision Support</h3>
-                          <p className="text-sm text-gray-600">AI-powered predictions for treatment planning</p>
+                          <h3 className="text-lg font-semibold text-gray-900">{t('clinicalDecisionSupport')}</h3>
+                          <p className="text-sm text-gray-600">{t('aiPredictionsForTreatment')}</p>
                         </div>
                       </div>
 
@@ -1527,15 +1527,15 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                                   </svg>
                                 </div>
                                 <div>
-                                  <h4 className="font-semibold text-gray-900">Transfer Risk Assessment</h4>
+                                  <h4 className="font-semibold text-gray-900">{t('transferRiskAssessment')}</h4>
                                   <p className={`text-xs font-medium ${currentRisk.iconText}`}>
-                                    {isHighRisk ? 'HIGH RISK' : isMediumRisk ? 'MODERATE RISK' : 'LOW RISK'}
+                                    {isHighRisk ? t('highRisk') : isMediumRisk ? t('moderateRisk') : t('lowRisk')}
                                   </p>
                                 </div>
                               </div>
                               <div className="space-y-3">
                                 <div className={`flex justify-between items-center p-3 ${currentRisk.accent} rounded-lg border shadow-sm`}>
-                                  <span className="text-sm font-medium text-gray-700">Transfer Probability</span>
+                                  <span className="text-sm font-medium text-gray-700">{t('transferProbability')}</span>
                                   <div className="flex items-center space-x-2">
                                     <div className={`w-16 bg-gray-200 rounded-full h-2 shadow-inner`}>
                                       <div 

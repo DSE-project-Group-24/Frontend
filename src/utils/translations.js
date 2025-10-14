@@ -1245,7 +1245,7 @@ const translations = {
   clinicalIncidentIntro: "නිදසුන සහ විශ්ලේෂණය",
   recordIdShort: "වාර්තාව ID: {id}",
   viewDetails: "විස්තර බලන්න",
-  aiPredictionsForTreatment: "පරිගණකpredictions කළ සුවිශේෂී සැලසුම්",
+  aiPredictionsForTreatment: "පරිගණක අනාවැකි කළ සුවිශේෂී සැලසුම්",
   clinicalIncidentIntro: "නිදසුන සහ විශ්ලේෂණය",
   medicalIncident: "වෛද්‍ය සිදුවීම",
   medicalRecordIncident: "වෛද්‍ය වාර්තාව - සිදුවීම",
