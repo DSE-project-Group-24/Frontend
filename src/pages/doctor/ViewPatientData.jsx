@@ -17,6 +17,8 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
   const [loadingPredictions, setLoadingPredictions] = useState({});
   const [dischargeOutcomePredictions, setDischargeOutcomePredictions] = useState({});
   const [loadingDischargeOutcome, setLoadingDischargeOutcome] = useState({});
+  const [hospitalStayPredictions, setHospitalStayPredictions] = useState({});
+  const [loadingHospitalStay, setLoadingHospitalStay] = useState({});
   const [copySuccess, setCopySuccess] = useState("");
 
   const handleCopy = async (text) => {
@@ -84,12 +86,137 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
       for (const accident of incompleteAccidents) {
         await getPredictionForAccident(accident, match); 
         await getDischargeOutcomePrediction(accident, match);
+        // hospital stay prediction
+        await getHospitalStayPrediction(accident, match);
       }
     } catch (err) {
       console.error(err);
       setError("Error fetching data");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const prepareHospitalStayData = (accident, patient) => {
+    // Prepare the payload object expected by the hospital-stay model
+    const obj = {};
+    const missingValues = [];
+
+    const injury1 = accident?.injuries && accident.injuries[0];
+    const injury2 = accident?.injuries && accident.injuries[1];
+
+    // Investigation Done - not present in current accident schema; hard-code and mark missing
+    obj['Investigation Done'] = accident?.['Investigation Done'] || 'Others';
+    if (!accident?.['Investigation Done']) missingValues.push('Investigation Done (hard-coded: Others)');
+
+    // Type of injury No 1
+    obj['Type of injury No 1'] = injury1?.type_of_injury || 'Fracture';
+    if (!injury1?.type_of_injury) missingValues.push('Type of injury No 1');
+
+    // Side (primary injury) - best-effort mapping; hardcode if not available
+    obj['Side'] = injury1?.side || injury1?.location_side || 'Right';
+    if (!injury1?.side && !injury1?.location_side) missingValues.push('Side (hard-coded)');
+
+    // Site of Injury No1
+    obj['Site of Injury No1'] = injury1?.site_of_injury || 'Shoulder Clavicle';
+    if (!injury1?.site_of_injury) missingValues.push('Site of Injury No1');
+
+    // Current Hospital Name
+    obj['Current Hospital Name'] = localStorage.getItem('hospital_name') || accident?.['Hospital'] || 'DGH – Vavuniya';
+    if (!localStorage.getItem('hospital_name') && !accident?.['Hospital']) missingValues.push('Current Hospital Name (fallback used)');
+
+    // Engine Capacity - best-effort fallback
+    obj['Engine Capacity'] = accident?.['Engine capacity'] || accident?.['Engine Capacity'] || '101To200';
+    if (!accident?.['Engine capacity'] && !accident?.['Engine Capacity']) missingValues.push('Engine Capacity (hard-coded)');
+
+    // Severity
+    obj['Severity'] = accident?.['Severity'] || (injury1?.severity === 'S' ? 'S' : 'M');
+    if (!accident?.['Severity'] && !injury1?.severity) missingValues.push('Severity');
+
+    // Collision Force From
+    obj['Collision Force From'] = accident?.['Collision force from'] || 'RightSide';
+    if (!accident?.['Collision force from']) missingValues.push('Collision Force From (hard-coded)');
+
+    // Side.1 (secondary injury side)
+    obj['Side.1'] = injury2 ? (injury2.side || 'Unknown') : 'No Secondary Injury Found';
+    if (!injury2) missingValues.push('Side.1 (no secondary injury)');
+
+    // Type of Injury No 2
+    obj['Type of Injury No 2'] = injury2?.type_of_injury || '';
+    if (!injury2?.type_of_injury) missingValues.push('Type of Injury No 2');
+
+    // Family Current Status
+    obj['Family Current Status'] = accident?.['Family current status'] || 'Severely Affected';
+    if (!accident?.['Family current status']) missingValues.push('Family Current Status (hard-coded)');
+
+    // Time Taken To Reach Hospital
+    obj['Time Taken To Reach Hospital'] = accident?.['Time taken to reach hospital'] || 'Less Than 15 Minutes';
+    if (!accident?.['Time taken to reach hospital']) missingValues.push('Time Taken To Reach Hospital (hard-coded)');
+
+    // Mode of Transport to the Hospital
+    obj['Mode of Transport to the Hospital'] = accident?.['Mode of transport to hospital'] || 'Ambulance';
+    if (!accident?.['Mode of transport to hospital']) missingValues.push('Mode of Transport to the Hospital (hard-coded)');
+
+    // Category of Road
+    obj['Category of Road'] = accident?.['Category of Road'] || 'SideRoad';
+    if (!accident?.['Category of Road']) missingValues.push('Category of Road (hard-coded)');
+
+    // Time of Collision
+    obj['Time of Collision'] = accident?.['time of collision'] || '09:00 - 12:00';
+    if (!accident?.['time of collision']) missingValues.push('Time of Collision (hard-coded)');
+
+    // Include the friendly debug missingValues so UI can show data quality warnings
+    obj._missingValues = missingValues;
+
+    return obj;
+  };
+
+  const getHospitalStayPrediction = async (accident, patient) => {
+    setLoadingHospitalStay(prev => ({ ...prev, [accident.accident_id]: true }));
+    try {
+      const prepared = prepareHospitalStayData(accident, patient);
+      const missingValues = prepared._missingValues || [];
+
+      // Remove debug prop before sending
+      const payloadObj = { ...prepared };
+      delete payloadObj._missingValues;
+
+      const payload = { data: [payloadObj] };
+      const response = await API.post('predictions/hospital-stay-predict', payload);
+
+      // Expect response.predictions array
+      const pred = response.data?.predictions && response.data.predictions[0];
+      if (pred) {
+        setHospitalStayPredictions(prev => ({
+          ...prev,
+          [accident.accident_id]: {
+            prediction: pred.prediction,
+            probabilities: pred.probabilities || pred.probabilities || {},
+            missingValues: missingValues
+          }
+        }));
+      } else {
+        setHospitalStayPredictions(prev => ({
+          ...prev,
+          [accident.accident_id]: {
+            prediction: 'Unknown',
+            probabilities: {},
+            missingValues: missingValues
+          }
+        }));
+      }
+    } catch (error) {
+      console.error(`Error getting hospital stay prediction for ${accident.accident_id}:`, error);
+      setHospitalStayPredictions(prev => ({
+        ...prev,
+        [accident.accident_id]: {
+          prediction: 'Error',
+          probabilities: {},
+          message: 'Failed to get hospital stay prediction'
+        }
+      }));
+    } finally {
+      setLoadingHospitalStay(prev => ({ ...prev, [accident.accident_id]: false }));
     }
   };
 
@@ -1073,6 +1200,60 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                             )}
 
                             {/* Discharge Outcome Prediction */}
+                            {/* Hospital Stay Prediction */}
+                            {loadingHospitalStay[acc.accident_id] ? (
+                              <div className="flex items-center justify-center p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
+                                <span className="ml-3 text-sm text-indigo-600">Predicting hospital stay...</span>
+                              </div>
+                            ) : hospitalStayPredictions[acc.accident_id] ? (() => {
+                              const hs = hospitalStayPredictions[acc.accident_id];
+                              const probs = hs.probabilities || {};
+                              // Determine top prediction text
+                              const top = hs.prediction || '';
+                              return (
+                                <div className="mt-3 bg-indigo-50 border border-indigo-200 rounded-lg p-3">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center space-x-2">
+                                      <div className="w-3 h-3 bg-indigo-500 rounded-full"></div>
+                                      <span className="text-xs font-medium text-indigo-700">Hospital Stay Prediction</span>
+                                    </div>
+                                    <span className="text-xs font-semibold text-indigo-800 bg-white px-2 py-1 rounded">{String(top)}</span>
+                                  </div>
+                                  {Object.keys(probs).length > 0 ? (
+                                    <div className="space-y-2">
+                                      {Object.entries(probs).sort(([,a],[,b]) => b-a).map(([k,v]) => (
+                                        <div key={k} className="flex items-center justify-between text-sm">
+                                          <div className="text-slate-700">{k}</div>
+                                          <div className="font-semibold text-indigo-700">{(v*100).toFixed(1)}%</div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <div className="text-xs text-indigo-600">No probability distribution returned</div>
+                                  )}
+
+                                  {hs.missingValues && hs.missingValues.length > 0 && (
+                                    <div className="mt-3 p-2 bg-orange-50 border border-orange-200 rounded">
+                                      <div className="text-xs text-orange-800 font-medium">Data Quality: missing or defaulted fields</div>
+                                      <div className="flex flex-wrap gap-1 mt-2">
+                                        {hs.missingValues.slice(0,5).map((m,i) => (
+                                          <span key={i} className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">{m}</span>
+                                        ))}
+                                        {hs.missingValues.length > 5 && <span className="text-xs text-orange-700">+{hs.missingValues.length - 5} more</span>}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })() : (
+                              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-3 h-3 bg-indigo-400 rounded-full"></div>
+                                  <span className="text-xs text-indigo-600">Hospital stay prediction unavailable</span>
+                                </div>
+                              </div>
+                            )}
                             {loadingDischargeOutcome[acc.accident_id] ? (
                               <div className="flex items-center justify-center p-4 bg-blue-50 rounded-lg border border-blue-200">
                                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600"></div>
@@ -1487,6 +1668,58 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                                           </div>
                                         );
                                       })}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
+
+                        {/* Hospital Stay Details in Modal */}
+                        {hospitalStayPredictions[selectedAccident.accident_id] && (() => {
+                          const hs = hospitalStayPredictions[selectedAccident.accident_id];
+                          const probs = hs.probabilities || {};
+                          const top = hs.prediction || '';
+
+                          return (
+                            <div className="bg-white border-2 border-indigo-200 rounded-lg p-4">
+                              <div className="flex items-center mb-3">
+                                <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
+                                  <svg className="w-4 h-4 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v4a1 1 0 001 1h3m10 0h3a1 1 0 001-1V7M3 7a2 2 0 012-2h14a2 2 0 012 2M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7" /></svg>
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-gray-900">Hospital Stay Prediction</h4>
+                                  <p className="text-xs text-indigo-600">Estimated length of stay and probabilities</p>
+                                </div>
+                              </div>
+
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-center p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                                  <span className="text-sm font-medium text-gray-700">Predicted Stay</span>
+                                  <span className="text-sm font-bold text-indigo-800">{String(top)}</span>
+                                </div>
+
+                                {Object.keys(probs).length > 0 ? (
+                                  <div className="space-y-2">
+                                    {Object.entries(probs).sort(([,a],[,b]) => b-a).map(([k,v]) => (
+                                      <div key={k} className="flex items-center justify-between p-2 rounded-lg bg-white border border-gray-100">
+                                        <div className="text-sm text-gray-700">{k}</div>
+                                        <div className="font-semibold text-indigo-700">{(v*100).toFixed(1)}%</div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div className="text-sm text-gray-600">No probabilities returned by the model.</div>
+                                )}
+
+                                {hs.missingValues && hs.missingValues.length > 0 && (
+                                  <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded">
+                                    <div className="text-sm font-medium text-orange-800">Missing / Defaulted Fields</div>
+                                    <div className="mt-2 flex flex-wrap gap-1">
+                                      {hs.missingValues.map((m,i) => (
+                                        <span key={i} className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">{m}</span>
+                                      ))}
+                                    </div>
                                   </div>
                                 )}
                               </div>

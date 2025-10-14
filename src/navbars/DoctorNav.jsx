@@ -26,7 +26,7 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
     if (isMobileMenuOpen) {
       // Use a slight delay to avoid immediate closing when menu button is clicked
       setTimeout(() => {
-        document.addEventListener('click', handleClickOutside); // ✅ use click instead of mousedown
+        document.addEventListener('click', handleClickOutside); 
         document.addEventListener('keydown', handleEscapeKey);
       }, 100);
     }
@@ -74,7 +74,7 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
     }
 
     // Fallback
-    return localStorage.getItem("username") || "doctor@hospital.com";
+    return localStorage.getItem("username");
   };
 
   const handleLogout = () => {
