@@ -61,21 +61,21 @@ const processedSummaryStats = translateSummaryStats(summaryData);
 // For chart data, you can use the translateChartData helper:
 const chartData = translateChartData(rawChartData, 'medicalOutcome');
 
-// Example for Recharts:
-<BarChart data={processedMedicalOutcomes}>
-  <XAxis dataKey="name" />
-  <YAxis />
-  <Tooltip formatter={(value, name) => [value, translateBackendValue(name, 'medicalOutcome')]} />
-  <Bar dataKey="value" fill="#8884d8" />
-</BarChart>
+// // Example for Recharts:
+// <BarChart data={processedMedicalOutcomes}>
+//   <XAxis dataKey="name" />
+//   <YAxis />
+//   <Tooltip formatter={(value, name) => [value, translateBackendValue(name, 'medicalOutcome')]} />
+//   <Bar dataKey="value" fill="#8884d8" />
+// </BarChart>
 
-// For displaying statistics with translations:
-<div className="stat-card">
-  <h3>{translateBackendValue('Total Cases', 'analytics')}</h3>
-  <p>{processedSummaryStats.totalCases}</p>
-</div>
+// // For displaying statistics with translations:
+// <div className="stat-card">
+//   <h3>{translateBackendValue('Total Cases', 'analytics')}</h3>
+//   <p>{processedSummaryStats.totalCases}</p>
+// </div>
 
-<div className="stat-card">
-  <h3>{translateBackendValue('Partial Recovery', 'medicalOutcome')}</h3>
-  <p>{processedSummaryStats.partialRecovery}</p>
-</div>
+// <div className="stat-card">
+//   <h3>{translateBackendValue('Partial Recovery', 'medicalOutcome')}</h3>
+//   <p>{processedSummaryStats.partialRecovery}</p>
+// </div>

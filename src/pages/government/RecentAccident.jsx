@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from 'axios';
+import API from '../../utils/api';
 import {
   Calendar,
   Filter,
@@ -40,18 +40,17 @@ const RecentAccident = ({ setIsAuthenticated, setRole }) => {
   const fetchData = async () => {
     setLoading(true);
     setError(null);
-    const API_URL = 'http://127.0.0.1:8000/govDash/comprehensive';
 
     try {
       if (severity === "All") {
         const [severeResponse, moderateResponse] = await Promise.all([
-          axios.post(API_URL, { start_date: startDate, end_date: endDate, severity: "S" }),
-          axios.post(API_URL, { start_date: startDate, end_date: endDate, severity: "M" })
+          API.post('/govDash/comprehensive', { start_date: startDate, end_date: endDate, severity: "S" }),
+          API.post('/govDash/comprehensive', { start_date: startDate, end_date: endDate, severity: "M" })
         ]);
         const mergedData = mergeData(severeResponse.data.results, moderateResponse.data.results);
         setData(mergedData);
       } else {
-        const response = await axios.post(API_URL, { start_date: startDate, end_date: endDate, severity: severity });
+        const response = await API.post('/govDash/comprehensive', { start_date: startDate, end_date: endDate, severity: severity });
         setData(response.data.results);
       }
     } catch (err) {
