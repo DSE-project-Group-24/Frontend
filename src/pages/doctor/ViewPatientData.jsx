@@ -45,7 +45,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
     }
     setLoading(true);
     try {
-      // 1️⃣ fetch patients and filter by id, NIC, or name
+      // 1️1 fetch patients and filter by id, NIC, or name
       const res = await API.get("/patients");
       setPatients(res.data);
       console.log("Fetched patients:", res.data);
@@ -76,12 +76,12 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
       }
       setFiltered(match);
 
-      // 2️⃣ fetch accident details for that patient using the matched patient's ID
+      // 22 fetch accident details for that patient using the matched patient's ID
       const accRes = await API.get(`/accidents/patient/${match.patient_id}`);
       setAccidents(accRes.data);
       console.log("Fetched accidents:", accRes.data);
       
-      // 3️⃣ Get predictions for incomplete accidents
+      // 3 Get predictions for incomplete accidents
       const incompleteAccidents = accRes.data.filter(acc => !acc["Completed"]);
       for (const accident of incompleteAccidents) {
         await getPredictionForAccident(accident, match); 
@@ -106,27 +106,28 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
     const injury2 = accident?.injuries && accident.injuries[1];
 
     // Investigation Done - not present in current accident schema; hard-code and mark missing
-    obj['Investigation Done'] = accident?.['Investigation Done'] || 'Others';
-    if (!accident?.['Investigation Done']) missingValues.push('Investigation Done (hard-coded: Others)');
+    obj['Investigation Done'] = injury1?.['investigation_done']; // investigation_done
+    console.log('Investigation Done value:', obj['Investigation Done']);
+    if (!injury1?.['investigation_done']) missingValues.push('Investigation Done (hard-coded: Others)');
 
     // Type of injury No 1
-    obj['Type of injury No 1'] = injury1?.type_of_injury || 'Fracture';
+    obj['Type of injury No 1'] = injury1?.type_of_injury;
     if (!injury1?.type_of_injury) missingValues.push('Type of injury No 1');
 
     // Side (primary injury) - best-effort mapping; hardcode if not available
-    obj['Side'] = injury1?.side || injury1?.location_side || 'Right';
+    obj['Side'] = injury1?.side || injury1?.location_side;
     if (!injury1?.side && !injury1?.location_side) missingValues.push('Side (hard-coded)');
 
     // Site of Injury No1
-    obj['Site of Injury No1'] = injury1?.site_of_injury || 'Shoulder Clavicle';
+    obj['Site of Injury No1'] = injury1?.site_of_injury;
     if (!injury1?.site_of_injury) missingValues.push('Site of Injury No1');
 
     // Current Hospital Name
-    obj['Current Hospital Name'] = localStorage.getItem('hospital_name') || accident?.['Hospital'] || 'DGH – Vavuniya';
+    obj['Current Hospital Name'] = localStorage.getItem('hospital_name')
     if (!localStorage.getItem('hospital_name') && !accident?.['Hospital']) missingValues.push('Current Hospital Name (fallback used)');
 
     // Engine Capacity - best-effort fallback
-    obj['Engine Capacity'] = accident?.['Engine capacity'] || accident?.['Engine Capacity'] || '101To200';
+    obj['Engine Capacity'] = accident?.['Engine capacity'];
     if (!accident?.['Engine capacity'] && !accident?.['Engine Capacity']) missingValues.push('Engine Capacity (hard-coded)');
 
     // Severity
@@ -146,23 +147,23 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
     if (!injury2?.type_of_injury) missingValues.push('Type of Injury No 2');
 
     // Family Current Status
-    obj['Family Current Status'] = accident?.['Family current status'] || 'Severely Affected';
+    obj['Family Current Status'] = accident?.['Family current status'];
     if (!accident?.['Family current status']) missingValues.push('Family Current Status (hard-coded)');
 
     // Time Taken To Reach Hospital
-    obj['Time Taken To Reach Hospital'] = accident?.['Time taken to reach hospital'] || 'Less Than 15 Minutes';
+    obj['Time Taken To Reach Hospital'] = accident?.['Time taken to reach hospital'];
     if (!accident?.['Time taken to reach hospital']) missingValues.push('Time Taken To Reach Hospital (hard-coded)');
 
     // Mode of Transport to the Hospital
-    obj['Mode of Transport to the Hospital'] = accident?.['Mode of transport to hospital'] || 'Ambulance';
+    obj['Mode of Transport to the Hospital'] = accident?.['Mode of transport to hospital'];
     if (!accident?.['Mode of transport to hospital']) missingValues.push('Mode of Transport to the Hospital (hard-coded)');
 
     // Category of Road
-    obj['Category of Road'] = accident?.['Category of Road'] || 'SideRoad';
+    obj['Category of Road'] = accident?.['Category of Road'];
     if (!accident?.['Category of Road']) missingValues.push('Category of Road (hard-coded)');
 
     // Time of Collision
-    obj['Time of Collision'] = accident?.['time of collision'] || '09:00 - 12:00';
+    obj['Time of Collision'] = accident?.['time of collision'];
     if (!accident?.['time of collision']) missingValues.push('Time of Collision (hard-coded)');
 
     // Include the friendly debug missingValues so UI can show data quality warnings

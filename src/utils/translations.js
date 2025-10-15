@@ -343,16 +343,7 @@ const translations = {
   recordIdShort: "Record ID: {id}",
   viewDetails: "View Details",
   aiPredictionsForTreatment: "AI-powered predictions for treatment planning",
-  // Hospital stay prediction panel
-  hospitalStayTitle: "හෝස්පිටල් නවාතැන් සම්භාවිතා",
-  hospitalStaySubtitle: "නවාතැන් කාලය සහ සම්භාවිතා",
-  predictedStay: "අනුමානිත නවාතැන්",
-  noHospitalStayProbabilities: "මාදිලිගෙන් ප්‍රබලතා ලබා නොදී ඇත.",
-  missingDefaultedFields: "නැති/මුදලදී පරීක්ෂාවන්",
-  // compact / card versions
-  hospitalStayTitleCompact: "හෝස්පිටල් නවාතැන්",
-  noHospitalStayProbabilitiesCompact: "ප්‍රබලතා බෙදාහැරීම නොමැත",
-  missingDefaultedFieldsCompact: "දත්ත ගුණාත්මකභාවය: නැති හෝ පූරණ කළ ක්ෂේත්‍ර",
+  
     
     // Modal/General UI
     basicInformation: "Basic Information",
@@ -1008,6 +999,7 @@ const translations = {
   behind: "Behind",
   leftSide: "Left Side",
   rightSide: "Right Side",
+  total: "Total",
   
   // Placeholders
   enterDateOfBirth: "Enter date of birth (YYYY-MM-DD)",
@@ -1055,6 +1047,7 @@ const translations = {
     noDataCategory: "No data available for this category.",
     errorFetch: "Failed to fetch data. Please try again.",
     selectParameters: 'Select your analysis parameters and click "Analyze" to view comprehensive accident statistics',
+    totalia: "Total",
 
     failedFetchData: "Failed to fetch data. Please try again.",
     noDataAvailableCategory: "No data available for this category.",
@@ -1063,12 +1056,32 @@ const translations = {
     totalCases: "Total Cases",
     close: "Close",
     comprehensiveAccidentAnalysis: "Comprehensive Accident Analysis",
-    accidentAnalysisDescription: "Analyze road accident patterns across North Province with temporal and severity filters"
+    accidentAnalysisDescription: "Analyze road accident patterns across North Province with temporal and severity filters",
+
+    hospitalStayTitle: "Hospital Stay Prediction",
+    hospitalStaySubtitle: "Hospital Stay Duration and Probabilities",
+    predictedStay: "Predicted Stay",
+    noHospitalStayProbabilities: "No probabilities provided by the model.",
+    missingDefaultedFields: "Missing/Defaulted Fields",
+    // compact / card versions
+    hospitalStayTitleCompact: "Hospital Stay",
+    noHospitalStayProbabilitiesCompact: "No probabilities available",
+    missingDefaultedFieldsCompact: "Data Quality: Missing or Defaulted Fields",
 
   
   },
   
   si: {
+    // Hospital stay prediction panel
+  hospitalStayTitle: "හෝස්පිටල් නවාතැන් සම්භාවිතා",
+  hospitalStaySubtitle: "නවාතැන් කාලය සහ සම්භාවිතා",
+  predictedStay: "අනුමානිත නවාතැන්",
+  noHospitalStayProbabilities: "මාදිලිගෙන් ප්‍රබලතා ලබා නොදී ඇත.",
+  missingDefaultedFields: "නැති/මුදලදී පරීක්ෂාවන්",
+  // compact / card versions
+  hospitalStayTitleCompact: "හෝස්පිටල් නවාතැන්",
+  noHospitalStayProbabilitiesCompact: "ප්‍රබලතා බෙදාහැරීම නොමැත",
+  missingDefaultedFieldsCompact: "දත්ත ගුණාත්මකභාවය: නැති හෝ පූරණ කළ ක්ෂේත්‍ර",
     // Common
     loading: "පූරණය වෙමින්...",
     search: "සොයන්න",
@@ -1235,6 +1248,7 @@ const translations = {
     createAccidentRecord: "අනතුරු වාර්තාවක් සාදන්න",
     editAccidentRecord: "අනතුරු වාර්තාව සංස්කරණය කරන්න",
     viewAccidentRecord: "අනතුරු වාර්තාව බලන්න",
+    totalia: "මුළු",
     
     // Form options
     unknown: "නොදන්නා",
@@ -2034,7 +2048,7 @@ const translations = {
     indicatingProportion: "%, ක්ෂණික ප්‍රතිචාර අවශ්‍ය අනුපාතය දක්වයි.",
     predictionValue: "පුරෝකථන වටිනාකම",
     useForecasts: "ඉහළ අවදානම් කාලවලදී සම්පත් බෙදාහැරීම, මුර සැලසුම් සහ නිවාරණ ක්‍රියාමාර්ග සඳහා පුරෝකථන භාවිතා කරන්න.",
-    
+
     // Daily Forecast
     dailyAccidentForecast: "දෛනික අනතුරු පුරෝකථනය",
     next7Days: "ඊළඟ දින 7 පුරෝකථනය",
@@ -2639,6 +2653,7 @@ const translations = {
     applyFilters: "வடிகட்டிகளை பயன்படுத்துக",
     clearFilters: "வடிகட்டிகளை அழிக்கவும்",
     applying: "பயன்படுத்துகிறது...",
+    totalia: "மொத்தம்",
     
     // Filter display
     activeFilters: "செயலில் உள்ள வடிகட்டிகள்",

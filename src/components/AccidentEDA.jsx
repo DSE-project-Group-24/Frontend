@@ -936,7 +936,7 @@ const AccidentEDA = () => {
               ) : (
                 <>
                   <div className="text-2xl font-bold text-gray-900">{total.toLocaleString()}</div>
-                  <div className="text-sm text-gray-500">Total</div>
+                  <div className="text-sm text-gray-500">{t('totalia')}</div>
                 </>
               )}
             </div>
@@ -1579,29 +1579,41 @@ const AccidentEDA = () => {
   };
 
   const renderTemporalTrends = () => {
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    
+    // Use translation keys for month/day short labels so they render in the current language
+    const monthKeys = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const dayKeys = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
     const monthlyData = {};
     const dailyData = {};
-    
-    // Convert numeric month/day keys to readable names
-    // Backend sends months as 1-12, so we need to subtract 1 for array indexing
-    Object.entries(temporalTrends.monthlyTrends || {}).forEach(([month, count]) => {
-      const monthIndex = parseInt(month) - 1; // Convert 1-12 to 0-11
+
+    // Convert numeric month keys -> sorted chronological list (backend uses 1-12)
+    const monthlyEntries = Object.entries(temporalTrends.monthlyTrends || {})
+      .map(([m, count]) => [parseInt(m), count])
+      .filter(([m]) => !Number.isNaN(m))
+      .sort((a, b) => a[0] - b[0]);
+
+    monthlyEntries.forEach(([monthNum, count]) => {
+      const monthIndex = monthNum - 1; // 0-based index
       if (monthIndex >= 0 && monthIndex < 12) {
-        monthlyData[monthNames[monthIndex]] = count;
+        const key = monthKeys[monthIndex];
+        monthlyData[t(key)] = count; // localized short month label
       } else {
-        monthlyData[`Month ${month}`] = count;
+        monthlyData[`Month ${monthNum}`] = count;
       }
     });
-    
-    Object.entries(temporalTrends.dailyTrends || {}).forEach(([day, count]) => {
-      const dayIndex = parseInt(day);
+
+    // Convert weekday indices -> localized short weekday labels (0 = Sun .. 6 = Sat)
+    const dailyEntries = Object.entries(temporalTrends.dailyTrends || {})
+      .map(([d, count]) => [parseInt(d), count])
+      .filter(([d]) => !Number.isNaN(d))
+      .sort((a, b) => a[0] - b[0]);
+
+    dailyEntries.forEach(([dayIndex, count]) => {
       if (dayIndex >= 0 && dayIndex < 7) {
-        dailyData[dayNames[dayIndex]] = count;
+        const key = dayKeys[dayIndex];
+        dailyData[t(key)] = count; // localized short weekday label
       } else {
-        dailyData[`Day ${day}`] = count;
+        dailyData[`Day ${dayIndex}`] = count;
       }
     });
 
