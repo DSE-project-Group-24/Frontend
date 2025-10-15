@@ -85,18 +85,20 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
   // Process historical monthly data
   const processedMonthlyData = useMemo(() => {
     if (!historicalData?.monthly_counts) return [];
-    
     const entries = Object.entries(historicalData.monthly_counts)
       .sort(([a], [b]) => a.localeCompare(b));
-    
+
+    const monthKeys = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
     return entries.map(([date, data]) => {
       const [year, month] = date.split('-');
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const mIndex = parseInt(month) - 1;
+      const monthLabel = t(monthKeys[mIndex]);
       return {
         date,
         year,
-        month: monthNames[parseInt(month) - 1],
-        label: `${monthNames[parseInt(month) - 1]} ${year}`,
+        month: monthLabel,
+        label: `${monthLabel} ${year}`,
         total: data.total,
         serious: data.serious,
         moderate: data.total - data.serious,
@@ -112,7 +114,7 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
     
     const forecastM = predictedMonthlyData.forecast_M || [];
     const forecastS = predictedMonthlyData.forecast_S || [];
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthKeys = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     
     // Start from June 2022
     const startDate = new Date(2022, 5);
@@ -129,8 +131,8 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
       return {
         date: `${year}-${String(month + 1).padStart(2, '0')}`,
         year: String(year),
-        month: monthNames[month],
-        label: `${monthNames[month]} ${year}`,
+        month: t(monthKeys[month]),
+        label: `${t(monthKeys[month])} ${year}`,
         total: Number(total.toFixed(1)),
         serious: Number(serious.toFixed(1)),
         moderate: Number(moderate.toFixed(1)),
