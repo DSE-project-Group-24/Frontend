@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useTranslation, withTranslation } from 'react-i18next';
+import { t } from '../../utils/translations';
 import { Search, MapPin, Phone, Building2, Filter, X, Hospital, Activity, TrendingUp } from 'lucide-react';
 import GovernmentNav from '../../navbars/GovernmentNav';
 import Footer from '../../components/Footer';
@@ -21,18 +21,17 @@ class ErrorBoundary extends React.Component {
   }
 
   render() {
-    const { t } = this.props; // provided by withTranslation HOC
-
+    // use project-level t() helper
     if (this.state.hasError) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
           <div className="text-center">
             <div className="text-red-600 text-6xl mb-4">⚠️</div>
             <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-              {t ? t('somethingWentWrong') : 'Something went wrong'}
+              {t('somethingWentWrong')}
             </h2>
             <p className="text-gray-600">
-              {t ? t('pleaseRefreshPage') : 'Please refresh the page.'}
+              {t('pleaseRefreshPage')}
             </p>
           </div>
         </div>
@@ -42,12 +41,11 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// Wrap ErrorBoundary with withTranslation so class gets t via props
-const TranslatedErrorBoundary = withTranslation()(ErrorBoundary);
+// We use the project-level translations helper directly
+const TranslatedErrorBoundary = ErrorBoundary;
 
 // Statistics Card Component (functional - can use hooks)
 const StatCard = ({ icon: Icon, label, value, change, color = "blue" }) => {
-  const { t } = useTranslation();
 
   // Tailwind dynamic class names (note: for purge you might need to add these variations to safelist)
   const bgClass = `bg-${color}-100`;
@@ -63,7 +61,7 @@ const StatCard = ({ icon: Icon, label, value, change, color = "blue" }) => {
             <div className="flex items-center gap-1 text-sm">
               <TrendingUp className="w-4 h-4 text-green-600" />
               <span className="text-green-600 font-medium">{change}</span>
-              <span className="text-gray-500">{t ? t('vsLastMonth') : 'vs last month'}</span>
+              <span className="text-gray-500">{t('vsLastMonth')}</span>
             </div>
           )}
         </div>
@@ -76,7 +74,6 @@ const StatCard = ({ icon: Icon, label, value, change, color = "blue" }) => {
 };
 
 const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
-  const { t } = useTranslation();
 
   const [allHospitals, setAllHospitals] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -185,7 +182,7 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             {t ? `${t('hospitalManagement')} ${t('dashboard')}` : 'Hospital Management Dashboard'}
           </h1>
-          <p className="text-gray-600">Monitor and manage hospitals across Northern Province</p>
+          <p className="text-gray-600">{t ? t('hospitalManagementDescription') : 'Monitor and manage hospitals across Northern Province'}</p>
         </div>
 
         {/* Statistics Cards */}

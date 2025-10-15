@@ -544,6 +544,7 @@ const translations = {
     
     // Hospital Management
     hospitalManagement: "Hospital Management",
+  hospitalManagementDescription: "Monitor and manage hospitals across Northern Province",
     hospitalSearch: "Hospital Search",
     searchHospitals: "Search hospitals by name, type, or region...",
     hospitalDetails: "Hospital Details",
@@ -1045,6 +1046,9 @@ const translations = {
     viewDetails: "View All Details",
     totalCases: "Total Cases",
     noDataCategory: "No data available for this category.",
+  csvCategory: "Category",
+  csvItem: "Item",
+  csvCount: "Count",
     errorFetch: "Failed to fetch data. Please try again.",
     selectParameters: 'Select your analysis parameters and click "Analyze" to view comprehensive accident statistics',
     totalia: "Total",
@@ -1601,6 +1605,7 @@ const translations = {
     
     // Hospital Management
     hospitalManagement: "රෝහල් කළමනාකරණය",
+  hospitalManagementDescription: "උතුරු ප්‍රදේශයේ රෝහල් නිරීක්ෂණය සහ කළමනාකරණය කරන්න",
     hospitalSearch: "රෝහල් සෙවීම",
     searchHospitals: "නම, වර්ගය හෝ කලාපය අනුව රෝහල් සොයන්න...",
     hospitalDetails: "රෝහල් විස්තර",
@@ -2183,6 +2188,9 @@ const translations = {
     viewDetails: "සියලු විස්තර බලන්න",
     totalCases: "මුළු නඩු",
     noDataCategory: "මෙම කාණ්ඩයට දත්ත නොමැත.",
+  csvCategory: "කාණ්ඩය",
+  csvItem: "අයිතමය",
+  csvCount: "ගණන",
     errorFetch: "දත්ත ලබා ගැනීමට අසමත් විය. කරුණාකර නැවත උත්සාහ කරන්න.",
     selectParameters: 'ඔබේ විශ්ලේෂණ පරාමිතීන් තෝරන්න සහ "විශ්ලේෂණය කරන්න" ක්ලික් කරන්න'
   },
@@ -2873,6 +2881,7 @@ const translations = {
     
     // Hospital Management
     hospitalManagement: "மருத்துவமனை மேலாண்மை",
+  hospitalManagementDescription: "வட மண்டலத்தின் மருத்துவமனைகளை கண்காணிக்கவும் மற்றும் நிர்வகிக்கவும்",
     hospitalSearch: "மருத்துவமனை தேடல்",
     searchHospitals: "பெயர், வகை அல்லது பிராந்தியத்தின் அடிப்படையில் மருத்துவமனைகளைத் தேடுங்கள்...",
     hospitalDetails: "மருத்துவமனை விவரங்கள்",
@@ -3179,6 +3188,9 @@ const translations = {
     viewDetails: "அனைத்து விவரங்களையும் காண்க",
     totalCases: "மொத்த வழக்குகள்",
     noDataCategory: "இந்த வகைக்கான தரவு கிடைக்கவில்லை.",
+  csvCategory: "வகை",
+  csvItem: "உருப்படி",
+  csvCount: "எண்ணிக்கை",
     errorFetch: "தரவை பெற முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
     selectParameters: 'உங்கள் விசாரணை அளவுருக்களைத் தேர்ந்தெடுத்து "விசாரணை செய்" கிளிக் செய்யவும்'
     

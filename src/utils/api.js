@@ -2,8 +2,9 @@ import axios from "axios";
 
 const API = axios.create({
 
-  baseURL: "http://127.0.0.1:8000/"
+  // baseURL: "http://127.0.0.1:8000/"
   //baseURL: "https://core-backend-production-5d7c.up.railway.app"
+  baseURL: "https://core-backend-2.onrender.com"
 });
 
 // Add JWT token to every request if available
