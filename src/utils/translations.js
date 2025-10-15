@@ -117,6 +117,7 @@ const translations = {
     saving: "Saving...",
     noHospitalSelected: "No hospital selected",
     hospitalLabel: "Hospital:",
+  printReport: "Print Report",
     
     // Search
     searchPatient: "Search Patient",
@@ -1058,6 +1059,7 @@ const translations = {
     
     // Navigation
     dashboard: "උපකරණ පුවරුව",
+  printReport: "වාර්තාව මුද්‍රණය කරන්න",
     viewPatientData: "රෝගී දත්ත බලන්න",
     getPrediction: "පුරෝකථනය ලබා ගන්න",
     logout: "ඉවත්වන්න",
@@ -2159,6 +2161,7 @@ const translations = {
     
     // Navigation
     dashboard: "டாஷ்போர்டு",
+  printReport: "அறிக்கை அச்சிடு",
     patients: "நோயாளிகள்",
     patientData: "நோயாளி தகவல்",
     viewPatientData: "நோயாளி தகவலைப் பார்க்கவும்",
