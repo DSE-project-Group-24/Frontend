@@ -544,6 +544,7 @@ const translations = {
     
     // Hospital Management
     hospitalManagement: "Hospital Management",
+  hospitalManagementDescription: "Monitor and manage hospitals across Northern Province",
     hospitalSearch: "Hospital Search",
     searchHospitals: "Search hospitals by name, type, or region...",
     hospitalDetails: "Hospital Details",
@@ -1601,6 +1602,7 @@ const translations = {
     
     // Hospital Management
     hospitalManagement: "රෝහල් කළමනාකරණය",
+  hospitalManagementDescription: "උතුරු ප්‍රදේශයේ රෝහල් නිරීක්ෂණය සහ කළමනාකරණය කරන්න",
     hospitalSearch: "රෝහල් සෙවීම",
     searchHospitals: "නම, වර්ගය හෝ කලාපය අනුව රෝහල් සොයන්න...",
     hospitalDetails: "රෝහල් විස්තර",
@@ -2873,6 +2875,7 @@ const translations = {
     
     // Hospital Management
     hospitalManagement: "மருத்துவமனை மேலாண்மை",
+  hospitalManagementDescription: "வட மண்டலத்தின் மருத்துவமனைகளை கண்காணிக்கவும் மற்றும் நிர்வகிக்கவும்",
     hospitalSearch: "மருத்துவமனை தேடல்",
     searchHospitals: "பெயர், வகை அல்லது பிராந்தியத்தின் அடிப்படையில் மருத்துவமனைகளைத் தேடுங்கள்...",
     hospitalDetails: "மருத்துவமனை விவரங்கள்",
