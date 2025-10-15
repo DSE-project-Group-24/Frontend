@@ -20,6 +20,24 @@ const StatusBadge = ({ completed }) => (
   </span>
 );
 
+const Chip = ({ children, tone = "blue" }) => {
+  const tones = {
+    blue: "bg-blue-50 text-blue-700 border-blue-200",
+    amber: "bg-amber-50 text-amber-700 border-amber-200",
+    red: "bg-red-50 text-red-700 border-red-200",
+    gray: "bg-gray-50 text-gray-700 border-gray-200",
+  };
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs border ${
+        tones[tone] || tones.gray
+      }`}
+    >
+      {children}
+    </span>
+  );
+};
+
 const Card = ({ title, right, children }) => (
   <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     {(title || right) && (
@@ -135,6 +153,43 @@ export default function TransferPatients() {
     })();
   }, []);
 
+  // --- Outgoing transfers (for pending detection) ---
+  const [outgoing, setOutgoing] = useState([]);
+  const [loadingOutgoing, setLoadingOutgoing] = useState(false);
+
+  const loadOutgoing = async () => {
+    try {
+      setLoadingOutgoing(true);
+      const r = await API.get("/transfers/outgoing");
+      setOutgoing(r.data || []);
+    } catch (e) {
+      console.error("Failed to load outgoing transfers", e);
+      setOutgoing([]);
+    } finally {
+      setLoadingOutgoing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadOutgoing();
+  }, []);
+
+  const findHospitalName = (hid) =>
+    (hospitals.find((h) => String(h.hospital_id) === String(hid)) || {}).name ||
+    hid ||
+    "";
+
+  // A helper that returns the pending transfer for an accident (if any)
+  const getPendingForAccident = (accident_id) => {
+    if (!accident_id) return null;
+    const pending = outgoing.find(
+      (t) =>
+        String(t.accident_id) === String(accident_id) &&
+        (t.approved_by === null || t.approved_by === undefined)
+    );
+    return pending || null;
+  };
+
   // --- Transfer State ---
   const [selectedAccident, setSelectedAccident] = useState(null);
   const [toHospital, setToHospital] = useState("");
@@ -147,13 +202,18 @@ export default function TransferPatients() {
     setMessage({ type: "", text: "" });
   };
 
+  const selectedPending = selectedAccident
+    ? getPendingForAccident(selectedAccident.accident_id)
+    : null;
+
   const canTransfer =
     !!selectedAccident &&
     !!toHospital &&
     !!myHospital.hospital_id &&
     toHospital !== myHospital.hospital_id &&
     !selectedAccident?.Completed &&
-    selectedAccident?.managed_by === me.id;
+    selectedAccident?.managed_by === me.id &&
+    !selectedPending; // <-- BLOCK if already pending
 
   const doTransfer = async () => {
     try {
@@ -168,11 +228,32 @@ export default function TransferPatients() {
         text: "Transfer request created. Awaiting approval by destination admin.",
       });
       setToHospital("");
+      await loadOutgoing(); // refresh pending list
     } catch (e) {
       const err =
         e?.response?.data?.detail ||
         e?.response?.data?.message ||
         "Failed to create transfer.";
+      setMessage({ type: "error", text: String(err) });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const cancelPending = async () => {
+    if (!selectedPending) return;
+    try {
+      setSubmitting(true);
+      setMessage({ type: "", text: "" });
+      // Assumes backend allows nurse to delete their own pending outgoing transfer:
+      await API.delete(`/transfers/${selectedPending.transfer_id}`);
+      setMessage({ type: "success", text: "Transfer request cancelled." });
+      await loadOutgoing(); // refresh
+    } catch (e) {
+      const err =
+        e?.response?.data?.detail ||
+        e?.response?.data?.message ||
+        "Failed to cancel transfer.";
       setMessage({ type: "error", text: String(err) });
     } finally {
       setSubmitting(false);
@@ -188,8 +269,8 @@ export default function TransferPatients() {
             Transfer Patients
           </h2>
           <p className="text-sm text-gray-600">
-            You can only request a transfer for accident records managed by you
-            and not yet completed.
+            You can only request a transfer for accident records managed by you,
+            not completed, and not already pending transfer.
           </p>
         </div>
 
@@ -271,7 +352,7 @@ export default function TransferPatients() {
                 <div className="text-sm text-gray-500">
                   Select a patient to view records.
                 </div>
-              ) : loadingAccidents ? (
+              ) : loadingAccidents || loadingOutgoing ? (
                 <div className="text-sm text-gray-500">
                   Loading accident records…
                 </div>
@@ -290,7 +371,9 @@ export default function TransferPatients() {
                       : created.toLocaleString();
 
                     const ownedByMe = rec.managed_by === me.id;
-                    const canTransferRecord = ownedByMe && !rec.Completed;
+                    const pending = getPendingForAccident(rec.accident_id);
+                    const canTransferRecord =
+                      ownedByMe && !rec.Completed && !pending;
 
                     return (
                       <div
@@ -298,16 +381,18 @@ export default function TransferPatients() {
                         className={`p-3 rounded-lg border ${
                           canTransferRecord
                             ? "bg-gray-50 hover:bg-blue-50 cursor-pointer"
-                            : "bg-gray-100 opacity-60 cursor-not-allowed"
+                            : "bg-gray-100 " + (ownedByMe ? "" : "opacity-60")
                         }`}
                         onClick={() => {
-                          if (canTransferRecord) setSelectedAccident(rec);
+                          if (ownedByMe) setSelectedAccident(rec);
                         }}
                         title={
                           canTransferRecord
                             ? "Click to select for transfer"
                             : ownedByMe
-                            ? "Completed record cannot be transferred"
+                            ? pending
+                              ? "This record already has a pending transfer"
+                              : "Completed record cannot be transferred"
                             : "You do not manage this record"
                         }
                       >
@@ -316,9 +401,14 @@ export default function TransferPatients() {
                             <div className="font-medium text-gray-800">
                               {dateStr}
                             </div>
-                            <div className="text-xs text-gray-600">
-                              Managed by:{" "}
-                              {rec.managed_by_name || rec.managed_by}
+                            <div className="text-xs text-gray-600 flex items-center gap-2">
+                              <span>
+                                Managed by:{" "}
+                                {rec.managed_by_name || rec.managed_by}
+                              </span>
+                              {pending && (
+                                <Chip tone="amber">Pending transfer</Chip>
+                              )}
                             </div>
                           </div>
                           <StatusBadge completed={!!rec.Completed} />
@@ -330,13 +420,68 @@ export default function TransferPatients() {
               )}
             </Card>
 
-            {/* Transfer Creation */}
-            <Card title="Create Transfer Request">
+            {/* Transfer Creation / Pending UI */}
+            <Card title="Transfer">
               {!selectedAccident ? (
                 <div className="text-sm text-gray-500">
-                  Choose a valid record first.
+                  Choose a record you manage.
+                </div>
+              ) : selectedPending ? (
+                // ----- Pending transfer details + cancel -----
+                <div className="space-y-3">
+                  <div className="text-sm text-gray-700">
+                    <div>
+                      Selected accident: <b>{selectedAccident.accident_id}</b>
+                    </div>
+                    <div className="mt-2">
+                      Status: <Chip tone="amber">Pending transfer</Chip>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        From hospital
+                      </label>
+                      <input
+                        disabled
+                        value={myHospital.name || myHospital.hospital_id}
+                        className="mt-1 block w-full p-2 border border-gray-300 rounded bg-gray-100"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">
+                        To hospital
+                      </label>
+                      <input
+                        disabled
+                        value={findHospitalName(selectedPending.to_hospital)}
+                        className="mt-1 block w-full p-2 border border-gray-300 rounded bg-gray-100"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-gray-500">
+                    This record already has a pending transfer. You can cancel
+                    it below if needed.
+                  </div>
+
+                  <div className="mt-2 flex justify-end">
+                    <button
+                      onClick={cancelPending}
+                      disabled={submitting}
+                      className={`px-4 py-2 rounded-lg text-sm ${
+                        submitting
+                          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                          : "bg-red-600 text-white hover:bg-red-700"
+                      }`}
+                    >
+                      {submitting ? "Cancelling…" : "Cancel transfer"}
+                    </button>
+                  </div>
                 </div>
               ) : (
+                // ----- Create transfer form -----
                 <>
                   <div className="text-sm text-gray-700 mb-3">
                     Selected accident: <b>{selectedAccident.accident_id}</b>
