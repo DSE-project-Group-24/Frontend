@@ -1452,11 +1452,9 @@ const AccidentEDA = () => {
                     <span className="text-lg font-bold text-gray-900">
                       {(() => {
                         const startDate = filters.start_date || analyticsData.data_period.start_date;
-                        return new Date(startDate).toLocaleDateString('en-US', { 
-                          year: 'numeric', 
-                          month: 'short', 
-                          day: 'numeric' 
-                        });
+                        const d = new Date(startDate);
+                        const monthKeys = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                        return `${t(monthKeys[d.getMonth()])} ${d.getDate()}, ${d.getFullYear()}`;
                       })()}
                     </span>
                     <div className="flex items-center space-x-2">
@@ -1479,11 +1477,9 @@ const AccidentEDA = () => {
                     <span className="text-lg font-bold text-gray-900">
                       {(() => {
                         const endDate = filters.end_date || analyticsData.data_period.end_date;
-                        return new Date(endDate).toLocaleDateString('en-US', { 
-                          year: 'numeric', 
-                          month: 'short', 
-                          day: 'numeric' 
-                        });
+                        const d = new Date(endDate);
+                        const monthKeys = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                        return `${t(monthKeys[d.getMonth()])} ${d.getDate()}, ${d.getFullYear()}`;
                       })()}
                     </span>
                   </div>
@@ -1498,15 +1494,13 @@ const AccidentEDA = () => {
                   <span>{t('lastUpdated')}</span>
                 </div>
                 <div className="text-sm font-medium text-gray-700">
-                  {new Date(analyticsData.generated_at).toLocaleDateString(getCurrentLanguage() === 'si' ? 'si-LK' : getCurrentLanguage() === 'ta' ? 'ta-LK' : 'en-US', { 
-                    month: 'short', 
-                    day: 'numeric', 
-                    year: 'numeric' 
-                  })} • {new Date(analyticsData.generated_at).toLocaleTimeString(getCurrentLanguage() === 'si' ? 'si-LK' : getCurrentLanguage() === 'ta' ? 'ta-LK' : 'en-US', { 
-                    hour: '2-digit', 
-                    minute: '2-digit',
-                    hour12: true 
-                  })}
+                  {(() => {
+                    const d = new Date(analyticsData.generated_at);
+                    const monthKeys = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    const locale = getCurrentLanguage() === 'si' ? 'si-LK' : getCurrentLanguage() === 'ta' ? 'ta-LK' : 'en-US';
+                    const timeStr = d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', hour12: true });
+                    return `${t(monthKeys[d.getMonth()])} ${d.getDate()}, ${d.getFullYear()} • ${timeStr}`;
+                  })()}
                 </div>
               </div>
             </div>

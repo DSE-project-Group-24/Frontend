@@ -1900,7 +1900,7 @@ const translations = {
 
     // Guide Page
     guide: "භාවිත මාර්ගෝපදේශය",
-    guideTitle: "භාවිත මාර්ගෝපදේශය: MedRecord ප්‍රජාතන්ත්‍රවාදී ද්වාරය",
+    guideTitle: "භාවිත මාර්ගෝපදේශය: MedRecord රජයේ ද්වාරය",
     guideSubtitle: "ශ්‍රී ලංකාවේ උතුරු පළාතේ මාර්ග අනතුරු වාර්තා කිරීමේ පද්ධතිය සැරිසැරීමට පියවරෙන් පියවර මාර්ගෝපදේශයක්.",
     guideSupportNote: "තාක්ෂණික සහාය හෝ විශේෂාංග ඉල්ලීම් සඳහා, support@medrecord.lk වෙත MedRecord සහාය කණ්ඩායම හමුවන්න.",
 

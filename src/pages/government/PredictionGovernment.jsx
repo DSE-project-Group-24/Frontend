@@ -5,7 +5,7 @@ import { Calendar, TrendingUp, TrendingDown, AlertTriangle, Clock, Filter, Activ
 import axios from 'axios';
 import GovernmentNav from '../../navbars/GovernmentNav';
 import Footer from '../../components/Footer';
-import { t } from '../../utils/translations';
+import { t, getCurrentLanguage } from '../../utils/translations';
 
 
 const API = axios.create({
@@ -143,14 +143,27 @@ const TemporalAccidentDashboard = ({ setIsAuthenticated, setRole }) => {
   // Process predicted daily data
   const processedPredictedDaily = useMemo(() => {
     if (!predictedDailyData) return [];
-    
     const sortedDates = Object.keys(predictedDailyData).sort();
-    return sortedDates.map((date, index) => ({
-      date,
-      day: new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
-      accidents: Number(predictedDailyData[date].toFixed(1)),
-      dayOfWeek: new Date(date).toLocaleDateString('en-US', { weekday: 'long' })
-    }));
+
+    // Use translation keys for month and weekday names so labels localize to en/si/ta
+    const monthKeys = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const weekdayShortKeys = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const weekdayFullKeys = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+    return sortedDates.map((date, index) => {
+      const d = new Date(date);
+      const wk = d.getDay(); // 0 = Sun
+      const m = d.getMonth();
+      const dayNum = d.getDate();
+
+      return {
+        date,
+        // e.g. "Tue, May 31" but localized via translations
+        day: `${t(weekdayShortKeys[wk])}, ${t(monthKeys[m])} ${dayNum}`,
+        accidents: Number(predictedDailyData[date].toFixed(1)),
+        dayOfWeek: t(weekdayFullKeys[wk])
+      };
+    });
   }, [predictedDailyData]);
 
   // Combined monthly data (historical + predicted)
