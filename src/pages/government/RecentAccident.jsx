@@ -134,7 +134,7 @@ const RecentAccident = ({ setIsAuthenticated, setRole }) => {
     if (chartData.length === 0) {
       return (
         <div className="bg-white p-6 rounded-lg border border-gray-200">
-          <h3 className="text-base font-semibold text-gray-800 mb-2">{title}</h3>
+          <h3 className="text-base font-semibold text-gray-800 mb-2">{translateDataValue(title)}</h3>
           <p className="text-sm text-gray-500">{t('noDataCategory')}</p>
         </div>
       );
@@ -145,7 +145,7 @@ const RecentAccident = ({ setIsAuthenticated, setRole }) => {
     return (
       <div className="bg-white p-6 rounded-lg border border-gray-200 hover:border-blue-300 transition-all duration-200">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold text-gray-800">{title}</h3>
+          <h3 className="text-base font-semibold text-gray-800">{translateDataValue(title)}</h3>
           <span className="text-xs text-gray-500">{total.toLocaleString(locale)} {t('total')}</span>
         </div>
 
@@ -182,7 +182,6 @@ const RecentAccident = ({ setIsAuthenticated, setRole }) => {
           </ResponsiveContainer>
         )}
 
-          <h3 className="text-base font-semibold text-gray-800 mb-2">{translateDataValue(title)}</h3>
         <button
           onClick={() => handleViewDetails(title, data)}
           className="mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center group"
@@ -386,15 +385,12 @@ const RecentAccident = ({ setIsAuthenticated, setRole }) => {
           <div className="p-6">
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-start">
-                <AlertCircle className="w-5 h-5 text-red-600 mr-3 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h3 className="text-sm font-medium text-red-800">Error</h3>
-                  <h3 className="text-sm font-medium text-red-800">{t('error')}</h3>
-                  <p className="text-sm text-red-700 mt-1">{error}</p>
-                            {data["time of collision"] ? getTotal(data["time of collision"]).toLocaleString(pageLocale) : (0).toLocaleString(pageLocale)}
-                      {(Object.keys(data).length || 0).toLocaleString(pageLocale)}
+                  <AlertCircle className="w-5 h-5 text-red-600 mr-3 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="text-sm font-medium text-red-800">{t('error')}</h3>
+                    <p className="text-sm text-red-700 mt-1">{error}</p>
+                  </div>
                 </div>
-              </div>
             )}
 
             {data && (
