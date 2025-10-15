@@ -3,6 +3,7 @@ import DoctorNav from "../../navbars/DoctorNav";
 import API from "../../utils/api"; // your axios instance
 import Footer from "../../components/Footer";
 import { t } from "../../utils/translations";
+import { motion } from 'framer-motion';
 
 const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
   const [searchId, setSearchId] = useState("");
@@ -1197,8 +1198,14 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                               const currentRisk = isHighRisk ? riskStyle.high : isMediumRisk ? riskStyle.medium : riskStyle.low;
                               const riskLevel = isHighRisk ? 'HIGH' : isMediumRisk ? 'MODERATE' : 'LOW';
                               
+                              const glow = isHighRisk ? 'rgba(239,68,68,0.14)' : isMediumRisk ? 'rgba(249,115,22,0.14)' : 'rgba(34,197,94,0.12)';
                               return (
-                                <div className={`${currentRisk.bg} border ${currentRisk.border} rounded-lg p-3`}>
+                                <motion.div
+                                  className={`${currentRisk.bg} border ${currentRisk.border} rounded-lg p-3`}
+                                  initial={{ y: 0, boxShadow: '0 0 rgba(0,0,0,0)' }}
+                                  whileHover={{ y: -6, scale: 1.01, boxShadow: `0 12px 30px ${glow}` }}
+                                  transition={{ duration: 0.35, ease: 'easeInOut' }}
+                                >
                                   <div className="flex items-center justify-between mb-2">
                                       <div className="flex items-center space-x-2">
                                       <div className={`w-3 h-3 ${currentRisk.indicator} rounded-full`}></div>
@@ -1211,18 +1218,22 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                                   <div className="flex items-center justify-between mb-2">
                                     <span className="text-sm font-semibold text-gray-800">{transferData.probability}</span>
                                     <div className="flex-1 mx-3">
-                                      <div className="w-full bg-gray-200 rounded-full h-1.5">
-                                        <div 
-                                          className={`h-1.5 rounded-full ${currentRisk.indicator} transition-all duration-1000`} 
-                                          style={{ width: `${Math.min(probabilityPercent, 100)}%` }}
-                                        ></div>
+                                      <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                                        <motion.div
+                                          className={`h-1.5 rounded-full ${currentRisk.indicator}`}
+                                          initial={{ width: 0 }}
+                                          animate={{ width: `${Math.min(probabilityPercent, 100)}%` }}
+                                          transition={{ duration: 0.9, ease: 'easeOut' }}
+                                          style={{ transformOrigin: '0 50%' }}
+                                          whileHover={{ scaleX: 1.02, filter: 'brightness(1.05)' }}
+                                        />
                                       </div>
                                     </div>
                                   </div>
                                   <p className={`text-xs ${currentRisk.text} font-medium`}>
                                     {translateTransferPrediction(transferData.prediction)}
                                   </p>
-                                </div>
+                                </motion.div>
                               );
                             })() : (
                               <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
@@ -1246,7 +1257,12 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                               // Determine top prediction text
                               const top = hs.prediction || '';
                               return (
-                                <div className="mt-3 bg-indigo-50 border border-indigo-200 rounded-lg p-3">
+                                <motion.div
+                                  className="mt-3 bg-indigo-50 border border-indigo-200 rounded-lg p-3"
+                                  initial={{ y: 0 }}
+                                  whileHover={{ y: -6, scale: 1.01, boxShadow: '0 12px 30px rgba(99,102,241,0.12)' }}
+                                  transition={{ duration: 0.35, ease: 'easeInOut' }}
+                                >
                                   <div className="flex items-center justify-between mb-2">
                                     <div className="flex items-center space-x-2">
                                         <div className="w-3 h-3 bg-indigo-500 rounded-full"></div>
@@ -1256,12 +1272,27 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                                   </div>
                                   {Object.keys(probs).length > 0 ? (
                                     <div className="space-y-2">
-                                      {Object.entries(probs).sort(([,a],[,b]) => b-a).map(([k,v]) => (
-                                        <div key={k} className="flex items-center justify-between text-sm">
-                                          <div className="text-slate-700">{k}</div>
-                                          <div className="font-semibold text-indigo-700">{(v*100).toFixed(1)}%</div>
-                                        </div>
-                                      ))}
+                                      {Object.entries(probs).sort(([,a],[,b]) => b-a).map(([k,v]) => {
+                                        const pct = Math.min(Number(v) * 100, 100);
+                                        return (
+                                          <div key={k} className="flex items-center justify-between text-sm">
+                                            <div className="text-slate-700">{k}</div>
+                                            <div className="ml-3 flex-1 mx-3">
+                                              <div className="w-full bg-indigo-100 rounded-full h-2 overflow-hidden">
+                                                <motion.div
+                                                  className="h-2 rounded-full bg-indigo-600"
+                                                  initial={{ width: 0 }}
+                                                  animate={{ width: `${pct}%` }}
+                                                  transition={{ duration: 0.9, ease: 'easeOut' }}
+                                                  whileHover={{ scaleX: 1.02, filter: 'brightness(1.05)' }}
+                                                  style={{ transformOrigin: '0 50%' }}
+                                                />
+                                              </div>
+                                              <div className="text-xs font-semibold text-indigo-700 mt-1">{pct.toFixed(1)}%</div>
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
                                     </div>
                                   ) : (
                                       <div className="text-xs text-indigo-600">{t('noHospitalStayProbabilitiesCompact')}</div>
@@ -1278,7 +1309,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                                       </div>
                                     </div>
                                   )}
-                                </div>
+                                </motion.div>
                               );
                             })() : (
                               <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
@@ -1319,7 +1350,12 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                               const confidenceLevel = highestProbability >= 80 ? 'HIGH' : highestProbability >= 60 ? 'MODERATE' : 'LOW';
                               
                               return (
-                                <div className={`${currentOutcome.bg} border ${currentOutcome.border} rounded-lg p-3`}>
+                                <motion.div
+                                  className={`${currentOutcome.bg} border ${currentOutcome.border} rounded-lg p-3`}
+                                  initial={{ y: 0 }}
+                                  whileHover={{ y: -6, scale: 1.01, boxShadow: '0 12px 30px rgba(59,130,246,0.12)' }}
+                                  transition={{ duration: 0.35, ease: 'easeInOut' }}
+                                >
                                   <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center space-x-2">
                                       <div className={`w-3 h-3 ${currentOutcome.indicator} rounded-full`}></div>
@@ -1358,31 +1394,35 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
                                           };
                                           
                                           return (
-                                            <div key={outcome} className={`flex items-center justify-between p-2 rounded-lg transition-all duration-300 ${
+                                            <motion.div key={outcome} className={`flex items-center justify-between p-2 rounded-lg transition-all duration-300 ${
                                               isHighest ? 'bg-white border border-blue-300 shadow-sm' : 'bg-white bg-opacity-60'
-                                            }`}>
+                                            }`} whileHover={{ scale: 1.01 }}>
                                               <div className="flex items-center space-x-2 flex-1">
                                                 <span className={`text-xs font-medium ${isHighest ? 'text-blue-900' : 'text-blue-700'} min-w-0 flex-1`}>
                                                   {translateOutcome(outcome)}
                                                 </span>
                                                 <div className="flex items-center space-x-2">
-                                                  <div className="w-12 bg-blue-200 rounded-full h-1.5 shadow-inner">
-                                                    <div 
-                                                      className={`h-1.5 rounded-full ${getProgressColor()} transition-all duration-1000`}
-                                                      style={{ width: `${Math.min(probabilityPercent, 100)}%` }}
-                                                    ></div>
+                                                  <div className="w-12 bg-blue-200 rounded-full h-1.5 shadow-inner overflow-hidden">
+                                                    <motion.div
+                                                      className={`h-1.5 rounded-full ${getProgressColor()}`}
+                                                      initial={{ width: 0 }}
+                                                      animate={{ width: `${Math.min(probabilityPercent, 100)}%` }}
+                                                      transition={{ duration: 0.9, ease: 'easeOut' }}
+                                                      whileHover={{ scaleX: 1.02, filter: 'brightness(1.05)' }}
+                                                      style={{ transformOrigin: '0 50%' }}
+                                                    />
                                                   </div>
                                                   <span className={`text-xs font-bold ${isHighest ? 'text-blue-900' : 'text-blue-700'} min-w-fit`}>
                                                     {formatPercent(probability)}
                                                   </span>
                                                 </div>
                                               </div>
-                                            </div>
+                                            </motion.div>
                                           );
                                         })}
                                     </div>
                                   )}
-                                </div>
+                                </motion.div>
                               );
                             })() : (
                               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { t } from '../../utils/translations';
+import API from '../../utils/api';
 import { Search, MapPin, Phone, Building2, Filter, X, Hospital, Activity, TrendingUp } from 'lucide-react';
 import GovernmentNav from '../../navbars/GovernmentNav';
 import Footer from '../../components/Footer';
@@ -88,8 +89,8 @@ const DashboardGovernmentContent = ({ setIsAuthenticated, setRole }) => {
   useEffect(() => {
     const fetchHospitals = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/hospital/all');
-        const data = await response.json();
+        const resp = await API.get('/hospital/all');
+        const data = resp?.data;
         setAllHospitals(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Error fetching hospitals:', error);

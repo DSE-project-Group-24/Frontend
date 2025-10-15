@@ -1889,9 +1889,9 @@ const AccidentEDA = () => {
 
         {/* Summary Section */}
         {activeTab === 'overview' && (
-          <ChartContainer title={`🔍 ${t('keyInsightsSummary')}`}>
+          <ChartContainer title={t('keyInsightsSummary')}>
             <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-xl shadow-inner">
-              <h4 className="text-2xl font-bold text-gray-800 mb-8 text-center">📊 {t('majorFindings')}</h4>
+              <h4 className="text-2xl font-bold text-gray-800 mb-8 text-center">{t('majorFindings')}</h4>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                 <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-blue-500">
                   <h5 className="text-xl font-bold text-blue-700 mb-4 flex items-center">
@@ -1903,20 +1903,20 @@ const AccidentEDA = () => {
                   <ul className="space-y-3 text-gray-700">
                     {Object.keys(demographics.ageGroups).length > 0 && (
                       <li className="flex items-start">
-                        <span className="text-blue-500 mr-2">🎯</span>
+                        <span className="w-2 h-2 rounded-full bg-blue-500 mr-3 mt-1" aria-hidden="true"></span>
                         <span><strong>{t('ageGroup')}:</strong> {Object.entries(demographics.ageGroups).sort((a,b) => b[1] - a[1])[0][0]} years ({t('highestRisk')})</span>
                       </li>
                     )}
                     {Object.keys(demographics.genderDist).length > 0 && (
                       <li className="flex items-start">
-                        <span className="text-blue-500 mr-2">⚧</span>
-                        <span><strong>Gender:</strong> {Object.entries(demographics.genderDist).sort((a,b) => b[1] - a[1])[0][0]} ({Math.round((Object.entries(demographics.genderDist).sort((a,b) => b[1] - a[1])[0][1] / (analyticsData.total_records || 1)) * 100)}% {t('ofCases')})</span>
+                        <span className="w-2 h-2 rounded-full bg-indigo-500 mr-3 mt-1" aria-hidden="true"></span>
+                        <span><strong>{t('gender')}:</strong> {Object.entries(demographics.genderDist).sort((a,b) => b[1] - a[1])[0][0]} ({Math.round((Object.entries(demographics.genderDist).sort((a,b) => b[1] - a[1])[0][1] / (analyticsData.total_records || 1)) * 100)}% {t('ofCases')})</span>
                       </li>
                     )}
                     {Object.keys(demographics.ageGroups).length === 0 && Object.keys(demographics.genderDist).length === 0 && (
                       <li className="text-gray-500 text-center py-4">
                         <div className="bg-gray-100 rounded-lg p-4">
-                          <span>📋 {t('noDemographicData')}</span>
+                          <span>{t('noDemographicData')}</span>
                         </div>
                       </li>
                     )}
@@ -1932,13 +1932,13 @@ const AccidentEDA = () => {
                   <ul className="space-y-3 text-gray-700">
                     {Object.keys(accidentChars.hourlyDistribution).length > 0 && (
                       <li className="flex items-start">
-                        <span className="text-red-500 mr-2">🕒</span>
+                        <span className="w-2 h-2 rounded-full bg-red-500 mr-3 mt-1" aria-hidden="true"></span>
                         <span><strong>{t('peakTime')}:</strong> {Object.entries(accidentChars.hourlyDistribution).sort((a,b) => b[1] - a[1])[0][0]}:00 {t('hours')}</span>
                       </li>
                     )}
                     {Object.keys(accidentChars.collisionTypes).length > 0 && (
                       <li className="flex items-start">
-                        <span className="text-red-500 mr-2">🚗</span>
+                        <span className="w-2 h-2 rounded-full bg-red-500 mr-3 mt-1" aria-hidden="true"></span>
                         <span><strong>{t('commonCollision')}:</strong> {translateDataValue(Object.entries(accidentChars.collisionTypes).sort((a,b) => b[1] - a[1])[0][0])}</span>
                       </li>
                     )}
@@ -1946,7 +1946,7 @@ const AccidentEDA = () => {
                     {Object.keys(accidentChars.hourlyDistribution).length === 0 && Object.keys(accidentChars.collisionTypes).length === 0 && Object.keys(accidentChars.roadCategories).length === 0 && (
                       <li className="text-gray-500 text-center py-4">
                         <div className="bg-gray-100 rounded-lg p-4">
-                          <span>📊 {t('noAccidentConditionData')}</span>
+                          <span>{t('noAccidentConditionData')}</span>
                         </div>
                       </li>
                     )}
