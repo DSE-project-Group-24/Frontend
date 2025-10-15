@@ -17,6 +17,8 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
   const [loadingPredictions, setLoadingPredictions] = useState({});
   const [dischargeOutcomePredictions, setDischargeOutcomePredictions] = useState({});
   const [loadingDischargeOutcome, setLoadingDischargeOutcome] = useState({});
+  const [hospitalStayPredictions, setHospitalStayPredictions] = useState({});
+  const [loadingHospitalStay, setLoadingHospitalStay] = useState({});
   const [copySuccess, setCopySuccess] = useState("");
 
   const handleCopy = async (text) => {
@@ -43,7 +45,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
     }
     setLoading(true);
     try {
-      // 1️⃣ fetch patients and filter by id, NIC, or name
+      // 1️1 fetch patients and filter by id, NIC, or name
       const res = await API.get("/patients");
       setPatients(res.data);
       console.log("Fetched patients:", res.data);
@@ -74,22 +76,148 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
       }
       setFiltered(match);
 
-      // 2️⃣ fetch accident details for that patient using the matched patient's ID
+      // 22 fetch accident details for that patient using the matched patient's ID
       const accRes = await API.get(`/accidents/patient/${match.patient_id}`);
       setAccidents(accRes.data);
       console.log("Fetched accidents:", accRes.data);
       
-      // 3️⃣ Get predictions for incomplete accidents
+      // 3 Get predictions for incomplete accidents
       const incompleteAccidents = accRes.data.filter(acc => !acc["Completed"]);
       for (const accident of incompleteAccidents) {
         await getPredictionForAccident(accident, match); 
         await getDischargeOutcomePrediction(accident, match);
+        // hospital stay prediction
+        await getHospitalStayPrediction(accident, match);
       }
     } catch (err) {
       console.error(err);
       setError("Error fetching data");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const prepareHospitalStayData = (accident, patient) => {
+    // Prepare the payload object expected by the hospital-stay model
+    const obj = {};
+    const missingValues = [];
+
+    const injury1 = accident?.injuries && accident.injuries[0];
+    const injury2 = accident?.injuries && accident.injuries[1];
+
+    // Investigation Done - not present in current accident schema; hard-code and mark missing
+    obj['Investigation Done'] = injury1?.['investigation_done']; // investigation_done
+    console.log('Investigation Done value:', obj['Investigation Done']);
+    if (!injury1?.['investigation_done']) missingValues.push('Investigation Done (hard-coded: Others)');
+
+    // Type of injury No 1
+    obj['Type of injury No 1'] = injury1?.type_of_injury;
+    if (!injury1?.type_of_injury) missingValues.push('Type of injury No 1');
+
+    // Side (primary injury) - best-effort mapping; hardcode if not available
+    obj['Side'] = injury1?.side || injury1?.location_side;
+    if (!injury1?.side && !injury1?.location_side) missingValues.push('Side (hard-coded)');
+
+    // Site of Injury No1
+    obj['Site of Injury No1'] = injury1?.site_of_injury;
+    if (!injury1?.site_of_injury) missingValues.push('Site of Injury No1');
+
+    // Current Hospital Name
+    obj['Current Hospital Name'] = localStorage.getItem('hospital_name')
+    if (!localStorage.getItem('hospital_name') && !accident?.['Hospital']) missingValues.push('Current Hospital Name (fallback used)');
+
+    // Engine Capacity - best-effort fallback
+    obj['Engine Capacity'] = accident?.['Engine capacity'];
+    if (!accident?.['Engine capacity'] && !accident?.['Engine Capacity']) missingValues.push('Engine Capacity (hard-coded)');
+
+    // Severity
+    obj['Severity'] = accident?.['Severity'] || (injury1?.severity === 'S' ? 'S' : 'M');
+    if (!accident?.['Severity'] && !injury1?.severity) missingValues.push('Severity');
+
+    // Collision Force From
+    obj['Collision Force From'] = accident?.['Collision force from'] || 'RightSide';
+    if (!accident?.['Collision force from']) missingValues.push('Collision Force From (hard-coded)');
+
+    // Side.1 (secondary injury side)
+    obj['Side.1'] = injury2 ? (injury2.side || 'Unknown') : 'No Secondary Injury Found';
+    if (!injury2) missingValues.push('Side.1 (no secondary injury)');
+
+    // Type of Injury No 2
+    obj['Type of Injury No 2'] = injury2?.type_of_injury || '';
+    if (!injury2?.type_of_injury) missingValues.push('Type of Injury No 2');
+
+    // Family Current Status
+    obj['Family Current Status'] = accident?.['Family current status'];
+    if (!accident?.['Family current status']) missingValues.push('Family Current Status (hard-coded)');
+
+    // Time Taken To Reach Hospital
+    obj['Time Taken To Reach Hospital'] = accident?.['Time taken to reach hospital'];
+    if (!accident?.['Time taken to reach hospital']) missingValues.push('Time Taken To Reach Hospital (hard-coded)');
+
+    // Mode of Transport to the Hospital
+    obj['Mode of Transport to the Hospital'] = accident?.['Mode of transport to hospital'];
+    if (!accident?.['Mode of transport to hospital']) missingValues.push('Mode of Transport to the Hospital (hard-coded)');
+
+    // Category of Road
+    obj['Category of Road'] = accident?.['Category of Road'];
+    if (!accident?.['Category of Road']) missingValues.push('Category of Road (hard-coded)');
+
+    // Time of Collision
+    obj['Time of Collision'] = accident?.['time of collision'];
+    if (!accident?.['time of collision']) missingValues.push('Time of Collision (hard-coded)');
+
+    // Include the friendly debug missingValues so UI can show data quality warnings
+    obj._missingValues = missingValues;
+
+    return obj;
+  };
+
+  const getHospitalStayPrediction = async (accident, patient) => {
+    setLoadingHospitalStay(prev => ({ ...prev, [accident.accident_id]: true }));
+    try {
+      const prepared = prepareHospitalStayData(accident, patient);
+      const missingValues = prepared._missingValues || [];
+
+      // Remove debug prop before sending
+      const payloadObj = { ...prepared };
+      delete payloadObj._missingValues;
+
+      const payload = { data: [payloadObj] };
+      const response = await API.post('predictions/hospital-stay-predict', payload);
+
+      // Expect response.predictions array
+      const pred = response.data?.predictions && response.data.predictions[0];
+      if (pred) {
+        setHospitalStayPredictions(prev => ({
+          ...prev,
+          [accident.accident_id]: {
+            prediction: pred.prediction,
+            probabilities: pred.probabilities || pred.probabilities || {},
+            missingValues: missingValues
+          }
+        }));
+      } else {
+        setHospitalStayPredictions(prev => ({
+          ...prev,
+          [accident.accident_id]: {
+            prediction: 'Unknown',
+            probabilities: {},
+            missingValues: missingValues
+          }
+        }));
+      }
+    } catch (error) {
+      console.error(`Error getting hospital stay prediction for ${accident.accident_id}:`, error);
+      setHospitalStayPredictions(prev => ({
+        ...prev,
+        [accident.accident_id]: {
+          prediction: 'Error',
+          probabilities: {},
+          message: 'Failed to get hospital stay prediction'
+        }
+      }));
+    } finally {
+      setLoadingHospitalStay(prev => ({ ...prev, [accident.accident_id]: false }));
     }
   };
 
@@ -165,6 +293,21 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
     return translated || label;
   };
 
+  // Helper to translate transfer prediction values into meaningful strings
+  const translateTransferPrediction = (prediction) => {
+    if (prediction === "1" || prediction === 1) {
+      return t('transferRequired') || 'Transfer Required';
+    } else if (prediction === "0" || prediction === 0) {
+      return t('noTransferRequired') || 'No Transfer Required';
+    } else if (prediction === "Yes") {
+      return t('transferRequired') || 'Transfer Required';
+    } else if (prediction === "No") {
+      return t('noTransferRequired') || 'No Transfer Required';
+    }
+    // Fallback for any other values
+    return prediction || t('unknown');
+  };
+
   const formatPercent = (prob) => {
     if (prob === null || prob === undefined || isNaN(prob)) return '-';
     try {
@@ -174,6 +317,39 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
     } catch (e) {
       return (prob * 100).toFixed(1) + '%';
     }
+  };
+
+  // Helper to format the hospital-stay model prediction responses like
+  // "[array(['2–3 days'], dtype=object)]" into a readable string "2–3 days".
+  const formatHospitalStayPrediction = (raw) => {
+    if (!raw && raw !== 0) return '';
+    // If it's already a string label, return it
+    if (typeof raw === 'string') {
+      // Some responses are strings like "[array(['2–3 days'], dtype=object)]" or "['2–3 days']"
+      // Try to extract the inner quoted text
+      const m = raw.match(/['"]([^'"]+)['"]/);
+      if (m && m[1]) return m[1];
+      // If it's a JSON-like array, try parse
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return String(parsed[0]);
+      } catch (e) {
+        // ignore
+      }
+      return raw;
+    }
+
+    // If it's an array-like object (e.g., returned already parsed), handle common shapes
+    try {
+      // e.g., ['2–3 days']
+      if (Array.isArray(raw) && raw.length > 0) return String(raw[0]);
+      // e.g., object with array inside
+      if (raw && raw[0] && Array.isArray(raw[0])) return String(raw[0][0]);
+    } catch (e) {
+      // fallback
+    }
+
+    return String(raw);
   };
 
   const getPredictionForAccident = async (accident, patientData) => {
@@ -290,31 +466,42 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
     const data = {};
     const missingValues = []; // Track missing/null values
 
-    // Current Hospital Name - use available hospital data
-    const hospitalName = accident?.["Hospital"] || accident?.hospital;
-    data['current_hospital_name'] = hospitalName || "DGH – Kilinochchi";
+    // Current Hospital Name - use localStorage hospital data first, then fallback to accident data
+    const hospitalName = localStorage.getItem('hospital_name') || accident?.["Hospital"] || accident?.hospital;
+    data['current_hospital_name'] = hospitalName;
     if (!hospitalName) {
       missingValues.push('Current Hospital Name');
     }
     
     // Family Current Status
-    data['family_current_status'] = accident?.["Family current status"] || "Moderately Affected";
+    data['family_current_status'] = accident?.["Family current status"];
     if (!accident?.["Family current status"]) {
       missingValues.push('Family Current Status');
     }
 
-    // Type of injury No 1 - Warning: Not available in current data
-    data['type_of_injury_no_1'] = "fracture"; // Default value
-    missingValues.push('Type of injury No 1 (not available in current data structure)');
+    // Type of injury No 1 - Extract from injuries array
+    const injury1 = accident?.injuries && accident.injuries[0];
+    data['type_of_injury_no_1'] = injury1?.type_of_injury 
+    if (!injury1?.type_of_injury) {
+      missingValues.push('Type of injury No 1 (no injury data available)');
+    }
+
+    // Type of Injury No 2 - Extract from injuries array
+    const injury2 = accident?.injuries && accident.injuries[1];
+    data['type_of_injury_no_2'] = injury2?.type_of_injury
+    if (!injury2?.type_of_injury) {
+      missingValues.push('Type of Injury No 2 (no secondary injury data available)');
+    }
+
 
     // Traveling Expenditure per day
-    data['traveling_expenditure_per_day'] = accident?.["Traveling Expenditure Per Day"] || "100-200";
+    data['traveling_expenditure_per_day'] = accident?.["Traveling Expenditure Per Day"];
     if (!accident?.["Traveling Expenditure Per Day"]) {
       missingValues.push('Traveling Expenditure Per Day');
     }
 
-    // First Hospital Name - use available hospital data
-    const firstHospitalName = accident?.["Hospital"] || accident?.hospital;
+    // First Hospital Name - use localStorage hospital data first, then fallback to accident data
+    const firstHospitalName = localStorage.getItem('hospital_name') || accident?.["Hospital"] || accident?.hospital;
     data['first_hospital_name'] = firstHospitalName || "DGH – Kilinochchi";
     if (!firstHospitalName) {
       missingValues.push('First Hospital Name');
@@ -327,24 +514,33 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
         if (!isNaN(dob.getTime())) {
           data['date_of_birth'] = dob.toISOString().split('T')[0]; // Format as YYYY-MM-DD
         } else {
-          data['date_of_birth'] = "1990-05-15"; // Default for invalid date
+          data['date_of_birth']
           missingValues.push('Date of Birth (invalid date format)');
         }
       } catch (e) {
-        data['date_of_birth'] = "1990-05-15"; // Default for parsing error
+        data['date_of_birth']
         missingValues.push('Date of Birth (date parsing error)');
       }
     } else {
-      data['date_of_birth'] = "1990-05-15"; // Default value
+      data['date_of_birth']
       missingValues.push('Date of Birth');
     }
 
-    // Site of injury No1 - Warning: Not available in current data
-    data['site_of_injury_no1'] = "head injury"; // Default value
-    missingValues.push('Site of injury No1 (not available in current data structure)');
+    // Site of injury No1 - Extract from injuries array
+    data['site_of_injury_no1'] = injury1?.site_of_injury
+    if (!injury1?.site_of_injury) {
+      missingValues.push('Site of injury No1 (no injury data available)');
+    }
+
+    // Site of injury No 2 - Extract from injuries array
+    data['site_of_injury_no_2'] = injury2?.site_of_injury
+    if (!injury2?.site_of_injury) {
+      missingValues.push('Site of injury No 2 (no secondary injury data available)');
+    }
+
 
     // Approximate Speed
-    data['approximate_speed'] = accident?.["Approximate speed"] || "40 - 80 km/h";
+    data['approximate_speed'] = accident?.["Approximate speed"];
     if (!accident?.["Approximate speed"]) {
       missingValues.push('Approximate Speed');
     }
@@ -356,87 +552,85 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
         if (!isNaN(incidentDate.getTime())) {
           data['incident_at_time_and_date'] = incidentDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
         } else {
-          data['incident_at_time_and_date'] = "2023-10-15"; // Default for invalid date
+          data['incident_at_time_and_date']
           missingValues.push('Incident At Time and Date (invalid date format)');
         }
       } catch (e) {
-        data['incident_at_time_and_date'] = "2023-10-15"; // Default for parsing error
+        data['incident_at_time_and_date'] 
         missingValues.push('Incident At Time and Date (date parsing error)');
       }
     } else {
-      data['incident_at_time_and_date'] = "2023-10-15"; // Default value
+      data['incident_at_time_and_date']
       missingValues.push('Incident At Time and Date');
     }
 
     // Hospital Distance From Home
-    data['hospital_distance_from_home'] = accident?.["Hospital Distance From Home"] || "5-10 Km";
+    data['hospital_distance_from_home'] = accident?.["Hospital Distance From Home"];
     if (!accident?.["Hospital Distance From Home"]) {
       missingValues.push('Hospital Distance From Home');
     }
 
     // Mode of Transport to the Hospital
-    data['mode_of_transport_to_the_hospital'] = accident?.["Mode of transport to hospital"] || "Ambulance";
+    data['mode_of_transport_to_the_hospital'] = accident?.["Mode of transport to hospital"];
     if (!accident?.["Mode of transport to hospital"]) {
       missingValues.push('Mode of Transport to the Hospital');
     }
 
     // Educational Qualification
-    data['educational_qualification'] = patient?.["Education Qualification"] || "O/L or A/L";
+    data['educational_qualification'] = patient?.["Education Qualification"];
     if (!patient?.["Education Qualification"]) {
       missingValues.push('Educational Qualification');
     }
 
-    // Time Taken To Reach Hospital - Warning: Not available in current data
-    data['time_taken_to_reach_hospital'] = "Less Than 15 Minutes"; // Default value
-    missingValues.push('Time Taken To Reach Hospital (not available in current data structure)');
+    // Time Taken To Reach Hospitat
+    data['time_taken_to_reach_hospital'] = accident?.["Time taken to reach hospital"];
+    if (!accident?.["Time taken to reach hospital"]) {
+      missingValues.push('Time taken to reach hospital');
+    }
+
 
     // Any Other Hospital Admission Expenditure
-    data['any_other_hospital_admission_expenditure'] = accident?.["Any Other Hospital Admission Expenditure"] || "No Other Expenses";
+    data['any_other_hospital_admission_expenditure'] = accident?.["Any Other Hospital Admission Expenditure"];
     if (!accident?.["Any Other Hospital Admission Expenditure"]) {
       missingValues.push('Any Other Hospital Admission Expenditure');
     }
 
-    // Site of injury No 2 - Warning: Not available in current data
-    data['site_of_injury_no_2'] = "no secondary injury found"; // Default value
-    missingValues.push('Site of injury No 2 (not available in current data structure)');
-
     // Occupation
-    data['occupation'] = patient?.["Occupation"] || "Student";
+    data['occupation'] = patient?.["Occupation"];
     if (!patient?.["Occupation"]) {
       missingValues.push('Occupation');
     }
 
-    // Family Monthly Income Before Accident - Warning: Not available in current data
-    data['family_monthly_income_before_accident'] = patient?.["Family Monthly Income"] || "30000-45000";
-    if (!patient?.["Family Monthly Income"]) {
-      missingValues.push('Family Monthly Income Before Accident (using current income as approximation)');
+    // Family Monthly Income Before Accident
+    data['family_monthly_income_before_accident'] = accident?.["Family monthly income before accident"];
+    if (!accident?.["Family monthly income before accident"]) {
+      missingValues.push('Family monthly income before accident');
     }
 
     // Collision With
-    data['collision_with'] = accident?.["Collision with"] || "Motorbike";
+    data['collision_with'] = accident?.["Collision with"];
     if (!accident?.["Collision with"]) {
       missingValues.push('Collision With');
     }
 
     // Life Style
-    data['life_style'] = patient?.["Life Style"] || "Living with care givers";
+    data['life_style'] = patient?.["Life Style"];
     if (!patient?.["Life Style"]) {
       missingValues.push('Life Style');
     }
 
-    // Collision Force From - Warning: Not available in current data
-    data['collision_force_from'] = "Front"; // Default value
-    missingValues.push('Collision Force From (not available in current data structure)');
+    // Collision Force From
+    data['collision_force_from'] = accident?.["Collision force from"];
+    if (!accident?.["Collision force from"]) {
+      missingValues.push('Collision force from');
+    }
 
     // Road Type
-    data['road_type'] = accident?.["Road Type"] || "Straight";
+    data['road_type'] = accident?.["Road Type"];
     if (!accident?.["Road Type"]) {
       missingValues.push('Road Type');
     }
 
-    // Type of Injury No 2 - Warning: Not available in current data
-    data['type_of_injury_no_2'] = "abrasion"; // Default value
-    missingValues.push('Type of Injury No 2 (not available in current data structure)');
 
     // Validate and clean data before sending
     const cleanedData = {};
@@ -625,7 +819,7 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
       missingValues.push(`Ethnicity (value: "${patient?.["Ehinicity"]}")`);
     }
 
-    // Hospital one-hot
+    // Hospital one-hot - use localStorage hospital data first, then fallback to accident data
     const hospital_options = [
       "BH, Tellipalai(Type A)",
       "BH,Chavakachcheri(TypeB)",
@@ -697,12 +891,13 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
     hospital_options.forEach(opt => {
       data["First Hospital Name_" + opt] = 0;
     });
-    if (accident?.hospital) {
-      data["First Hospital Name_" + accident.hospital] = 1;
+    
+    // Use localStorage hospital data first, then fallback to accident hospital data
+    const hospitalName = localStorage.getItem('hospital_name') || accident?.hospital;
+    if (hospitalName) {
+      data["First Hospital Name_" + hospitalName] = 1;
     } else {
-      missingValues.push(`Hospital (value: "${accident?.hospital}")`);
-      // Default to DGH – Vavuniya if no hospital specified
-      data["First Hospital Name_DGH – Vavuniya"] = 1;
+      missingValues.push(`Hospital (localStorage: "${localStorage.getItem('hospital_name')}", accident: "${accident?.hospital}")`);
     }
 
     // Log missing values for debugging
@@ -770,139 +965,455 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
           <SkeletonPatient />
         ) : (
           filtered && (
-            <div className="bg-white p-6 rounded-xl shadow-md mb-6 border border-slate-100">
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-sky-600 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-md">
-                    {filtered["Full Name"] ? filtered["Full Name"].split(' ').map(n => n[0]).slice(0,2).join('') : 'P'}
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm mb-6">
+              {/* Patient Header */}
+              <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium">
+                      {filtered["Full Name"] ? filtered["Full Name"].split(' ').map(n => n[0]).slice(0,2).join('') : 'P'}
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-semibold text-gray-900">{filtered["Full Name"]}</h2>
+                      <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
+                        <span>ID: {filtered["patient_id"]}</span>
+                        <span>•</span>
+                        <span>{filtered["Contact Number"]}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-lg font-semibold text-slate-800">{filtered["Full Name"]}</h2>
-                    <p className="text-sm text-slate-500">{filtered["Contact Number"]}</p>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => handleCopy(filtered["patient_id"])} 
+                      className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                    >
+                      {t('copyId')}
+                    </button>
+                    {copySuccess && <span className="text-xs text-green-600 font-medium">{copySuccess}</span>}
                   </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button onClick={() => handleCopy(filtered["patient_id"])} className="inline-flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm hover:shadow transition">Copy ID</button>
-                  {copySuccess && <span className="text-sm text-emerald-600">{copySuccess}</span>}
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-700">
-                <div className="space-y-2">
-                  <p><span className="font-medium">{t('dateOfBirth')}:</span> {filtered["Date of Birth"]} {filtered["Date of Birth"] && (<span className="text-sm text-slate-500"> ({t('age')}: {Math.floor((new Date() - new Date(filtered["Date of Birth"])) / (1000 * 60 * 60 * 24 * 365.25))})</span>)}</p>
-                  <p><span className="font-medium">{t('ethnicity')}:</span> {filtered["Ethnicity"]}</p>
-                  <p><span className="font-medium">{t('gender')}:</span> {filtered["Gender"]}</p>
-                  <p><span className="font-medium">{t('address')}:</span> {filtered["Address Street"]}</p>
-                </div>
-                <div className="space-y-2">
-                  <p><span className="font-medium">{t('lifeStyle')}:</span> {filtered["Life Style"]}</p>
-                  <p><span className="font-medium">{t('education')}:</span> {filtered["Education Qualification"]}</p>
-                  <p><span className="font-medium">{t('occupation')}:</span> {filtered["Occupation"]}</p>
-                  <p><span className="font-medium">{t('familyMonthlyIncome')}:</span> {filtered["Family Monthly Income"]}</p>
-                  <p><span className="font-medium">{t('bloodGroup')}:</span> {filtered["Blood Group"] || t('notRecorded')}</p>
-                  <p><span className="font-medium">{t('patientId')}:</span> <span className="text-sm text-slate-600">{filtered["patient_id"]}</span></p>
+              {/* Patient Details */}
+              <div className="px-6 py-5">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Demographics */}
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-2">
+                      {t('demographics')}
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start">
+                        <span className="text-sm text-gray-600 w-20 flex-shrink-0">{t('dateOfBirth')}</span>
+                        <div className="text-sm text-gray-900 text-right">
+                          <div>{filtered["Date of Birth"]}</div>
+                          {filtered["Date of Birth"] && (
+                            <div className="text-xs text-gray-500 mt-0.5">
+                              {t('age')}: {Math.floor((new Date() - new Date(filtered["Date of Birth"])) / (1000 * 60 * 60 * 24 * 365.25))} years
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600 w-20 flex-shrink-0">{t('gender')}</span>
+                        <span className="text-sm text-gray-900">{filtered["Gender"]}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600 w-20 flex-shrink-0">{t('ethnicity')}</span>
+                        <span className="text-sm text-gray-900">{filtered["Ethnicity"]}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600 w-20 flex-shrink-0">{t('bloodGroup')}</span>
+                        <span className="text-sm text-gray-900">{filtered["Blood Group"] || t('notRecorded')}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Social Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-2">
+                      {t('socialInformation')}
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600 w-24 flex-shrink-0">{t('occupation')}</span>
+                        <span className="text-sm text-gray-900 text-right">{filtered["Occupation"]}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600 w-24 flex-shrink-0">{t('education')}</span>
+                        <span className="text-sm text-gray-900 text-right">{filtered["Education Qualification"]}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600 w-24 flex-shrink-0">{t('lifeStyle')}</span>
+                        <span className="text-sm text-gray-900 text-right">{filtered["Life Style"]}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600 w-24 flex-shrink-0">{t('familyMonthlyIncome')}</span>
+                        <span className="text-sm text-gray-900 text-right">{filtered["Family Monthly Income"]}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Contact Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide border-b border-gray-200 pb-2">
+                      {t('contactInformation')}
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start">
+                        <span className="text-sm text-gray-600 w-16 flex-shrink-0">{t('address')}</span>
+                        <span className="text-sm text-gray-900 text-right">{filtered["Address Street"]}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600 w-16 flex-shrink-0">Phone</span>
+                        <span className="text-sm text-gray-900">{filtered["Contact Number"]}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           )
         )}
 
-        {/* Accident Summary */}
+        {/* Medical Records Overview */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
               <SkeletonAccidentCard key={i} />
             ))}
           </div>
         ) : (
           filtered && accidents.length > 0 && (
-          <section className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-slate-800">{t('accidentRecords')} <span className="text-sm text-slate-500">({accidents.length})</span></h2>
+          <section className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">{t('accidentRecords')}</h2>
+                  <p className="text-sm text-gray-600">{t('clinicalIncidentIntro')}</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                  {accidents.length} {accidents.length === 1 ? 'Record' : 'Records'}
+                </span>
+              </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {accidents.map((acc, index) => (
-                <article
-                  key={acc.accident_id}
-                  onClick={() => {
-                    setSelectedAccident(acc);
-                    setShowModal(true);
-                  }}
-                  className="group bg-white rounded-xl border border-slate-100 p-4 hover:shadow-lg transition-shadow duration-200 cursor-pointer"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="text-sm font-semibold text-slate-800">Accident #{index + 1}</h3>
-                      <p className="text-xs text-slate-500">{acc["incident at date"]} • {acc["time of collision"]}</p>
-                    </div>
-                    {!acc["Completed"] && (
-                      <div className="inline-flex items-center gap-2 px-2 py-1 rounded-md text-xs font-medium bg-amber-100 text-amber-800">
-                        {t('incomplete')}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {accidents.map((acc, index) => {
+                // Calculate dynamic severity styling
+                const severity = acc["Severity"];
+                const isHighSeverity = severity === 'Serious';
+                const isMediumSeverity = severity === 'Medium';
+                const isLowSeverity = severity === 'Light' || severity === 'Minor';
+                
+                const severityColors = {
+                  high: { border: 'border-l-red-500', bg: 'bg-red-50', text: 'text-red-700', badge: 'bg-red-100 text-red-800' },
+                  medium: { border: 'border-l-orange-500', bg: 'bg-orange-50', text: 'text-orange-700', badge: 'bg-orange-100 text-orange-800' },
+                  low: { border: 'border-l-green-500', bg: 'bg-green-50', text: 'text-green-700', badge: 'bg-green-100 text-green-800' },
+                  default: { border: 'border-l-gray-500', bg: 'bg-gray-50', text: 'text-gray-700', badge: 'bg-gray-100 text-gray-800' }
+                };
+                
+                const currentSeverity = isHighSeverity ? severityColors.high : 
+                                      isMediumSeverity ? severityColors.medium : 
+                                      isLowSeverity ? severityColors.low : 
+                                      severityColors.default;
+
+                return (
+                  <article
+                    key={acc.accident_id}
+                    onClick={() => {
+                      setSelectedAccident(acc);
+                      setShowModal(true);
+                    }}
+                    className={`group bg-white border border-gray-200 ${currentSeverity.border} border-l-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden`}
+                  >
+                    {/* Card Header */}
+                    <div className={`${currentSeverity.bg} px-4 py-3 border-b border-gray-100`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">
+                            <span className="text-sm font-bold text-gray-700">#{index + 1}</span>
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-semibold text-gray-900">{t('medicalIncident')} {index + 1}</h3>
+                            <p className="text-xs text-gray-600">{acc["incident at date"]}</p>
+                          </div>
+                        </div>
                       </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-2 text-slate-700">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-500">{t('timeOfCollision')}</span>
-                      <span className="font-medium text-sm">{acc["time of collision"]}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-500">{t('completed')}</span>
-                      <span className="font-medium text-sm">{acc["Completed"] ? t('yes') : t('no')}</span>
                     </div>
 
-                    {!acc["Completed"] && (
-                      <div className="mt-3 space-y-2">
-                        <div className="p-3 bg-gradient-to-r from-sky-50 to-indigo-50 rounded-lg border border-sky-100">
-                          <h4 className="text-xs font-semibold text-sky-700">{t('mlTransferPrediction')}</h4>
-                          {loadingPredictions[acc.accident_id] ? (
-                            <div className="flex items-center gap-2 text-sky-600 mt-2">
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-sky-600"></div>
-                              <span className="text-sm">{t('calculatingPrediction')}</span>
-                            </div>
-                          ) : transferProbabilities[acc.accident_id] ? (
-                            <div className="mt-2">
-                              <div className="text-sm text-slate-600">{t('transferProbability')}: <span className="font-bold text-sky-700">{transferProbabilities[acc.accident_id].probability}</span></div>
-                              <div className="text-sm mt-1">{t('prediction')}: <span className="font-semibold">{transferProbabilities[acc.accident_id].prediction}</span></div>
-                            </div>
-                          ) : (
-                            <p className="text-sm text-red-600 mt-2">{t('predictionNotAvailable')}</p>
-                          )}
+                    {/* Card Body */}
+                    <div className="px-4 py-4">
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="flex flex-col">
+                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t('time')}</span>
+                            <span className="font-medium text-gray-900 mt-1">{acc["time of collision"]}</span>
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t('status')}</span>
+                            <span className={`font-medium mt-1 ${acc["Completed"] ? 'text-green-600' : 'text-orange-600'}`}>
+                              {acc["Completed"] ? t('complete') : t('inProgress')}
+                            </span>
+                          </div>
                         </div>
 
-                        <div className="p-3 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-100">
-                          <h4 className="text-xs font-semibold text-emerald-700">{t('dischargeOutcomePrediction') /* intentional key label */}</h4>
-                          {loadingDischargeOutcome[acc.accident_id] ? (
-                            <div className="flex items-center gap-2 text-emerald-600 mt-2">
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-emerald-600"></div>
-                              <span className="text-sm">{t('calculatingPrediction')}</span>
+                        {/* Dynamic ML Predictions Section */}
+                        {!acc["Completed"] && (
+                          <div className="mt-4 space-y-3 border-t border-gray-100 pt-4">
+                            <div className="flex items-center space-x-2 mb-3">
+                              <div className="w-5 h-5 bg-blue-600 rounded flex items-center justify-center">
+                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                                </svg>
+                              </div>
+                              <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">{t('clinicalDecisionSupport')}</h4>
                             </div>
-                          ) : dischargeOutcomePredictions[acc.accident_id] ? (
-                            <div className="mt-2 text-sm">
-                              <div className="font-bold text-emerald-700">{dischargeOutcomePredictions[acc.accident_id].prediction}</div>
-                              {dischargeOutcomePredictions[acc.accident_id].probabilities && (
-                                <div className="text-xs text-slate-600 mt-1">
-                                  {Object.entries(dischargeOutcomePredictions[acc.accident_id].probabilities).map(([outcome, prob]) => (
-                                    <div key={outcome} className="flex justify-between">
-                                      <span>{translateOutcome(outcome)}</span>
-                                      <span className="font-semibold">{formatPercent(prob)}</span>
+
+                            {/* Transfer Risk Assessment */}
+                            {loadingPredictions[acc.accident_id] ? (
+                              <div className="flex items-center justify-center p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                                <span className="ml-3 text-sm text-gray-600">Analyzing transfer risk...</span>
+                              </div>
+                            ) : transferProbabilities[acc.accident_id] ? (() => {
+                              const transferData = transferProbabilities[acc.accident_id];
+                              const probabilityPercent = parseFloat(transferData.probability?.replace('%', '') || '0');
+                              const isHighRisk = probabilityPercent >= 70;
+                              const isMediumRisk = probabilityPercent >= 40 && probabilityPercent < 70;
+                              
+                              const riskStyle = {
+                                high: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', accent: 'bg-red-600', indicator: 'bg-red-500' },
+                                medium: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', accent: 'bg-orange-600', indicator: 'bg-orange-500' },
+                                low: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', accent: 'bg-green-600', indicator: 'bg-green-500' }
+                              };
+                              
+                              const currentRisk = isHighRisk ? riskStyle.high : isMediumRisk ? riskStyle.medium : riskStyle.low;
+                              const riskLevel = isHighRisk ? 'HIGH' : isMediumRisk ? 'MODERATE' : 'LOW';
+                              
+                              return (
+                                <div className={`${currentRisk.bg} border ${currentRisk.border} rounded-lg p-3`}>
+                                  <div className="flex items-center justify-between mb-2">
+                                      <div className="flex items-center space-x-2">
+                                      <div className={`w-3 h-3 ${currentRisk.indicator} rounded-full`}></div>
+                                      <span className="text-xs font-medium text-gray-600">{t('transferRisk')}</span>
                                     </div>
-                                  ))}
+                                    <span className={`text-xs font-bold px-2 py-1 rounded ${currentRisk.text} bg-white`}>
+                                      {isHighRisk ? t('highRisk') : isMediumRisk ? t('moderateRisk') : t('lowRisk')}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm font-semibold text-gray-800">{transferData.probability}</span>
+                                    <div className="flex-1 mx-3">
+                                      <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                        <div 
+                                          className={`h-1.5 rounded-full ${currentRisk.indicator} transition-all duration-1000`} 
+                                          style={{ width: `${Math.min(probabilityPercent, 100)}%` }}
+                                        ></div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <p className={`text-xs ${currentRisk.text} font-medium`}>
+                                    {translateTransferPrediction(transferData.prediction)}
+                                  </p>
                                 </div>
-                              )}
-                            </div>
-                          ) : (
-                            <p className="text-sm text-red-600 mt-2">{t('predictionNotAvailable')}</p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                              );
+                            })() : (
+                              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                                  <span className="text-xs text-gray-600">Transfer risk analysis unavailable</span>
+                                </div>
+                              </div>
+                            )}
 
-                  <p className="mt-3 text-xs text-sky-600 group-hover:underline">{t('clickToViewFullDetails')}</p>
-                </article>
-              ))}
+                            {/* Discharge Outcome Prediction */}
+                            {/* Hospital Stay Prediction */}
+                            {loadingHospitalStay[acc.accident_id] ? (
+                              <div className="flex items-center justify-center p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-indigo-600"></div>
+                                <span className="ml-3 text-sm text-indigo-600">Predicting hospital stay...</span>
+                              </div>
+                            ) : hospitalStayPredictions[acc.accident_id] ? (() => {
+                              const hs = hospitalStayPredictions[acc.accident_id];
+                              const probs = hs.probabilities || {};
+                              // Determine top prediction text
+                              const top = hs.prediction || '';
+                              return (
+                                <div className="mt-3 bg-indigo-50 border border-indigo-200 rounded-lg p-3">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-3 h-3 bg-indigo-500 rounded-full"></div>
+                                        <span className="text-xs font-medium text-indigo-700">{t('hospitalStayTitleCompact')}</span>
+                                      </div>
+                                      <span className="text-xs font-semibold text-indigo-800 bg-white px-2 py-1 rounded">{formatHospitalStayPrediction(top)}</span>
+                                  </div>
+                                  {Object.keys(probs).length > 0 ? (
+                                    <div className="space-y-2">
+                                      {Object.entries(probs).sort(([,a],[,b]) => b-a).map(([k,v]) => (
+                                        <div key={k} className="flex items-center justify-between text-sm">
+                                          <div className="text-slate-700">{k}</div>
+                                          <div className="font-semibold text-indigo-700">{(v*100).toFixed(1)}%</div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                      <div className="text-xs text-indigo-600">{t('noHospitalStayProbabilitiesCompact')}</div>
+                                  )}
+
+                                  {hs.missingValues && hs.missingValues.length > 0 && (
+                                    <div className="mt-3 p-2 bg-orange-50 border border-orange-200 rounded">
+                                        <div className="text-xs text-orange-800 font-medium">{t('missingDefaultedFieldsCompact')}</div>
+                                      <div className="flex flex-wrap gap-1 mt-2">
+                                          {hs.missingValues.slice(0,5).map((m,i) => (
+                                            <span key={i} className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">{t(m) || m}</span>
+                                          ))}
+                                        {hs.missingValues.length > 5 && <span className="text-xs text-orange-700">+{hs.missingValues.length - 5} more</span>}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })() : (
+                              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-3 h-3 bg-indigo-400 rounded-full"></div>
+                                  <span className="text-xs text-indigo-600">Hospital stay prediction unavailable</span>
+                                </div>
+                              </div>
+                            )}
+                            {loadingDischargeOutcome[acc.accident_id] ? (
+                              <div className="flex items-center justify-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-600"></div>
+                                <span className="ml-3 text-sm text-blue-600">Predicting discharge outcome...</span>
+                              </div>
+                            ) : dischargeOutcomePredictions[acc.accident_id] ? (() => {
+                              const dischargeData = dischargeOutcomePredictions[acc.accident_id];
+                              const prediction = dischargeData.prediction?.toLowerCase() || '';
+                              
+                              const isPositive = prediction.includes('home') || prediction.includes('routine');
+                              const isCritical = prediction.includes('death') || prediction.includes('expired');
+                              const isTransfer = prediction.includes('transfer') || prediction.includes('other');
+                              
+                              const outcomeStyle = {
+                                positive: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', indicator: 'bg-green-500' },
+                                critical: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', indicator: 'bg-red-500' },
+                                transfer: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', indicator: 'bg-blue-500' },
+                                default: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', indicator: 'bg-blue-500' }
+                              };
+                              
+                              const currentOutcome = isCritical ? outcomeStyle.critical : 
+                                                   isPositive ? outcomeStyle.positive : 
+                                                   isTransfer ? outcomeStyle.transfer : 
+                                                   outcomeStyle.default;
+                              
+                              // Get the highest probability percentage for the progress bar
+                              const probabilities = dischargeData.probabilities || {};
+                              const highestProbability = Math.max(...Object.values(probabilities).map(p => Number(p) * 100));
+                              const confidenceLevel = highestProbability >= 80 ? 'HIGH' : highestProbability >= 60 ? 'MODERATE' : 'LOW';
+                              
+                              return (
+                                <div className={`${currentOutcome.bg} border ${currentOutcome.border} rounded-lg p-3`}>
+                                  <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center space-x-2">
+                                      <div className={`w-3 h-3 ${currentOutcome.indicator} rounded-full`}></div>
+                                      <span className="text-xs font-medium text-blue-600">Discharge Outcome</span>
+                                    </div>
+                                    <span className={`text-xs font-bold px-2 py-1 rounded ${currentOutcome.text} bg-white`}>
+                                      {confidenceLevel} CONFIDENCE
+                                    </span>
+                                  </div>
+                                  <p className={`text-xs ${currentOutcome.text} font-medium mb-3`}>
+                                    {dischargeData.prediction}
+                                  </p>
+                                  {dischargeData.probabilities && (
+                                    <div className="space-y-2">
+                                      {Object.entries(dischargeData.probabilities)
+                                        .sort(([,a], [,b]) => b - a)
+                                        .map(([outcome, probability]) => {
+                                          const probabilityPercent = Number(probability) * 100;
+                                          const isHighest = probabilityPercent === highestProbability;
+                                          
+                                          // Dynamic color based on probability and outcome type
+                                          const getProgressColor = () => {
+                                            if (outcome.toLowerCase().includes('recovery') && outcome.toLowerCase().includes('complete')) {
+                                              return 'bg-green-500';
+                                            } else if (outcome.toLowerCase().includes('recovery') && outcome.toLowerCase().includes('partial')) {
+                                              return 'bg-blue-500';
+                                            } else if (outcome.toLowerCase().includes('intervention')) {
+                                              return 'bg-orange-500';
+                                            } else if (probabilityPercent >= 70) {
+                                              return 'bg-red-500';
+                                            } else if (probabilityPercent >= 40) {
+                                              return 'bg-yellow-500';
+                                            } else {
+                                              return 'bg-blue-500';
+                                            }
+                                          };
+                                          
+                                          return (
+                                            <div key={outcome} className={`flex items-center justify-between p-2 rounded-lg transition-all duration-300 ${
+                                              isHighest ? 'bg-white border border-blue-300 shadow-sm' : 'bg-white bg-opacity-60'
+                                            }`}>
+                                              <div className="flex items-center space-x-2 flex-1">
+                                                <span className={`text-xs font-medium ${isHighest ? 'text-blue-900' : 'text-blue-700'} min-w-0 flex-1`}>
+                                                  {translateOutcome(outcome)}
+                                                </span>
+                                                <div className="flex items-center space-x-2">
+                                                  <div className="w-12 bg-blue-200 rounded-full h-1.5 shadow-inner">
+                                                    <div 
+                                                      className={`h-1.5 rounded-full ${getProgressColor()} transition-all duration-1000`}
+                                                      style={{ width: `${Math.min(probabilityPercent, 100)}%` }}
+                                                    ></div>
+                                                  </div>
+                                                  <span className={`text-xs font-bold ${isHighest ? 'text-blue-900' : 'text-blue-700'} min-w-fit`}>
+                                                    {formatPercent(probability)}
+                                                  </span>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })() : (
+                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+                                  <span className="text-xs text-blue-600">Discharge prediction unavailable</span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Card Footer */}
+                    <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-500">
+                          {t('recordIdShort', { id: acc.accident_id?.toString().slice(-6) || 'N/A' })}
+                        </span>
+                        <span className="text-xs text-blue-600 font-medium group-hover:text-blue-800 flex items-center">
+                          {t('viewDetails')}
+                          <svg className="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </span>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </section>
         ))}
@@ -916,150 +1427,841 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
 
         {/* Modal for Accident Details */}
         {showModal && selectedAccident && (
-          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto border border-slate-100">
-              <div className="p-6">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-                  <h2 className="text-2xl font-bold text-slate-800">Accident #{accidents.findIndex(acc => acc.accident_id === selectedAccident.accident_id) + 1} — {t('fullDetails')}</h2>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => {
-                        setShowModal(false);
-                        setSelectedAccident(null);
-                      }}
-                      className="inline-flex items-center justify-center w-10 h-10 rounded-md bg-slate-50 border border-slate-100 hover:bg-slate-100"
-                    >
-                      <span className="text-xl font-semibold text-slate-600">×</span>
-                    </button>
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-7xl w-full max-h-[95vh] overflow-hidden border border-gray-200">
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-blue-900 to-blue-500 px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-semibold text-white">
+                        {t('medicalRecordIncident')} #{accidents.findIndex(acc => acc.accident_id === selectedAccident.accident_id) + 1}
+                      </h2>
+                      <p className="text-blue-100 text-sm">{t('detailedAccidentInfo')}</p>
+                    </div>
                   </div>
-                </div>
-
-                {/* Predictions in Modal for Incomplete Accidents */}
-                {!selectedAccident["Completed"] && (
-                  <div className="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    {/* Transfer Probability Prediction */}
-                    {transferProbabilities[selectedAccident.accident_id] && (
-                      <div className="p-4 rounded-lg bg-gradient-to-r from-sky-50 to-indigo-50 border border-sky-100">
-                        <h3 className="text-lg font-semibold text-sky-800 mb-3">🧠 {t('mlTransferPredictionAnalysis')}</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                          <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                            <div className="text-2xl font-bold text-sky-600">{transferProbabilities[selectedAccident.accident_id].probability}</div>
-                            <div className="text-sm text-sky-800 font-medium">{t('transferProbability')}</div>
-                          </div>
-                          <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                            <div className="text-xl font-bold text-purple-600">{transferProbabilities[selectedAccident.accident_id].prediction}</div>
-                            <div className="text-sm text-purple-800 font-medium">{t('predictionOutcome')}</div>
-                          </div>
-                          <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                            <div className="text-sm text-slate-700">{transferProbabilities[selectedAccident.accident_id].message}</div>
-                            <div className="text-xs text-slate-500 font-medium mt-1">{t('analysis')}</div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Discharge Outcome Prediction */}
-                    {dischargeOutcomePredictions[selectedAccident.accident_id] && (
-                      <div className="p-4 rounded-lg bg-gradient-to-r from-emerald-50 to-emerald-100 border border-emerald-100">
-                        <h3 className="text-lg font-semibold text-emerald-800 mb-3">🏥 {t('dischargeOutcomePredictionTitle') || 'Discharge Outcome Prediction'}</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                          <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                            <div className="text-xl font-bold text-emerald-600">{dischargeOutcomePredictions[selectedAccident.accident_id].prediction}</div>
-                            <div className="text-sm text-emerald-800 font-medium">{t('predictedOutcome')}</div>
-                          </div>
-                          <div className="text-center p-3 bg-white rounded-lg shadow-sm">
-                            <div className="text-sm text-slate-700">{dischargeOutcomePredictions[selectedAccident.accident_id].modelInfo?.model_type || 'CatBoost Classifier'}</div>
-                            <div className="text-xs text-slate-500 font-medium mt-1">{t('modelType')}</div>
-                          </div>
-                        </div>
-                        {dischargeOutcomePredictions[selectedAccident.accident_id].probabilities && (
-                          <div className="bg-white rounded-lg p-3 shadow-sm">
-                            <h4 className="font-semibold text-green-800 mb-2">{t('outcomeProbabilities')}</h4>
-                            <div className="space-y-2">
-                              {Object.entries(dischargeOutcomePredictions[selectedAccident.accident_id].probabilities)
-                                .sort(([,a], [,b]) => b - a)
-                                .map(([outcome, probability]) => (
-                                <div key={outcome} className="flex justify-between items-center">
-                                  <span className="text-sm font-medium text-slate-700">{translateOutcome(outcome)}</span>
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-36 bg-gray-200 rounded-full h-2">
-                                      <div className="bg-green-600 h-2 rounded-full" style={{ width: `${Number(probability) * 100}%` }}></div>
-                                    </div>
-                                    <span className="text-sm font-bold text-green-600 w-12">{formatPercent(probability)}</span>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {dischargeOutcomePredictions[selectedAccident.accident_id].missingValues && dischargeOutcomePredictions[selectedAccident.accident_id].missingValues.length > 0 && (
-                          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                            <h4 className="font-semibold text-yellow-800 mb-2">⚠️ {t('dataAvailabilityWarning')}</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-28 overflow-y-auto">
-                              {dischargeOutcomePredictions[selectedAccident.accident_id].missingValues.map((missing, idx) => (
-                                <div key={idx} className="text-xs text-yellow-700 bg-yellow-100 px-2 py-1 rounded">{t(missing) || missing}</div>
-                              ))}
-                            </div>
-                            <p className="text-xs text-yellow-600 mt-2 italic">{t('missingFieldsNote')}</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-700">
-                  <div className="bg-slate-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-3 text-sky-700">{t('basicInformation')}</h3>
-                    <p className="mb-2"><span className="font-medium">{t('incidentDate')}:</span> {selectedAccident["incident at date"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('timeOfCollision')}:</span> {selectedAccident["time of collision"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('severity')}:</span> {selectedAccident["Severity"]}</p>
-                  </div>
-                  
-                  <div className="bg-slate-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-3 text-sky-700">{t('environmentConditions')}</h3>
-                    <p className="mb-2"><span className="font-medium">{t('visibility')}:</span> {selectedAccident["Visibility"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('roadCondition')}:</span> {selectedAccident["Road Condition"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('roadType')}:</span> {selectedAccident["Road Type"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('categoryOfRoad')}:</span> {selectedAccident["Category of Road"]}</p>
-                  </div>
-                  
-                  <div className="bg-slate-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-3 text-sky-700">{t('accidentDetails')}</h3>
-                    <p className="mb-2"><span className="font-medium">{t('approximateSpeed')}:</span> {selectedAccident["Approximate speed"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('modeOfTraveling')}:</span> {selectedAccident["Mode of traveling during accident"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('collisionWith')}:</span> {selectedAccident["Collision with"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('modeOfTransportToHospital')}:</span> {selectedAccident["Mode of transport to hospital"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('alcoholConsumption')}:</span> {selectedAccident["Alcohol Consumption"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('illicitDrugs')}:</span> {selectedAccident["Illicit Drugs"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('helmetWorn')}:</span> {selectedAccident["Helmet Worn"]}</p>
-                  </div>
-                  
-                  <div className="bg-slate-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-3 text-sky-700">{t('medicalFinancial')}</h3>
-                    <p className="mb-2"><span className="font-medium">{t('firstAidGivenAtScene')}:</span> {selectedAccident["First aid given at seen"] ? t('yes') : t('no')}</p>
-                    <p className="mb-2"><span className="font-medium">{t('hospitalDistanceFromHome')}:</span> {selectedAccident["Hospital Distance From Home"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('hospital')}:</span> {selectedAccident["Hospital"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('familyCurrentStatus')}:</span> {selectedAccident["Family current status"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('bystanderExpenditurePerDay')}:</span> {selectedAccident["Bystander expenditure per day"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('travelingExpenditurePerDay')}:</span> {selectedAccident["Traveling Expenditure Per Day"]}</p>
-                    <p className="mb-2"><span className="font-medium">{t('anyOtherHospitalAdmissionExpenditure')}:</span> {selectedAccident["Any Other Hospital Admission Expenditure"]}</p>
-                  </div>
-
-                  <p className="mb-2"><span className="font-medium">{t('completed')}:</span> {selectedAccident["Completed"] ? t('yes') : t('no')}</p>
-                </div>
-                
-                <div className="mt-6 flex justify-end">
                   <button
                     onClick={() => {
                       setShowModal(false);
                       setSelectedAccident(null);
                     }}
-                    className="bg-gradient-to-r from-sky-600 to-indigo-600 text-white px-6 py-2 rounded-lg hover:from-sky-700 hover:to-indigo-700 transition-colors"
+                    className="text-white hover:text-blue-100 transition-colors p-2 hover:bg-white hover:bg-opacity-10 rounded-lg"
                   >
-                    {t('close')}
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
+                </div>
+              </div>
+
+              {/* Modal Body */}
+              <div className="overflow-y-auto max-h-[calc(95vh-80px)]">
+                <div className="p-6 space-y-6">
+
+                  {/* Clinical Decision Support Section */}
+                  {!selectedAccident["Completed"] && (
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-5 mb-6">
+                      <div className="flex items-center mb-4">
+                        <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">{t('clinicalDecisionSupport')}</h3>
+                          <p className="text-sm text-gray-600">{t('aiPredictionsForTreatment')}</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {/* Transfer Probability Analysis */}
+                        {transferProbabilities[selectedAccident.accident_id] && (() => {
+                          const transferData = transferProbabilities[selectedAccident.accident_id];
+                          const probabilityPercent = parseFloat(transferData.probability?.replace('%', '') || '0');
+                          const isHighRisk = probabilityPercent >= 70;
+                          const isMediumRisk = probabilityPercent >= 40 && probabilityPercent < 70;
+                          const isLowRisk = probabilityPercent < 40;
+                          
+                          const riskColors = {
+                            high: {
+                              border: 'border-red-300',
+                              bg: 'bg-red-50',
+                              icon: 'bg-red-100',
+                              iconText: 'text-red-600',
+                              probability: 'text-red-600',
+                              recommendation: 'text-red-700',
+                              accent: 'bg-red-100 border-red-200 text-red-800'
+                            },
+                            medium: {
+                              border: 'border-orange-300',
+                              bg: 'bg-orange-50',
+                              icon: 'bg-orange-100',
+                              iconText: 'text-orange-600',
+                              probability: 'text-orange-600',
+                              recommendation: 'text-orange-700',
+                              accent: 'bg-orange-100 border-orange-200 text-orange-800'
+                            },
+                            low: {
+                              border: 'border-blue-300',
+                              bg: 'bg-blue-50',
+                              icon: 'bg-blue-100',
+                              iconText: 'text-blue-600',
+                              probability: 'text-blue-600',
+                              recommendation: 'text-blue-700',
+                              accent: 'bg-blue-100 border-blue-200 text-blue-800'
+                            }
+                          };
+                          
+                          const currentRisk = isHighRisk ? riskColors.high : isMediumRisk ? riskColors.medium : riskColors.low;
+                          
+                          return (
+                            <div className={`bg-white border-2 ${currentRisk.border} rounded-lg p-4 ${currentRisk.bg} shadow-lg transition-all duration-300 hover:shadow-xl`}>
+                              <div className="flex items-center mb-3">
+                                <div className={`w-8 h-8 ${currentRisk.icon} rounded-lg flex items-center justify-center mr-3 shadow-sm`}>
+                                  <svg className={`w-4 h-4 ${currentRisk.iconText}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                                  </svg>
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-gray-900">{t('transferRiskAssessment')}</h4>
+                                  <p className={`text-xs font-medium ${currentRisk.iconText}`}>
+                                    {isHighRisk ? t('highRisk') : isMediumRisk ? t('moderateRisk') : t('lowRisk')}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="space-y-3">
+                                <div className={`flex justify-between items-center p-3 ${currentRisk.accent} rounded-lg border shadow-sm`}>
+                                  <span className="text-sm font-medium text-gray-700">{t('transferProbability')}</span>
+                                  <div className="flex items-center space-x-2">
+                                    <div className={`w-16 bg-gray-200 rounded-full h-2 shadow-inner`}>
+                                      <div 
+                                        className={`h-2 rounded-full transition-all duration-1000 ${
+                                          isHighRisk ? 'bg-red-500' : isMediumRisk ? 'bg-orange-500' : 'bg-green-500'
+                                        }`} 
+                                        style={{ width: `${Math.min(probabilityPercent, 100)}%` }}
+                                      ></div>
+                                    </div>
+                                    <span className={`text-lg font-bold ${currentRisk.probability}`}>{transferData.probability}</span>
+                                  </div>
+                                </div>
+                                <div className="flex justify-between items-center p-3 bg-white rounded-lg border border-gray-200 shadow-sm">
+                                  <span className="text-sm font-medium text-gray-700">Recommendation</span>
+                                  <span className={`text-sm font-semibold px-3 py-1 rounded-full ${currentRisk.accent}`}>
+                                    {translateTransferPrediction(transferData.prediction)}
+                                  </span>
+                                </div>
+                                <div className={`p-3 ${currentRisk.accent} rounded-lg border animate-pulse-subtle`}>
+                                  <div className="flex items-start space-x-2">
+                                    <svg className={`w-4 h-4 ${currentRisk.iconText} mt-0.5 flex-shrink-0`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <p className={`text-sm ${currentRisk.recommendation} font-medium`}>{transferData.message}</p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {transferData.missingValues && transferData.missingValues.length > 0 && (
+                                <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                                  <h5 className="font-medium text-orange-900 mb-2 flex items-center">
+                                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.962-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                    </svg>
+                                    Data Quality Notice
+                                  </h5>
+                                  <div className="max-h-20 overflow-y-auto">
+                                    <div className="flex flex-wrap gap-1">
+                                      {transferData.missingValues.slice(0, 5).map((missing, idx) => (
+                                        <span key={idx} className="inline-block text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">{t(missing) || missing}</span>
+                                      ))}
+                                      {transferData.missingValues.length > 5 && (
+                                        <span className="text-xs text-orange-700">+{transferData.missingValues.length - 5} more</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+
+                        {/* Discharge Outcome Analysis */}
+                        {dischargeOutcomePredictions[selectedAccident.accident_id] && (() => {
+                          const dischargeData = dischargeOutcomePredictions[selectedAccident.accident_id];
+                          const prediction = dischargeData.prediction?.toLowerCase() || '';
+                          
+                          // Determine outcome type and styling
+                          const isPositiveOutcome = prediction.includes('home') || prediction.includes('routine') || prediction.includes('recovery');
+                          const isCriticalOutcome = prediction.includes('death') || prediction.includes('expired') || prediction.includes('mortality');
+                          const isTransferOutcome = prediction.includes('transfer') || prediction.includes('other');
+                          
+                          const outcomeColors = {
+                            positive: {
+                              border: 'border-green-300',
+                              bg: 'bg-green-50',
+                              icon: 'bg-green-100',
+                              iconText: 'text-green-600',
+                              prediction: 'text-green-700',
+                              accent: 'bg-green-100 border-green-200 text-green-800',
+                              gradient: 'from-green-500 to-emerald-500'
+                            },
+                            critical: {
+                              border: 'border-red-300',
+                              bg: 'bg-red-50',
+                              icon: 'bg-red-100',
+                              iconText: 'text-red-600',
+                              prediction: 'text-red-700',
+                              accent: 'bg-red-100 border-red-200 text-red-800',
+                              gradient: 'from-red-500 to-rose-500'
+                            },
+                            transfer: {
+                              border: 'border-blue-300',
+                              bg: 'bg-blue-50',
+                              icon: 'bg-blue-100',
+                              iconText: 'text-blue-600',
+                              prediction: 'text-blue-700',
+                              accent: 'bg-blue-100 border-blue-200 text-blue-800',
+                              gradient: 'from-blue-500 to-indigo-500'
+                            },
+                            default: {
+                              border: 'border-gray-300',
+                              bg: 'bg-gray-50',
+                              icon: 'bg-gray-100',
+                              iconText: 'text-gray-600',
+                              prediction: 'text-gray-700',
+                              accent: 'bg-gray-100 border-gray-200 text-gray-800',
+                              gradient: 'from-gray-500 to-slate-500'
+                            }
+                          };
+                          
+                          const currentOutcome = isCriticalOutcome ? outcomeColors.critical : 
+                                               isPositiveOutcome ? outcomeColors.positive : 
+                                               isTransferOutcome ? outcomeColors.transfer : 
+                                               outcomeColors.default;
+                          
+                          return (
+                            <div className={`bg-white border-2 ${currentOutcome.border} rounded-lg p-4 ${currentOutcome.bg} shadow-lg transition-all duration-300 hover:shadow-xl`}>
+                              <div className="flex items-center mb-3">
+                                <div className={`w-8 h-8 ${currentOutcome.icon} rounded-lg flex items-center justify-center mr-3 shadow-sm`}>
+                                  <svg className={`w-4 h-4 ${currentOutcome.iconText}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                  </svg>
+                                </div>
+                                <div>
+                                              <h4 className="font-semibold text-gray-900">{t('dischargeOutcomePredictionTitle')}</h4>
+                                  <p className={`text-xs font-medium ${currentOutcome.iconText}`}>
+                                    {isCriticalOutcome ? t('criticalOutcome') : 
+                                     isPositiveOutcome ? t('positiveOutcome') : 
+                                     isTransferOutcome ? t('transferRequired') : 
+                                     t('standardCare')}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="space-y-3">
+                                <div className={`flex justify-between items-center p-3 ${currentOutcome.accent} rounded-lg border shadow-sm`}>
+                                  <span className="text-sm font-medium text-gray-700">{t('predictedOutcome')}</span>
+                                  <span className={`text-sm font-bold px-3 py-1 rounded-full bg-white shadow-sm ${currentOutcome.prediction}`}>
+                                    {dischargeData.prediction}
+                                  </span>
+                                </div>
+                                {dischargeData.probabilities && (
+                                  <div className="space-y-2">
+                                    <h5 className="text-sm font-medium text-gray-700 flex items-center">
+                                      <svg className="w-4 h-4 mr-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                      </svg>
+                                      Probability Distribution
+                                    </h5>
+                                    {Object.entries(dischargeData.probabilities)
+                                      .sort(([,a], [,b]) => b - a)
+                                      .slice(0, 3)
+                                      .map(([outcome, probability], index) => {
+                                        const isHighest = index === 0;
+                                        return (
+                                          <div key={outcome} className={`flex justify-between items-center p-2 rounded-lg transition-all duration-300 ${
+                                            isHighest ? `${currentOutcome.accent} border shadow-sm` : 'bg-white border border-gray-200'
+                                          }`}>
+                                            <span className={`text-xs font-medium ${isHighest ? currentOutcome.prediction : 'text-gray-600'}`}>
+                                              {translateOutcome(outcome)}
+                                            </span>
+                                            <div className="flex items-center gap-2">
+                                              <div className="w-20 bg-gray-200 rounded-full h-2 shadow-inner">
+                                                <div 
+                                                  className={`h-2 rounded-full bg-gradient-to-r ${currentOutcome.gradient} transition-all duration-1000`}
+                                                  style={{ width: `${Number(probability) * 100}%` }}
+                                                ></div>
+                                              </div>
+                                              <span className={`text-xs font-bold w-10 ${isHighest ? currentOutcome.prediction : 'text-gray-900'}`}>
+                                                {formatPercent(probability)}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
+
+                        {/* Hospital Stay Details in Modal */}
+                        {hospitalStayPredictions[selectedAccident.accident_id] && (() => {
+                          const hs = hospitalStayPredictions[selectedAccident.accident_id];
+                          const probs = hs.probabilities || {};
+                          const top = hs.prediction || '';
+
+                          return (
+                            <div className="bg-white border-2 border-indigo-200 rounded-lg p-4">
+                              <div className="flex items-center mb-3">
+                                <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
+                                  <svg className="w-4 h-4 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v4a1 1 0 001 1h3m10 0h3a1 1 0 001-1V7M3 7a2 2 0 012-2h14a2 2 0 012 2M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7" /></svg>
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-gray-900">{t('hospitalStayTitle')}</h4>
+                                  <p className="text-xs text-indigo-600">{t('hospitalStaySubtitle')}</p>
+                                </div>
+                              </div>
+
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-center p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                                  <span className="text-sm font-medium text-gray-700">{t('predictedStay')}</span>
+                                  <span className="text-sm font-bold text-indigo-800">{formatHospitalStayPrediction(top)}</span>
+                                </div>
+
+                                {Object.keys(probs).length > 0 ? (
+                                  <div className="space-y-2">
+                                    {Object.entries(probs).sort(([,a],[,b]) => b-a).map(([k,v]) => (
+                                      <div key={k} className="flex items-center justify-between p-2 rounded-lg bg-white border border-gray-100">
+                                        <div className="text-sm text-gray-700">{k}</div>
+                                        <div className="font-semibold text-indigo-700">{(v*100).toFixed(1)}%</div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div className="text-sm text-gray-600">{t('noHospitalStayProbabilities')}</div>
+                                )}
+
+                                {hs.missingValues && hs.missingValues.length > 0 && (
+                                  <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded">
+                                    <div className="text-sm font-medium text-orange-800">{t('missingDefaultedFields')}</div>
+                                    <div className="mt-2 flex flex-wrap gap-1">
+                                      {hs.missingValues.map((m,i) => (
+                                        <span key={i} className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded">{t(m) || m}</span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Main Content Sections */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {/* Incident Overview */}
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="bg-blue-50 border-b border-blue-200 px-4 py-3">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          </div>
+                          <h3 className="font-semibold text-gray-900">{t('incidentOverview') || 'Incident Overview'}</h3>
+                        </div>
+                      </div>
+                      <div className="p-4 space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('incidentDate')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["incident at date"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('timeOfCollision')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["time of collision"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('severity')}</span>
+                          <span className={`text-sm font-semibold px-2 py-1 rounded-full ${
+                            selectedAccident["Severity"] === 'Serious' ? 'bg-red-100 text-red-800' :
+                            selectedAccident["Severity"] === 'Medium' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>{selectedAccident["Severity"]}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Environmental Conditions */}
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="bg-green-50 border-b border-green-200 px-4 py-3">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center mr-3">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                            </svg>
+                          </div>
+                          <h3 className="font-semibold text-gray-900">{t('environmentConditions')}</h3>
+                        </div>
+                      </div>
+                      <div className="p-4 space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('visibility')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Visibility"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('roadCondition')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Road Condition"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('roadType')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Road Type"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('categoryOfRoad')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Category of Road"]}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Vehicle & Collision Details */}
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="bg-purple-50 border-b border-purple-200 px-4 py-3">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center mr-3">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                          </div>
+                          <h3 className="font-semibold text-gray-900">{t('vehicleCollisionDetails') || 'Vehicle & Collision Details'}</h3>
+                        </div>
+                      </div>
+                      <div className="p-4 space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('approximateSpeed')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Approximate speed"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('modeOfTraveling')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Mode of traveling during accident"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('collisionWith')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Collision with"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('helmetWorn')}</span>
+                          <span className={`text-sm font-medium ${selectedAccident["Helmet Worn"] === 'Yes' ? 'text-green-600' : 'text-red-600'}`}>
+                            {selectedAccident["Helmet Worn"]}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('alcoholConsumption')}</span>
+                          <span className={`text-sm font-medium ${selectedAccident["Alcohol Consumption"] === 'No' ? 'text-green-600' : 'text-red-600'}`}>
+                            {selectedAccident["Alcohol Consumption"]}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('illicitDrugs')}</span>
+                          <span className={`text-sm font-medium ${selectedAccident["Illicit Drugs"] === 'No' ? 'text-green-600' : 'text-red-600'}`}>
+                            {selectedAccident["Illicit Drugs"]}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Medical Response */}
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="bg-blue-50 border-b border-blue-200 px-4 py-3">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                            </svg>
+                          </div>
+                          <h3 className="font-semibold text-gray-900">{t('medicalResponse') || 'Medical Response'}</h3>
+                        </div>
+                      </div>
+                      <div className="p-4 space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('firstAidGivenAtScene')}</span>
+                          <span className={`text-sm font-medium ${selectedAccident["First aid given at seen"] ? 'text-green-600' : 'text-red-600'}`}>
+                            {selectedAccident["First aid given at seen"] ? t('yes') : t('no')}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('modeOfTransportToHospital')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Mode of transport to hospital"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('timeTakenToReachHospital')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Time taken to reach hospital"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('hospital')}</span>
+                          <span className="text-sm text-gray-900">{localStorage.getItem('hospital_name') || selectedAccident["Hospital"] || selectedAccident?.hospital || 'Not specified'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('hospitalDistanceFromHome')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Hospital Distance From Home"]}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Financial Impact */}
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="bg-emerald-50 border-b border-emerald-200 px-4 py-3">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center mr-3">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                            </svg>
+                          </div>
+                          <h3 className="font-semibold text-gray-900">{t('financialImpact') || 'Financial Impact'}</h3>
+                        </div>
+                      </div>
+                      <div className="p-4 space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('familyMonthlyIncomeBeforeAccident')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Family monthly income before accident"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('familyMonthlyIncomeAfterAccident')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Family monthly income after accident"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('familyCurrentStatus')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Family current status"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('bystanderExpenditurePerDay')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Bystander expenditure per day"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('travelingExpenditurePerDay')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Traveling Expenditure Per Day"]}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600 font-medium">{t('anyOtherHospitalAdmissionExpenditure')}</span>
+                          <span className="text-sm text-gray-900">{selectedAccident["Any Other Hospital Admission Expenditure"]}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Injury Details Section */}
+                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="bg-red-50 border-b border-red-200 px-4 py-3">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center mr-3">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.962-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                          </div>
+                          <h3 className="font-semibold text-gray-900">{t('injuryDetails')}</h3>
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        {selectedAccident.injuries && selectedAccident.injuries.length > 0 ? (
+                          <div className="space-y-3">
+                            {selectedAccident.injuries.map((injury, index) => (
+                              <div key={index} className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                <div className="flex items-center mb-2">
+                                  <div className="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold mr-2">
+                                    {index + 1}
+                                  </div>
+                                  <h4 className="text-sm font-medium text-gray-900">{t('injuryNumber')} {index + 1}</h4>
+                                </div>
+                                <div className="space-y-2">
+                                  <div className="flex justify-between">
+                                    <span className="text-xs text-gray-600 font-medium">{t('siteOfInjury')}</span>
+                                    <span className="text-xs text-gray-900">{injury.site_of_injury || '-'}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-xs text-gray-600 font-medium">{t('typeOfInjury')}</span>
+                                    <span className="text-xs text-gray-900">{injury.type_of_injury || '-'}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span className="text-xs text-gray-600 font-medium">{t('severity')}</span>
+                                    <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                                      injury.severity === 'S' ? 'bg-red-100 text-red-800' : 
+                                      injury.severity === 'M' ? 'bg-yellow-100 text-yellow-800' : 
+                                      injury.severity === 'L' ? 'bg-green-100 text-green-800' : 
+                                      'bg-gray-100 text-gray-800'
+                                    }`}>
+                                      {injury.severity === 'S' ? 'Serious' :
+                                       injury.severity === 'M' ? 'Medium' :
+                                       injury.severity === 'L' ? 'Light' :
+                                       injury.severity || 'Unknown'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-6 text-gray-500">
+                            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                            </div>
+                            <p className="text-sm text-gray-600 font-medium">{t('noInjuries')}</p>
+                            <p className="text-xs text-gray-500 mt-1">No injury information recorded</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Modal Footer */}
+                  <div className="border-t border-gray-200 bg-gray-50 px-6 py-4 flex items-center justify-between">
+                    <div className="text-sm text-gray-500">
+                      Record ID: {selectedAccident.accident_id} • Last updated: {selectedAccident["incident at date"]}
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() => {
+                          setShowModal(false);
+                          setSelectedAccident(null);
+                        }}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                      >
+                        {t('close')}
+                      </button>
+                      <button
+                        onClick={() => {
+                          const printContent = `
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                              <title>Medical Report - ${filtered["Full Name"]}</title>
+                              <style>
+                                @media print { @page { margin: 1in; } }
+                                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+                                .header { text-align: center; border-bottom: 3px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; }
+                                .hospital-name { color: #2563eb; font-size: 24px; font-weight: bold; margin-bottom: 5px; }
+                                .report-title { font-size: 20px; font-weight: 600; color: #1f2937; }
+                                .report-date { color: #6b7280; font-size: 14px; }
+                                .section { margin-bottom: 25px; }
+                                .section-title { background: #f3f4f6; padding: 10px 15px; border-left: 4px solid #2563eb; font-weight: 600; color: #1f2937; margin-bottom: 15px; }
+                                .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
+                                .info-item { display: flex; padding: 8px 12px; border-bottom: 1px solid #e5e7eb; }
+                                .info-label { font-weight: 600; color: #374151; min-width: 150px; }
+                                .info-value { color: #1f2937; }
+                                .accident-header { background: #fef3c7; padding: 12px 15px; border-left: 4px solid #f59e0b; margin: 20px 0 15px 0; }
+                                .prediction-box { background: #dbeafe; border: 1px solid #93c5fd; padding: 15px; border-radius: 8px; margin: 10px 0; }
+                                .prediction-title { font-weight: 600; color: #1e40af; margin-bottom: 8px; }
+                                .injury-item { background: #fef2f2; border: 1px solid #fecaca; padding: 12px; border-radius: 6px; margin: 8px 0; }
+                                .severity-serious { background: #fee2e2; color: #991b1b; }
+                                .severity-medium { background: #fef3c7; color: #92400e; }
+                                .severity-light { background: #dcfce7; color: #15803d; }
+                                .footer { text-align: center; border-top: 1px solid #d1d5db; padding-top: 20px; margin-top: 40px; color: #6b7280; font-size: 12px; }
+                              </style>
+                            </head>
+                            <body>
+                              <div class="header">
+                                <div class="hospital-name">${localStorage.getItem('hospital_name') || 'Medical Center'}</div>
+                                <div class="report-title">Patient Medical Report</div>
+                                <div class="report-date">Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</div>
+                              </div>
+
+                              <div class="section">
+                                <div class="section-title">Patient Information</div>
+                                <div class="info-grid">
+                                  <div class="info-item">
+                                    <span class="info-label">Full Name:</span>
+                                    <span class="info-value">${filtered["Full Name"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Patient ID:</span>
+                                    <span class="info-value">${filtered["patient_id"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Date of Birth:</span>
+                                    <span class="info-value">${filtered["Date of Birth"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Age:</span>
+                                    <span class="info-value">${Math.floor((new Date() - new Date(filtered["Date of Birth"])) / (1000 * 60 * 60 * 24 * 365.25))} years</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Gender:</span>
+                                    <span class="info-value">${filtered["Gender"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Blood Group:</span>
+                                    <span class="info-value">${filtered["Blood Group"] || 'Not recorded'}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Contact Number:</span>
+                                    <span class="info-value">${filtered["Contact Number"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Address:</span>
+                                    <span class="info-value">${filtered["Address Street"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Occupation:</span>
+                                    <span class="info-value">${filtered["Occupation"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Education:</span>
+                                    <span class="info-value">${filtered["Education Qualification"]}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div class="accident-header">
+                                <strong>ACCIDENT RECORD - Incident #${accidents.findIndex(acc => acc.accident_id === selectedAccident.accident_id) + 1}</strong>
+                              </div>
+
+                              <div class="section">
+                                <div class="section-title">Incident Overview</div>
+                                <div class="info-grid">
+                                  <div class="info-item">
+                                    <span class="info-label">Incident Date:</span>
+                                    <span class="info-value">${selectedAccident["incident at date"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Time of Collision:</span>
+                                    <span class="info-value">${selectedAccident["time of collision"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Severity:</span>
+                                    <span class="info-value">${selectedAccident["Severity"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Completed:</span>
+                                    <span class="info-value">${selectedAccident["Completed"] ? 'Yes' : 'No'}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              ${!selectedAccident["Completed"] && transferProbabilities[selectedAccident.accident_id] ? `
+                              <div class="prediction-box">
+                                <div class="prediction-title">AI Transfer Risk Assessment</div>
+                                <div class="info-item">
+                                  <span class="info-label">Transfer Probability:</span>
+                                  <span class="info-value">${transferProbabilities[selectedAccident.accident_id].probability}</span>
+                                </div>
+                                <div class="info-item">
+                                  <span class="info-label">Recommendation:</span>
+                                  <span class="info-value">${translateTransferPrediction(transferProbabilities[selectedAccident.accident_id].prediction)}</span>
+                                </div>
+                              </div>
+                              ` : ''}
+
+                              ${!selectedAccident["Completed"] && dischargeOutcomePredictions[selectedAccident.accident_id] ? `
+                              <div class="prediction-box">
+                                <div class="prediction-title">AI Discharge Outcome Prediction</div>
+                                <div class="info-item">
+                                  <span class="info-label">Predicted Outcome:</span>
+                                  <span class="info-value">${dischargeOutcomePredictions[selectedAccident.accident_id].prediction}</span>
+                                </div>
+                              </div>
+                              ` : ''}
+
+                              <div class="section">
+                                <div class="section-title">Medical Response</div>
+                                <div class="info-grid">
+                                  <div class="info-item">
+                                    <span class="info-label">First Aid at Scene:</span>
+                                    <span class="info-value">${selectedAccident["First aid given at seen"] ? 'Yes' : 'No'}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Transport to Hospital:</span>
+                                    <span class="info-value">${selectedAccident["Mode of transport to hospital"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Time to Hospital:</span>
+                                    <span class="info-value">${selectedAccident["Time taken to reach hospital"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Hospital:</span>
+                                    <span class="info-value">${localStorage.getItem('hospital_name') || selectedAccident["Hospital"] || 'Not specified'}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              ${selectedAccident.injuries && selectedAccident.injuries.length > 0 ? `
+                              <div class="section">
+                                <div class="section-title">Injury Details</div>
+                                ${selectedAccident.injuries.map((injury, index) => `
+                                  <div class="injury-item">
+                                    <strong>Injury ${index + 1}:</strong><br>
+                                    <span class="info-label">Site:</span> ${injury.site_of_injury || 'Not specified'}<br>
+                                    <span class="info-label">Type:</span> ${injury.type_of_injury || 'Not specified'}<br>
+                                    <span class="info-label">Severity:</span> 
+                                    <span class="severity-${injury.severity === 'S' ? 'serious' : injury.severity === 'M' ? 'medium' : 'light'}">
+                                      ${injury.severity === 'S' ? 'Serious' : injury.severity === 'M' ? 'Medium' : injury.severity === 'L' ? 'Light' : 'Unknown'}
+                                    </span>
+                                  </div>
+                                `).join('')}
+                              </div>
+                              ` : ''}
+
+                              <div class="section">
+                                <div class="section-title">Environmental & Vehicle Details</div>
+                                <div class="info-grid">
+                                  <div class="info-item">
+                                    <span class="info-label">Visibility:</span>
+                                    <span class="info-value">${selectedAccident["Visibility"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Road Condition:</span>
+                                    <span class="info-value">${selectedAccident["Road Condition"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Approximate Speed:</span>
+                                    <span class="info-value">${selectedAccident["Approximate speed"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Mode of Travel:</span>
+                                    <span class="info-value">${selectedAccident["Mode of traveling during accident"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Helmet Worn:</span>
+                                    <span class="info-value">${selectedAccident["Helmet Worn"]}</span>
+                                  </div>
+                                  <div class="info-item">
+                                    <span class="info-label">Alcohol Consumption:</span>
+                                    <span class="info-value">${selectedAccident["Alcohol Consumption"]}</span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div class="footer">
+                                <p>This report was generated electronically by the Medical Information System</p>
+                                <p>Record ID: ${selectedAccident.accident_id} | Generated by: ${localStorage.getItem('user_name') || 'Medical Staff'}</p>
+                              </div>
+                            </body>
+                            </html>
+                          `;
+                          
+                          const printWindow = window.open('', '_blank');
+                          printWindow.document.write(printContent);
+                          printWindow.document.close();
+                          printWindow.focus();
+                          setTimeout(() => {
+                            printWindow.print();
+                            printWindow.close();
+                          }, 250);
+                        }}
+                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        {t('printReport')}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

@@ -7,6 +7,9 @@ import { t } from '../../utils/translations';
 
 const GetPredictions = ({ setIsAuthenticated, setRole }) => {
   const [activeTab, setActiveTab] = useState('transfer'); // 'transfer' | 'discharge'
+  // Add hospital-stay tab
+  // 'hospital' will be the new tab key
+  // ensure activeTab can accept it
 
   // ---------- Transfer prediction state (from existing GetPrediction.jsx) ----------
   const [formData, setFormData] = useState({
@@ -56,6 +59,28 @@ const GetPredictions = ({ setIsAuthenticated, setRole }) => {
   const [dischargeResult, setDischargeResult] = useState(null);
   const [dischargeError, setDischargeError] = useState(null);
   const [isDischargeLoading, setIsDischargeLoading] = useState(false);
+
+  // ---------- Hospital stay prediction state ----------
+  const [hospitalForm, setHospitalForm] = useState({
+    investigation_done: 'Others',
+    type_of_injury_no_1: '',
+    side: '',
+    site_of_injury_no1: '',
+    current_hospital_name: localStorage.getItem('hospital_name') || '',
+    engine_capacity: '',
+    severity: '',
+    collision_force_from: '',
+    side_1: '',
+    type_of_injury_no_2: '',
+    family_current_status: '',
+    time_taken_to_reach_hospital: '',
+    mode_of_transport_to_the_hospital: '',
+    category_of_road: '',
+    time_of_collision: ''
+  });
+  const [hospitalResult, setHospitalResult] = useState(null);
+  const [hospitalError, setHospitalError] = useState(null);
+  const [isHospitalLoading, setIsHospitalLoading] = useState(false);
 
   // Field/config helpers taken from GetPrediction.jsx
   const formSections = [
@@ -135,6 +160,26 @@ const GetPredictions = ({ setIsAuthenticated, setRole }) => {
   // ---------- Handlers ----------
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   const handleDischargeChange = (e) => setDischargeForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleHospitalChange = (e) => setHospitalForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+
+  // Simple formatter for hospital-stay prediction raw strings
+  const formatHospitalStayPrediction = (raw) => {
+    if (!raw && raw !== 0) return '';
+    if (typeof raw === 'string') {
+      const m = raw.match(/['"]([^'\"]+)['"]/);
+      if (m && m[1]) return m[1];
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) return String(parsed[0]);
+      } catch (e) {}
+      return raw;
+    }
+    try {
+      if (Array.isArray(raw) && raw.length > 0) return String(raw[0]);
+      if (raw && raw[0] && Array.isArray(raw[0])) return String(raw[0][0]);
+    } catch (e) {}
+    return String(raw);
+  };
 
   // Transfer submit logic (kept from GetPrediction.jsx)
   const handleTransferSubmit = async (e) => {
@@ -540,8 +585,9 @@ const GetPredictions = ({ setIsAuthenticated, setRole }) => {
 
         {/* Tabs */}
         <div className="mb-6 flex items-center justify-center gap-3">
-          <button onClick={() => setActiveTab('transfer')} className={`px-4 py-2 rounded-lg ${activeTab==='transfer' ? 'bg-white shadow-lg' : 'bg-white/60'}`}>{t('getPredictionAnalysis')}</button>
-          <button onClick={() => setActiveTab('discharge')} className={`px-4 py-2 rounded-lg ${activeTab==='discharge' ? 'bg-white shadow-lg' : 'bg-white/60'}`}>{t('dischargeOutcomePrediction')}</button>
+            <button onClick={() => setActiveTab('transfer')} className={`px-4 py-2 rounded-lg ${activeTab==='transfer' ? 'bg-white shadow-lg' : 'bg-white/60'}`}>{t('transferProbabilityPrediction')}</button>
+            <button onClick={() => setActiveTab('discharge')} className={`px-4 py-2 rounded-lg ${activeTab==='discharge' ? 'bg-white shadow-lg' : 'bg-white/60'}`}>{t('dischargeOutcomePrediction')}</button>
+            <button onClick={() => setActiveTab('hospital')} className={`px-4 py-2 rounded-lg ${activeTab==='hospital' ? 'bg-white shadow-lg' : 'bg-white/60'}`}>{t('hospitalStayTitle')}</button>
         </div>
 
         {activeTab === 'transfer' && (
@@ -684,6 +730,204 @@ const GetPredictions = ({ setIsAuthenticated, setRole }) => {
                   )}
 
                   {/* Preprocessed features intentionally hidden from UI to avoid exposing internal preprocessing details */}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        {activeTab === 'hospital' && (
+          <div>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              setIsHospitalLoading(true);
+              setHospitalError(null);
+              setHospitalResult(null);
+
+              try {
+                // Build payload matching expected shape
+                const payload = { data: [ {
+                  'Investigation Done': hospitalForm.investigation_done || 'Others',
+                  'Type of injury No 1': hospitalForm.type_of_injury_no_1 || '',
+                  'Side': hospitalForm.side || '',
+                  'Site of Injury No1': hospitalForm.site_of_injury_no1 || '',
+                  'Current Hospital Name': hospitalForm.current_hospital_name || localStorage.getItem('hospital_name') || '',
+                  'Engine Capacity': hospitalForm.engine_capacity || '',
+                  'Severity': hospitalForm.severity || '',
+                  'Collision Force From': hospitalForm.collision_force_from || '',
+                  'Side.1': hospitalForm.side_1 || '',
+                  'Type of Injury No 2': hospitalForm.type_of_injury_no_2 || '',
+                  'Family Current Status': hospitalForm.family_current_status || '',
+                  'Time Taken To Reach Hospital': hospitalForm.time_taken_to_reach_hospital || '',
+                  'Mode of Transport to the Hospital': hospitalForm.mode_of_transport_to_the_hospital || '',
+                  'Category of Road': hospitalForm.category_of_road || '',
+                  'Time of Collision': hospitalForm.time_of_collision || ''
+                } ] };
+
+                const res = await API.post('predictions/hospital-stay-predict', payload);
+                const pred = res.data?.predictions && res.data.predictions[0];
+                if (pred) {
+                  setHospitalResult({ prediction: pred.prediction, probabilities: pred.probabilities || {} });
+                } else {
+                  setHospitalResult({ prediction: 'Unknown', probabilities: {} });
+                }
+              } catch (err) {
+                console.error('Hospital stay prediction error', err);
+                setHospitalError(err?.response?.data || err.message || 'Request failed');
+              } finally {
+                setIsHospitalLoading(false);
+              }
+            }} className="space-y-6">
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">{t('investigationDone') || 'Investigation Done'}</label>
+                  <select name="investigation_done" value={hospitalForm.investigation_done} onChange={handleHospitalChange} className="w-full p-3 border rounded bg-white">
+                    <option value="">{t('selectAnOption')}</option>
+                    <option value="Others">{t('others') || 'Others'}</option>
+                    <option value="XRay">X-Ray</option>
+                    <option value="CT">CT</option>
+                    <option value="MRI">MRI</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">{t('typeOfInjuryNo1') || 'Type of Injury No 1'}</label>
+                  <input name="type_of_injury_no_1" value={hospitalForm.type_of_injury_no_1} onChange={handleHospitalChange} className="w-full p-3 border rounded" placeholder={t('typeOfInjuryNo1') || 'Type of injury'} />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">{t('side') || 'Side'}</label>
+                  <select name="side" value={hospitalForm.side} onChange={handleHospitalChange} className="w-full p-3 border rounded bg-white">
+                    <option value="">{t('selectAnOption')}</option>
+                    <option value="Right">{t('right') || 'Right'}</option>
+                    <option value="Left">{t('left') || 'Left'}</option>
+                    <option value="Unknown">{t('unknown')}</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">{t('siteOfInjuryNo1') || 'Site of Injury No 1'}</label>
+                  <input name="site_of_injury_no1" value={hospitalForm.site_of_injury_no1} onChange={handleHospitalChange} className="w-full p-3 border rounded" placeholder={t('siteOfInjuryNo1') || 'Site'} />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">{t('currentHospitalName') || 'Current Hospital Name'}</label>
+                  <input name="current_hospital_name" value={hospitalForm.current_hospital_name} onChange={handleHospitalChange} className="w-full p-3 border rounded" placeholder={t('currentHospitalName') || 'Hospital'} />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">Engine Capacity</label>
+                  <select name="engine_capacity" value={hospitalForm.engine_capacity} onChange={handleHospitalChange} className="w-full p-3 border rounded bg-white">
+                    <option value="">{t('selectAnOption')}</option>
+                    <option value="0To100">0To100</option>
+                    <option value="101To200">101To200</option>
+                    <option value="201To400">201To400</option>
+                    <option value="400Plus">400Plus</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">{t('severity') || 'Severity'}</label>
+                  <select name="severity" value={hospitalForm.severity} onChange={handleHospitalChange} className="w-full p-3 border rounded bg-white">
+                    <option value="">{t('selectAnOption')}</option>
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">{t('collisionForceFrom') || 'Collision Force From'}</label>
+                  <select name="collision_force_from" value={hospitalForm.collision_force_from} onChange={handleHospitalChange} className="w-full p-3 border rounded bg-white">
+                    <option value="">{t('selectAnOption')}</option>
+                    <option value="RightSide">{t('rightSide') || 'RightSide'}</option>
+                    <option value="LeftSide">{t('leftSide') || 'LeftSide'}</option>
+                    <option value="Front">{t('front')}</option>
+                    <option value="Behind">{t('behind')}</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">Side (secondary)</label>
+                  <input name="side_1" value={hospitalForm.side_1} onChange={handleHospitalChange} className="w-full p-3 border rounded" placeholder={t('side') || 'Side'} />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">{t('typeOfInjuryNo2') || 'Type of Injury No 2'}</label>
+                  <input name="type_of_injury_no_2" value={hospitalForm.type_of_injury_no_2} onChange={handleHospitalChange} className="w-full p-3 border rounded" placeholder={t('typeOfInjuryNo2') || ''} />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">{t('familyCurrentStatus') || 'Family Current Status'}</label>
+                  <select name="family_current_status" value={hospitalForm.family_current_status} onChange={handleHospitalChange} className="w-full p-3 border rounded bg-white">
+                    <option value="">{t('selectAnOption')}</option>
+                    <option value="Not Affected">{t('notAffected')}</option>
+                    <option value="Mildly Affected">{t('mildlyAffected')}</option>
+                    <option value="Moderately Affected">{t('moderatelyAffected')}</option>
+                    <option value="Severely Affected">{t('severelyAffected')}</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">{t('timeTakenToReachHospital') || 'Time Taken To Reach Hospital'}</label>
+                  <select name="time_taken_to_reach_hospital" value={hospitalForm.time_taken_to_reach_hospital} onChange={handleHospitalChange} className="w-full p-3 border rounded bg-white">
+                    <option value="">{t('selectAnOption')}</option>
+                    <option value="Less Than 15 Minutes">{t('lessThan15Minutes')}</option>
+                    <option value="15 Minutes - 30 Minutes">{t('minutes15To30')}</option>
+                    <option value="30 Minutes - 1 Hour">{t('minutes30To1Hour')}</option>
+                    <option value="1 Hour - 2 Hour">{t('hour1To2')}</option>
+                    <option value="More Than 2 Hour">{t('moreThan2Hours')}</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">{t('modeOfTransportToHospital') || 'Mode of Transport to the Hospital'}</label>
+                  <select name="mode_of_transport_to_the_hospital" value={hospitalForm.mode_of_transport_to_the_hospital} onChange={handleHospitalChange} className="w-full p-3 border rounded bg-white">
+                    <option value="">{t('selectAnOption')}</option>
+                    <option value="Ambulance">{t('ambulance')}</option>
+                    <option value="Three wheeler">{t('threeWheeler')}</option>
+                    <option value="Motor Bike">{t('motorBike')}</option>
+                    <option value="Other Vehicle">{t('otherVehicle')}</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">{t('categoryOfRoad') || 'Category of Road'}</label>
+                  <select name="category_of_road" value={hospitalForm.category_of_road} onChange={handleHospitalChange} className="w-full p-3 border rounded bg-white">
+                    <option value="">{t('selectAnOption')}</option>
+                    <option value="SideRoad">{t('sideRoad') || 'SideRoad'}</option>
+                    <option value="HighWay">{t('highway') || 'HighWay'}</option>
+                    <option value="Junction">{t('junction')}</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">{t('timeOfCollision') || 'Time of Collision'}</label>
+                  <input name="time_of_collision" value={hospitalForm.time_of_collision} onChange={handleHospitalChange} className="w-full p-3 border rounded" placeholder={t('timeOfCollision') || 'e.g., 09:00 - 12:00'} />
+                </div>
+              </div>
+
+              <div className="flex justify-center">
+                <button type="submit" disabled={isHospitalLoading} className="px-8 py-4 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg font-semibold disabled:opacity-50">
+                  {isHospitalLoading ? `${t('processingPrediction')}` : `${t('getPredictionAnalysis')}`}
+                </button>
+              </div>
+            </form>
+
+            <div className="mt-6">
+              {hospitalError && (<div className="bg-red-50 border border-red-200 p-4 text-red-700 rounded">{typeof hospitalError === 'string' ? hospitalError : JSON.stringify(hospitalError, null, 2)}</div>)}
+
+              {hospitalResult && (
+                <div className="bg-white p-6 rounded-xl shadow-md border border-slate-100">
+                  <h3 className="text-lg font-semibold mb-2">{t('hospitalStayTitle')}: <span className="font-bold text-emerald-700">{formatHospitalStayPrediction(hospitalResult.prediction)}</span></h3>
+                  {hospitalResult.probabilities && (
+                    <div className="mt-3">
+                      <h4 className="font-medium mb-2">{t('outcomeProbabilities') || 'Probabilities'}</h4>
+                      <div className="space-y-2">{Object.entries(hospitalResult.probabilities).sort(([,a],[,b]) => b-a).map(([k,v]) => (
+                        <div key={k} className="flex justify-between"><div className="text-sm text-slate-700">{k}</div><div className="font-semibold text-green-600">{(v*100).toFixed(1)}%</div></div>
+                      ))}</div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
