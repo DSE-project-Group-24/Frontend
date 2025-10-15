@@ -1046,6 +1046,9 @@ const translations = {
     viewDetails: "View All Details",
     totalCases: "Total Cases",
     noDataCategory: "No data available for this category.",
+  csvCategory: "Category",
+  csvItem: "Item",
+  csvCount: "Count",
     errorFetch: "Failed to fetch data. Please try again.",
     selectParameters: 'Select your analysis parameters and click "Analyze" to view comprehensive accident statistics',
     totalia: "Total",
@@ -2185,6 +2188,9 @@ const translations = {
     viewDetails: "සියලු විස්තර බලන්න",
     totalCases: "මුළු නඩු",
     noDataCategory: "මෙම කාණ්ඩයට දත්ත නොමැත.",
+  csvCategory: "කාණ්ඩය",
+  csvItem: "අයිතමය",
+  csvCount: "ගණන",
     errorFetch: "දත්ත ලබා ගැනීමට අසමත් විය. කරුණාකර නැවත උත්සාහ කරන්න.",
     selectParameters: 'ඔබේ විශ්ලේෂණ පරාමිතීන් තෝරන්න සහ "විශ්ලේෂණය කරන්න" ක්ලික් කරන්න'
   },
@@ -3182,6 +3188,9 @@ const translations = {
     viewDetails: "அனைத்து விவரங்களையும் காண்க",
     totalCases: "மொத்த வழக்குகள்",
     noDataCategory: "இந்த வகைக்கான தரவு கிடைக்கவில்லை.",
+  csvCategory: "வகை",
+  csvItem: "உருப்படி",
+  csvCount: "எண்ணிக்கை",
     errorFetch: "தரவை பெற முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும்.",
     selectParameters: 'உங்கள் விசாரணை அளவுருக்களைத் தேர்ந்தெடுத்து "விசாரணை செய்" கிளிக் செய்யவும்'
     

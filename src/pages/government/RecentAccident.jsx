@@ -102,6 +102,8 @@ const RecentAccident = ({ setIsAuthenticated, setRole }) => {
     return total > 0 ? ((value / total) * 100).toFixed(1) : 0;
   };
 
+
+  const pageLocale = getCurrentLanguage() === 'si' ? 'si-LK' : getCurrentLanguage() === 'ta' ? 'ta-LK' : 'en-US';
   const exportData = () => {
     if (!data) return;
 
@@ -110,7 +112,7 @@ const RecentAccident = ({ setIsAuthenticated, setRole }) => {
       return rows.join('\n');
     }).join('\n');
 
-    const blob = new Blob([`Category,Item,Count\n${csvContent}`], { type: 'text/csv' });
+  const blob = new Blob([`${t('csvCategory')},${t('csvItem')},${t('csvCount')}\n${csvContent}`], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -180,6 +182,7 @@ const RecentAccident = ({ setIsAuthenticated, setRole }) => {
           </ResponsiveContainer>
         )}
 
+          <h3 className="text-base font-semibold text-gray-800 mb-2">{translateDataValue(title)}</h3>
         <button
           onClick={() => handleViewDetails(title, data)}
           className="mt-4 text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center group"
@@ -245,7 +248,7 @@ const RecentAccident = ({ setIsAuthenticated, setRole }) => {
                 onClick={onClose}
                 className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               >
-                Close
+                {t('close')}
               </button>
             </div>
           </div>
@@ -386,7 +389,10 @@ const RecentAccident = ({ setIsAuthenticated, setRole }) => {
                 <AlertCircle className="w-5 h-5 text-red-600 mr-3 flex-shrink-0 mt-0.5" />
                 <div>
                   <h3 className="text-sm font-medium text-red-800">Error</h3>
+                  <h3 className="text-sm font-medium text-red-800">{t('error')}</h3>
                   <p className="text-sm text-red-700 mt-1">{error}</p>
+                            {data["time of collision"] ? getTotal(data["time of collision"]).toLocaleString(pageLocale) : (0).toLocaleString(pageLocale)}
+                      {(Object.keys(data).length || 0).toLocaleString(pageLocale)}
                 </div>
               </div>
             )}
