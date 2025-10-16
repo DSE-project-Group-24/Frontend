@@ -1,6 +1,6 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import backgroundImage from '../assets/background.jpg';
+import { useNavigate, Link } from 'react-router-dom';
+import backgroundVideo from "../assets/backgroundq9.mov";
 
 const RoleSelection = ({ setRole, isRegister = false }) => {
   const navigate = useNavigate();
@@ -46,48 +46,47 @@ const RoleSelection = ({ setRole, isRegister = false }) => {
   ];
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-100 py-12 px-4 sm:px-6 lg:px-8 relative"
-      style={{
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }}
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/10 to-indigo-900/20"></div>
-      
-      <div className="max-w-4xl w-full relative z-10">
-        <div className="text-center mb-12">
-          <div className="mx-auto h-20 w-20 bg-white rounded-full flex items-center justify-center shadow-2xl mb-6">
-            <span className="text-3xl">⚕️</span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+  <div className="h-screen flex items-center justify-center py-6 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-slate-900/5 to-blue-900/5">
+      {/* Background video */}
+      <video
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        src={backgroundVideo}
+        autoPlay
+        muted
+        loop
+        playsInline
+      />
+
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 to-indigo-900/30 z-10"></div>
+
+      <div className="max-w-4xl w-full h-full relative z-20 flex flex-col justify-center">
+        <div className="text-center mb-6">
+          <h1 className="text-3xl md:text-4xl font-semibold text-white mb-2 tracking-tight">
             {isRegister ? 'Register for Healthcare Portal' : 'Healthcare Portal'}
           </h1>
-          <p className="text-xl text-blue-100 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm md:text-base text-white/90 max-w-2xl mx-auto leading-snug">
             {isRegister ? 'Select your role to register' : 'Select your role to access the healthcare management system'}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
           {roles.map((role) => (
             <div
               key={role.id}
               onClick={() => selectRole(role.id)}
               className="group cursor-pointer transform transition-all duration-300 hover:scale-105"
             >
-              <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl hover:shadow-2xl p-8 border border-white/20 transition-all duration-300 hover:bg-white">
-                <div className="flex items-center justify-center mb-6">
-                  <div className={`h-16 w-16 rounded-full bg-gradient-to-r ${role.color} group-hover:bg-gradient-to-r group-hover:${role.hoverColor} flex items-center justify-center text-2xl shadow-lg transition-all duration-300 group-hover:shadow-xl`}>
+              <div className="bg-white/8 backdrop-blur-sm rounded-2xl shadow-md hover:shadow-lg p-5 md:p-6 border border-white/8 transition-all duration-300 hover:bg-white/10 hover:bg-opacity-30">
+                <div className="flex items-center justify-center mb-4">
+                  <div className={`h-12 w-12 rounded-full bg-gradient-to-r ${role.color} group-hover:bg-gradient-to-r group-hover:${role.hoverColor} flex items-center justify-center text-xl shadow-md transition-all duration-300 group-hover:shadow-lg`}>
                     <span className="text-white">{role.icon}</span>
                   </div>
                 </div>
                 <div className="text-center">
-                  <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-gray-900 transition-colors duration-300">
+                  <h3 className="text-lg md:text-xl font-semibold text-white mb-1 group-hover:text-white transition-colors duration-300">
                     {role.title}
                   </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed group-hover:text-gray-700 transition-colors duration-300">
+                  <p className="text-white/85 text-xs md:text-sm leading-snug group-hover:text-white transition-colors duration-300">
                     {role.description}
                   </p>
                 </div>
@@ -103,23 +102,20 @@ const RoleSelection = ({ setRole, isRegister = false }) => {
           ))}
         </div>
 
-        <div className="text-center mt-12">
-          <p className="text-blue-100 text-sm">
+        <div className="text-center mt-8">
+          <p className="text-white/90 text-sm">
             Secure • Reliable • Professional Healthcare Management
           </p>
-          <div className="flex justify-center items-center mt-4 space-x-4 text-blue-200 text-xs">
-            <span className="flex items-center">
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          <div className="flex flex-col justify-center items-center mt-4 space-y-2 text-white/80 text-xs">
+            <Link to="/" className="group inline-flex items-center text-sm text-white/90 hover:text-white transition-colors duration-200">
+              <span className="relative">
+                <span className="block">Already have an account? Login</span>
+                <span className="absolute left-0 -bottom-1 h-[2px] w-0 bg-white transition-all duration-300 group-hover:w-full"></span>
+              </span>
+              <svg className="ml-2 h-4 w-4 text-white/90 transform transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
               </svg>
-              HIPAA Compliant
-            </span>
-            <span className="flex items-center">
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              SSL Encrypted
-            </span>
+            </Link>
           </div>
         </div>
       </div>
