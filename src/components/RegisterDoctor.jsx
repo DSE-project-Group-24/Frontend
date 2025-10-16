@@ -44,18 +44,17 @@ const RegisterDoctor = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="h-screen flex items-center justify-center py-6 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100">
       <video className="absolute inset-0 w-full h-full object-cover z-0" src={backgroundVideo} autoPlay muted loop playsInline />
       <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 to-indigo-900/30 z-10"></div>
 
-      <div className="max-w-md w-full space-y-8 relative z-20">
+      <div className="max-w-md w-full space-y-6 relative z-20">
         <div className="text-center">
-          
-          <h2 className="text-3xl font-bold text-white mb-2">Register as Doctor</h2>
+          <h2 className="text-2xl font-semibold text-white mb-1">Register as Doctor</h2>
           <p className="text-blue-100 text-sm">Create your account</p>
         </div>
 
-  <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-lg p-8 border border-white/10">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-white/10">
           <form className="space-y-6" onSubmit={handleRegister}>
             {/* Name */}
             <div>
@@ -68,7 +67,7 @@ const RegisterDoctor = () => {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Enter your full name"
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-sm"
                 required
               />
             </div>
@@ -84,7 +83,7 @@ const RegisterDoctor = () => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="Enter your email"
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-sm"
                 required
               />
             </div>
@@ -100,7 +99,7 @@ const RegisterDoctor = () => {
                 value={formData.nic}
                 onChange={handleChange}
                 placeholder="Enter your NIC"
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-sm"
                 required
               />
             </div>
@@ -116,13 +115,13 @@ const RegisterDoctor = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="Enter your password"
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-sm"
                 required
               />
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-md text-sm">
                 {error}
               </div>
             )}
@@ -130,13 +129,13 @@ const RegisterDoctor = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center items-center px-4 py-3 rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
+              className="w-full flex justify-center items-center px-4 py-2 rounded-md text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-sm transition-all"
             >
               {isLoading ? "Registering..." : "Register"}
             </button>
 
             <div className="text-center">
-              <Link to="/" className="text-sm text-gray-600 hover:text-gray-800">
+              <Link to="/" className="text-sm text-gray-200 hover:text-white">
                 Back to Login
               </Link>
             </div>

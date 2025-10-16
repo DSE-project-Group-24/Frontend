@@ -57,18 +57,17 @@ const RegisterGovernment = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="h-screen flex items-center justify-center py-6 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100">
       <video className="absolute inset-0 w-full h-full object-cover z-0" src={backgroundVideo} autoPlay muted loop playsInline />
       <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 to-indigo-900/30 z-10"></div>
 
-      <div className="max-w-md w-full space-y-8 relative z-20">
+      <div className="max-w-md w-full space-y-6 relative z-20">
         <div className="text-center">
-         
-          <h2 className="text-3xl font-bold text-white mb-2">Register as Government Official</h2>
+          <h2 className="text-2xl font-semibold text-white mb-1">Register as Government Official</h2>
           <p className="text-blue-100 text-sm">Create your account</p>
         </div>
 
-  <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-lg p-8 border border-white/10">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-white/10">
           <form className="space-y-6" onSubmit={handleRegister}>
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -81,7 +80,7 @@ const RegisterGovernment = () => {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Enter your full name"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm"
                   disabled={isLoading}
                   required
                 />
@@ -104,7 +103,7 @@ const RegisterGovernment = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Enter your email"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm"
                   disabled={isLoading}
                   required
                 />
@@ -127,7 +126,7 @@ const RegisterGovernment = () => {
                   value={formData.nic}
                   onChange={handleChange}
                   placeholder="Enter your NIC"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm"
                   disabled={isLoading}
                   required
                 />
@@ -150,7 +149,7 @@ const RegisterGovernment = () => {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm"
                   disabled={isLoading}
                   required
                 />
@@ -163,7 +162,7 @@ const RegisterGovernment = () => {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-md text-sm">
                 <div className="flex items-center">
                   <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -176,7 +175,7 @@ const RegisterGovernment = () => {
             <button
               type="submit"
               disabled={isLoading || !formData.name.trim() || !formData.email.trim() || !formData.password.trim() || !formData.nic.trim()}
-              className="w-full flex justify-center items-center px-4 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
             >
               {isLoading ? (
                 <>
@@ -194,7 +193,7 @@ const RegisterGovernment = () => {
             <div className="text-center">
               <Link
                 to="/"
-                className="text-sm text-gray-600 hover:text-gray-800 transition-colors duration-200"
+                className="text-sm text-gray-200 hover:text-white transition-colors duration-200"
               >
                 Back to Login
               </Link>
