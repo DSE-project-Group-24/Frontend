@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { t } from '../utils/translations';
 import backgroundVideo from '../assets/backgroundq9.mov';
 import API from '../utils/api';
 
@@ -63,8 +64,8 @@ const RegisterGovernment = () => {
 
       <div className="max-w-md w-full space-y-6 relative z-20">
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-white mb-1">Register as Government Official</h2>
-          <p className="text-blue-100 text-sm">Create your account</p>
+          <h2 className="text-2xl font-semibold text-white mb-1">{t('registerAsGovernmentOfficial')}</h2>
+          <p className="text-blue-100 text-sm">{t('createYourAccount')}</p>
         </div>
 
         <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-white/10">
@@ -79,7 +80,7 @@ const RegisterGovernment = () => {
                   type="text"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="Enter your full name"
+                  placeholder={t('enterFullName')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm"
                   disabled={isLoading}
                   required
@@ -102,7 +103,7 @@ const RegisterGovernment = () => {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="Enter your email"
+                  placeholder={t('enterEmail')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm"
                   disabled={isLoading}
                   required
@@ -125,7 +126,7 @@ const RegisterGovernment = () => {
                   type="text"
                   value={formData.nic}
                   onChange={handleChange}
-                  placeholder="Enter your NIC"
+                  placeholder={t('enterNIC')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm"
                   disabled={isLoading}
                   required
@@ -148,7 +149,7 @@ const RegisterGovernment = () => {
                   type="password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Enter your password"
+                  placeholder={t('enterPassword')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm"
                   disabled={isLoading}
                   required
@@ -195,14 +196,14 @@ const RegisterGovernment = () => {
                 to="/"
                 className="text-sm text-gray-200 hover:text-white transition-colors duration-200"
               >
-                Back to Login
+                {t('backToLogin')}
               </Link>
             </div>
           </form>
         </div>
 
         <div className="text-center">
-          <p className="text-blue-100 text-xs">Secure healthcare management system</p>
+          <p className="text-blue-100 text-xs">{t('secureSystem')}</p>
         </div>
       </div>
     </div>
