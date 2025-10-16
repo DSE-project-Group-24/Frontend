@@ -7,8 +7,30 @@ const LanguageSwitcher = ({ className = '' }) => {
   const handleLanguageChange = (langCode) => {
     setCurrentLang(langCode);
     setLanguage(langCode);
-    // Reload the page to apply the new language
-    window.location.reload();
+    // Try a lightweight HEAD request to the current pathname. If the server
+    // would return a 404 for this path (common on some static hosts without
+    // SPA fallback rules), redirect to the app root instead to avoid a
+    // deployment 404. If the HEAD check succeeds, do a normal reload so the
+    // user stays on the same page.
+    try {
+      fetch(window.location.pathname, { method: 'HEAD' })
+        .then((res) => {
+          if (res && res.ok) {
+            // server can serve this path - reload in-place
+            window.location.reload();
+          } else {
+            // server would return 404 - navigate to root so index.html is served
+            window.location.assign('/');
+          }
+        })
+        .catch(() => {
+          // any error (CORS, network) - fallback to root to be safe
+          window.location.assign('/');
+        });
+    } catch (e) {
+      // defensive fallback
+      window.location.assign('/');
+    }
   };
 
   return (
