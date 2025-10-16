@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import backgroundImage from '../assets/background.jpg';
+import backgroundVideo from '../assets/backgroundq9.mov';
 import API from '../utils/api';
 
 // Register Nurse API function
@@ -44,27 +44,18 @@ const RegisterNurse = () => {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8 relative"
-      style={{
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }}
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-indigo-900/20"></div>
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100">
+      <video className="absolute inset-0 w-full h-full object-cover z-0" src={backgroundVideo} autoPlay muted loop playsInline />
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 to-indigo-900/30 z-10"></div>
 
-      <div className="max-w-md w-full space-y-8 relative z-10">
+      <div className="max-w-md w-full space-y-8 relative z-20">
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-white rounded-full flex items-center justify-center shadow-lg mb-4">
-            <span className="text-2xl">🩺</span>
-          </div>
+         
           <h2 className="text-3xl font-bold text-white mb-2">Register as Nurse</h2>
           <p className="text-blue-100 text-sm">Create your account</p>
         </div>
 
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
+  <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-lg p-8 border border-white/10">
           <form className="space-y-6" onSubmit={handleRegister}>
             {/* Name */}
             <div>
