@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import backgroundImage from '../assets/background.jpg';
+import { t } from '../utils/translations';
+import backgroundVideo from '../assets/backgroundq9.mov';
 import API from '../utils/api';
 
 // Register Nurse API function
@@ -44,27 +45,17 @@ const RegisterNurse = () => {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8 relative"
-      style={{
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }}
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-indigo-900/20"></div>
+    <div className="h-screen flex items-center justify-center py-6 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100">
+      <video className="absolute inset-0 w-full h-full object-cover z-0" src={backgroundVideo} autoPlay muted loop playsInline />
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/30 to-indigo-900/30 z-10"></div>
 
-      <div className="max-w-md w-full space-y-8 relative z-10">
+      <div className="max-w-md w-full space-y-6 relative z-20">
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-white rounded-full flex items-center justify-center shadow-lg mb-4">
-            <span className="text-2xl">🩺</span>
-          </div>
-          <h2 className="text-3xl font-bold text-white mb-2">Register as Nurse</h2>
-          <p className="text-blue-100 text-sm">Create your account</p>
+          <h2 className="text-2xl font-semibold text-white mb-1">{t('registerAsNurse')}</h2>
+          <p className="text-blue-100 text-sm">{t('createYourAccount')}</p>
         </div>
 
-        <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-lg p-6 border border-white/10">
           <form className="space-y-6" onSubmit={handleRegister}>
             {/* Name */}
             <div>
@@ -74,8 +65,8 @@ const RegisterNurse = () => {
                 type="text"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="Enter your full name"
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                placeholder={t('enterFullName')}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-sm"
                 required
               />
             </div>
@@ -88,8 +79,8 @@ const RegisterNurse = () => {
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="Enter your email"
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                placeholder={t('enterEmail')}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-sm"
                 required
               />
             </div>
@@ -102,8 +93,8 @@ const RegisterNurse = () => {
                 type="text"
                 value={formData.nic}
                 onChange={handleChange}
-                placeholder="Enter your NIC"
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                placeholder={t('enterNIC')}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-sm"
                 required
               />
             </div>
@@ -116,14 +107,14 @@ const RegisterNurse = () => {
                 type="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="Enter your password"
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                placeholder={t('enterPassword')}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-sm"
                 required
               />
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-md text-sm">
                 {error}
               </div>
             )}
@@ -131,17 +122,20 @@ const RegisterNurse = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center items-center px-4 py-3 rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
+              className="w-full flex justify-center items-center px-4 py-2 rounded-md text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-sm transition-all"
             >
               {isLoading ? "Registering..." : "Register"}
             </button>
 
             <div className="text-center">
-              <Link to="/" className="text-sm text-gray-600 hover:text-gray-800">
-                Back to Login
+              <Link to="/" className="text-sm text-gray-200 hover:text-white">
+                {t('backToLogin')}
               </Link>
             </div>
           </form>
+        </div>
+        <div className="text-center">
+          <p className="text-blue-100 text-xs">{t('secureSystem')}</p>
         </div>
       </div>
     </div>
