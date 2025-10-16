@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { t } from '../utils/translations';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const DoctorNav = ({ setIsAuthenticated, setRole }) => {
   const navigate = useNavigate();
@@ -171,7 +170,6 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
           {/* Desktop User Info + Language + Logout - Compact */}
           <div className="hidden lg:block">
             <div className="flex items-center space-x-2">
-              <LanguageSwitcher />
               <div className="flex items-center space-x-2">
                 <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                   <div className="w-2 h-2 bg-green-200 rounded-full animate-pulse"></div>
@@ -196,7 +194,6 @@ const DoctorNav = ({ setIsAuthenticated, setRole }) => {
           {/* Mobile Menu Button */}
           <div className="lg:hidden">
             <div className="flex items-center space-x-2">
-              <LanguageSwitcher />
               <button
                 type="button"
                 onClick={(e) => {
