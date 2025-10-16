@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { t } from '../utils/translations';
 import backgroundVideo from "../assets/backgroundq9.mov";
 
 const RoleSelection = ({ setRole, isRegister = false }) => {
@@ -13,32 +14,32 @@ const RoleSelection = ({ setRole, isRegister = false }) => {
   const roles = [
     {
       id: 'nurse',
-      title: 'Nurse',
-      description: 'Patient care and medical assistance',
+      title: t('role_nurse_title'),
+      description: t('role_nurse_description'),
       icon: '🩺',
       color: 'from-emerald-500 to-teal-600',
       hoverColor: 'from-emerald-600 to-teal-700',
     },
     {
       id: 'doctor',
-      title: 'Doctor',
-      description: 'Medical diagnosis and treatment',
+      title: t('role_doctor_title'),
+      description: t('role_doctor_description'),
       icon: '👨‍⚕️',
       color: 'from-blue-500 to-indigo-600',
       hoverColor: 'from-blue-600 to-indigo-700',
     },
     {
       id: 'admin',
-      title: 'Hospital Administrator',
-      description: 'Hospital operations and management',
+      title: t('role_admin_title'),
+      description: t('role_admin_description'),
       icon: '🏥',
       color: 'from-purple-500 to-pink-600',
       hoverColor: 'from-purple-600 to-pink-700',
     },
     {
       id: 'government',
-      title: 'Government Official',
-      description: 'Healthcare policy and oversight',
+      title: t('role_government_title'),
+      description: t('role_government_description'),
       icon: '🏛️',
       color: 'from-amber-500 to-orange-600',
       hoverColor: 'from-amber-600 to-orange-700',
@@ -62,10 +63,10 @@ const RoleSelection = ({ setRole, isRegister = false }) => {
       <div className="max-w-4xl w-full h-full relative z-20 flex flex-col justify-center">
         <div className="text-center mb-6">
           <h1 className="text-3xl md:text-4xl font-semibold text-white mb-2 tracking-tight">
-            {isRegister ? 'Register for Healthcare Portal' : 'Healthcare Portal'}
+            {isRegister ? t('roleSelectionTitleRegister') : t('roleSelectionTitle')}
           </h1>
           <p className="text-sm md:text-base text-white/90 max-w-2xl mx-auto leading-snug">
-            {isRegister ? 'Select your role to register' : 'Select your role to access the healthcare management system'}
+            {isRegister ? t('roleSelectionSubtitleRegister') : t('roleSelectionSubtitle')}
           </p>
         </div>
 
@@ -104,12 +105,12 @@ const RoleSelection = ({ setRole, isRegister = false }) => {
 
         <div className="text-center mt-8">
           <p className="text-white/90 text-sm">
-            Secure • Reliable • Professional Healthcare Management
+            {t('role_footer_line')}
           </p>
           <div className="flex flex-col justify-center items-center mt-4 space-y-2 text-white/80 text-xs">
             <Link to="/" className="group inline-flex items-center text-sm text-white/90 hover:text-white transition-colors duration-200">
               <span className="relative">
-                <span className="block">Already have an account? Login</span>
+                <span className="block">{t('alreadyHaveAccountLogin')}</span>
                 <span className="absolute left-0 -bottom-1 h-[2px] w-0 bg-white transition-all duration-300 group-hover:w-full"></span>
               </span>
               <svg className="ml-2 h-4 w-4 text-white/90 transform transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
