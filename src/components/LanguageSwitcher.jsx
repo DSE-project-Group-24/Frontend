@@ -7,8 +7,14 @@ const LanguageSwitcher = ({ className = '' }) => {
   const handleLanguageChange = (langCode) => {
     setCurrentLang(langCode);
     setLanguage(langCode);
-    // Reload the page to apply the new language
-    window.location.reload();
+    // Small delay to allow any transient UI/state updates to settle, then
+    // refresh the exact current page (no redirect to root).
+    const delayMs = 350; // milliseconds
+    setTimeout(() => {
+      // Reload the current URL so translations (from localStorage) are picked up
+      // and the page re-renders in the selected language.
+      window.location.reload();
+    }, delayMs);
   };
 
   return (

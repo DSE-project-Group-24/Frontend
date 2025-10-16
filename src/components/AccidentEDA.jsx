@@ -4,7 +4,29 @@ import { t, getCurrentLanguage } from '../utils/translations';
 import { processBackendChartData, processBackendResponse, translateBackendValue, translateDataValue } from '../utils/dataTranslations';
 import LanguageSwitcher from './LanguageSwitcher';
 
-const fetchAnalyticsData = async (filters = {}) => {
+// Simple sessionStorage cache helper with TTL (milliseconds)
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const cacheGet = (key) => {
+  try {
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (Date.now() - parsed.ts > CACHE_TTL) {
+      sessionStorage.removeItem(key);
+      return null;
+    }
+    return parsed.value;
+  } catch (e) {
+    return null;
+  }
+};
+const cacheSet = (key, value) => {
+  try {
+    sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), value }));
+  } catch (e) {}
+};
+
+const fetchAnalyticsData = async (filters = {}, { force = false } = {}) => {
   try {
     const params = new URLSearchParams();
     
@@ -18,9 +40,17 @@ const fetchAnalyticsData = async (filters = {}) => {
     if (filters.collision_type) params.append('collision_type', filters.collision_type);
     if (filters.road_category) params.append('road_category', filters.road_category);
     if (filters.discharge_outcome) params.append('discharge_outcome', filters.discharge_outcome);
-    
-    const url = `/analytics${params.toString() ? '?' + params.toString() : ''}`;
-    const response = await API.get(url);
+
+    const urlPath = `/analytics${params.toString() ? '?' + params.toString() : ''}`;
+    const cacheKey = `cache:${urlPath}`;
+
+    if (!force) {
+      const cached = cacheGet(cacheKey);
+      if (cached) return cached;
+    }
+
+    const response = await API.get(urlPath);
+    cacheSet(cacheKey, response.data);
     return response.data; 
   } catch (error) {
     console.error('Error fetching analytics data:', error);
@@ -29,7 +59,7 @@ const fetchAnalyticsData = async (filters = {}) => {
 };
 
 // Fetch summary data from backend with optional filters
-const fetchSummaryData = async (filters = {}) => {
+const fetchSummaryData = async (filters = {}, { force = false } = {}) => {
   try {
     const params = new URLSearchParams();
     
@@ -37,8 +67,16 @@ const fetchSummaryData = async (filters = {}) => {
     if (filters.start_date) params.append('start_date', filters.start_date);
     if (filters.end_date) params.append('end_date', filters.end_date);
     
-    const url = `/analytics/summary${params.toString() ? '?' + params.toString() : ''}`;
-    const response = await API.get(url);
+    const urlPath = `/analytics/summary${params.toString() ? '?' + params.toString() : ''}`;
+    const cacheKey = `cache:${urlPath}`;
+
+    if (!force) {
+      const cached = cacheGet(cacheKey);
+      if (cached) return cached;
+    }
+
+    const response = await API.get(urlPath);
+    cacheSet(cacheKey, response.data);
     return response.data; 
   } catch (error) {
     console.error('Error fetching summary data:', error);
@@ -47,10 +85,16 @@ const fetchSummaryData = async (filters = {}) => {
 };
 
 // Fetch filter options from backend (initial load to get available options)
-const fetchFilterOptions = async () => {
+const fetchFilterOptions = async ({ force = false } = {}) => {
   try {
+    const cacheKey = `cache:/analytics:options`;
+    if (!force) {
+      const cached = cacheGet(cacheKey);
+      if (cached) return cached;
+    }
     const response = await API.get('/analytics');
     console.log('Filter options response:', response.data);
+    cacheSet(cacheKey, response.data);
     return response.data; 
   } catch (error) {
     console.error('Error fetching filter options:', error);
@@ -102,10 +146,10 @@ const AccidentEDA = () => {
       if (filters.road_category) apiFilters.road_category = filters.road_category;
       if (filters.discharge_outcome) apiFilters.discharge_outcome = filters.discharge_outcome;
 
-      // Fetch filtered data from backend
+      // Fetch filtered data from backend (force fresh)
       const [analytics, summary] = await Promise.all([
-        fetchAnalyticsData(apiFilters),
-        fetchSummaryData(apiFilters)
+        fetchAnalyticsData(apiFilters, { force: true }),
+        fetchSummaryData(apiFilters, { force: true })
       ]);
 
       // Store raw data and process for translations
@@ -314,11 +358,11 @@ const AccidentEDA = () => {
         setLoading(true);
         setError(null);
         
-        // Fetch initial data without filters (all data)
+        // Fetch initial data without filters (all data). Use cache when available.
         const [analytics, summary, filterOpts] = await Promise.all([
-          fetchAnalyticsData(),
-          fetchSummaryData(),
-          fetchFilterOptions()
+          fetchAnalyticsData({}, { force: false }),
+          fetchSummaryData({}, { force: false }),
+          fetchFilterOptions({ force: false })
         ]);
         
         // Store raw data and process for translations
