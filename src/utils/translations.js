@@ -49,6 +49,10 @@ const translations = {
   role_government_description: "Healthcare policy and oversight",
   role_footer_line: "Secure • Reliable • Professional Healthcare Management",
   alreadyHaveAccountLogin: "Already have an account? Login",
+  // Government / analytics
+  analysisFilters: "Analysis Filters",
+  summary: "Summary",
+  severityBoth: "S + M (Both)",
     dontHaveAnAccountRegisterHere: "Don't have an account? Register here",
     online: "Online",
     currentlyOnline: "Currently Online",
@@ -1160,6 +1164,10 @@ const translations = {
   role_government_description: "සෞඛ්‍ය ප්‍රතිපත්ති සහ අධීක්ෂණ",
   role_footer_line: "ආරක්ෂිත • විශ්වසනීය • වෘත්තීය සෞඛ්‍ය කළමනාකරණ",
   alreadyHaveAccountLogin: "ගිණුමක් තිබේද? ඇතුල් වන්න",
+  // Government / analytics
+  analysisFilters: "විශ්ලේෂණ පෙරහන්",
+  summary: "සාරාංශය",
+  severityBoth: "S + M (දෙකම)",
   ta: {
     // Role selection / auth page (Tamil)
     roleSelectionTitle: "மருத்துவ போர்டல்",
@@ -1176,6 +1184,10 @@ const translations = {
     role_government_description: "மருத்துவக் கொள்கை மற்றும் கண்காணிப்பு",
     role_footer_line: "பாதுகாப்பான • நம்பகமான • தொழில்முறை மருத்துவ மேலாண்மை",
     alreadyHaveAccountLogin: "ஏற்கனவே ஒரு கணக்கு உள்ளதா? உள்நுழைய",
+    // Government / analytics
+    analysisFilters: "விசாரணை வடிகட்டிகள்",
+    summary: "சுருக்கம்",
+    severityBoth: "S + M (இரண்டும்)",
   },
   // Short footer sentence used across auth pages
   secureSystem: "ආරක්ෂිත සෞඛ්‍ය සේවා කළමනාකරණ පද්ධතිය",
@@ -3334,6 +3346,12 @@ export const getCurrentLanguage = () => {
 // Set language in localStorage
 export const setLanguage = (lang) => {
   localStorage.setItem('selectedLanguage', lang);
+  // Dispatch a window event so pages can react to language changes in the same tab
+  try {
+    window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));
+  } catch (e) {
+    // ignore if window not available
+  }
 };
 
 // Get translation for a key
