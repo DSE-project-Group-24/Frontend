@@ -25,7 +25,7 @@ import {
 } from "recharts";
 import GovernmentNav from './../../navbars/GovernmentNav';
 import { t, getCurrentLanguage } from '../../utils/translations';
-import { translateChartData, translateDataValue } from '../../utils/dataTranslations';
+import { translateChartData, translateDataValue, createTranslatedTooltip, createTranslatedLabel } from '../../utils/dataTranslations';
 
 const RecentAccident = ({ setIsAuthenticated, setRole }) => {
   const [startDate, setStartDate] = useState("2020-10-13");
@@ -36,6 +36,7 @@ const RecentAccident = ({ setIsAuthenticated, setRole }) => {
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalData, setModalData] = useState(null);
+  const [, setLangVersion] = useState(0);
 
   const fetchData = async () => {
     setLoading(true);
@@ -83,6 +84,13 @@ const RecentAccident = ({ setIsAuthenticated, setRole }) => {
     fetchData();
   }, []);
 
+  // Re-render when app language changes
+  useEffect(() => {
+    const handler = () => setLangVersion(v => v + 1);
+    window.addEventListener('languageChanged', handler);
+    return () => window.removeEventListener('languageChanged', handler);
+  }, []);
+
   const handleViewDetails = (title, values) => {
     setModalData({ title, values });
     setIsModalOpen(true);
@@ -107,7 +115,7 @@ const RecentAccident = ({ setIsAuthenticated, setRole }) => {
     if (!data) return;
 
     const csvContent = Object.entries(data).map(([category, values]) => {
-      const rows = Object.entries(values).map(([key, value]) => `"${category}","${key}",${value}`);
+      const rows = Object.entries(values).map(([key, value]) => `"${translateDataValue(category)}","${translateDataValue(key)}",${value}`);
       return rows.join('\n');
     }).join('\n');
 
@@ -124,9 +132,16 @@ const RecentAccident = ({ setIsAuthenticated, setRole }) => {
   const CategoryChart = ({ title, data }) => {
     const locale = getCurrentLanguage() === 'si' ? 'si-LK' : getCurrentLanguage() === 'ta' ? 'ta-LK' : 'en-US';
     // translate item names (backend values) for display
-    const chartData = Object.entries(data)
-      .filter(([key]) => key !== "Unknown")
-      .map(([key, value]) => ({ name: translateDataValue(key), value }));
+    // If data is an object mapping value->count, convert to array then translate
+    let chartData = [];
+    if (!data) chartData = [];
+    else if (Array.isArray(data)) {
+      chartData = translateChartData(data);
+    } else {
+      chartData = Object.entries(data)
+        .filter(([key]) => key !== "Unknown")
+        .map(([key, value]) => ({ name: translateDataValue(key), value }));
+    }
 
     const total = chartData.reduce((sum, d) => sum + d.value, 0);
 
@@ -152,9 +167,18 @@ const RecentAccident = ({ setIsAuthenticated, setRole }) => {
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={chartData} margin={{ top: 10, right: 20, bottom: 10, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-30} textAnchor="end" height={60} />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-30} textAnchor="end" height={60} tickFormatter={createTranslatedLabel()} />
               <YAxis />
-              <Tooltip />
+              <Tooltip content={({payload, label}) => {
+                if (!payload || !payload.length) return null;
+                const item = payload[0];
+                return (
+                  <div className="bg-white p-2 rounded border">
+                    <div className="text-sm font-semibold">{translateDataValue(label)}</div>
+                    <div className="text-xs text-gray-600">{item.value}</div>
+                  </div>
+                );
+              }} />
               <Legend />
               <Bar dataKey="value" fill="#3b82f6" radius={[6, 6, 0, 0]} />
             </BarChart>
@@ -169,14 +193,23 @@ const RecentAccident = ({ setIsAuthenticated, setRole }) => {
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
-                label={(entry) => `${entry.name} (${((entry.value / total) * 100).toFixed(1)}%)`}
+                label={(entry) => `${translateDataValue(entry.name)} (${((entry.value / total) * 100).toFixed(1)}%)`}
               >
                 {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip />
-              <Legend />
+              <Tooltip content={({payload, label}) => {
+                if (!payload || !payload.length) return null;
+                const item = payload[0];
+                return (
+                  <div className="bg-white p-2 rounded border">
+                    <div className="text-sm font-semibold">{translateDataValue(label)}</div>
+                    <div className="text-xs text-gray-600">{item.value}</div>
+                  </div>
+                );
+              }} />
+              <Legend formatter={(value) => translateDataValue(value)} />
             </PieChart>
           </ResponsiveContainer>
         )}

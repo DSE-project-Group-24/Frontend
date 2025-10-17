@@ -50,6 +50,8 @@ const ViewPatientData = ({ setIsAuthenticated, setRole }) => {
       const res = await API.get("/patients");
       setPatients(res.data);
       console.log("Fetched patients:", res.data);
+      console.log("Number of patients:", res.data.length);
+
       
       const searchTerm = searchId.trim().toLowerCase();
       const match = res.data.find((p) => {
