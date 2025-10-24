@@ -213,7 +213,7 @@ export default function TransferPatients() {
     toHospital !== myHospital.hospital_id &&
     !selectedAccident?.Completed &&
     selectedAccident?.managed_by === me.id &&
-    !selectedPending; // <-- BLOCK if already pending
+    !selectedPending; // BLOCK if already pending
 
   const doTransfer = async () => {
     try {

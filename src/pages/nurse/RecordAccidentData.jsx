@@ -5,30 +5,14 @@ import NurseNav from "../../navbars/NurseNav";
 import Footer from "../../components/Footer";
 import { t } from "../../utils/translations";
 
-/**
- * Assumptions
- * - Backend routes exist:
- *   GET /patients                     -> list of patients (your existing format)
- *   GET /accidents/patient/:patientId -> list accident records for a patient
- *   POST /accidents                   -> create accident record
- *   PATCH /accidents/:accident_id     -> update accident record
- *
- * - The backend enforces:
- *   - managed_by is set to current nurse user_id on create
- *   - Updates only allowed if record is not Completed and managed_by == current user
- *   - Severity defaults to 'U' in DB (we do not send it)
- *
- * - We read nurse user_id from localStorage (same as before),
- *   since your backend auth stub takes `Authorization: Bearer <user_id>`.
- */
 const useAuth = () => {
   const id = window.localStorage.getItem("user_id") || "demo-nurse-id";
-  const name = window.localStorage.getItem("name") || t('demoNurse');
+  const name = window.localStorage.getItem("name") || t("demoNurse");
   //window.localStorage.setItem("user_id", id);
   return { id, name, role: "nurse" };
 };
 
-/** Categorical options (per your spec) */
+/** Categorical options  */
 const OPTIONS = {
   time_of_collision: [
     "00:00 - 03:00",
@@ -156,16 +140,14 @@ const OPTIONS = {
   ],
 };
 
-/** Injuries — categorical options */
-
 const INJURY_SITE_OPTIONS = Object.keys(injuryMap).sort();
 
 const SIDE_OPTIONS = ["Front", "Back", "Left", "Right", "N/A", "Unknown"];
 
-// Severity is auto from ML (display only)
+// Severity is auto from ML
 const SEVERITY_LABEL = "Auto (from ML when saved)";
 
-/** Treatments — categorical options (placeholder; replace with your list) */
+/** Treatments — categorical options THESE ARE PLACEHOLDERS */
 const TREATMENT_TYPE_OPTIONS = [
   "Medication",
   "Surgery",
@@ -210,7 +192,7 @@ const EMPTY_MODEL = {
 
   // NEW
   injuries: [],
-  treatments: [], // <-- added
+  treatments: [], // added
 };
 
 const StatusBadge = ({ completed }) => (
@@ -221,7 +203,7 @@ const StatusBadge = ({ completed }) => (
         : "bg-yellow-50 text-yellow-800 border-yellow-200"
     }`}
   >
-    {completed ? t('completed') : t('notCompleted')}
+    {completed ? t("completed") : t("notCompleted")}
   </span>
 );
 
@@ -239,15 +221,15 @@ const RecordRow = ({ rec, currentUserId, onView, onEdit }) => {
         <StatusBadge completed={!!rec.Completed} />
       </div>
       <div className="text-xs text-gray-500 mt-1">
-        {t('managedBy')}{" "}
-        {rec.managed_by === currentUserId ? t('you') : rec.managed_by_name}
+        {t("managedBy")}{" "}
+        {rec.managed_by === currentUserId ? t("you") : rec.managed_by_name}
       </div>
       <div className="flex gap-2 mt-3">
         <button
           onClick={() => onView(rec)}
           className="px-3 py-1.5 rounded-lg border bg-gray-100 hover:bg-gray-200 text-sm"
         >
-          {t('view')}
+          {t("view")}
         </button>
         <button
           onClick={() => onEdit(rec)}
@@ -258,7 +240,7 @@ const RecordRow = ({ rec, currentUserId, onView, onEdit }) => {
               : "bg-gray-200 text-gray-500 cursor-not-allowed"
           }`}
         >
-          {t('edit')}
+          {t("edit")}
         </button>
       </div>
     </div>
@@ -361,7 +343,7 @@ const SmartSelect = ({ name, value, onChange, options, disabled }) => {
       />
     );
   }
-  // Fallback: your existing Select
+
   return (
     <select
       name={name}
@@ -372,7 +354,7 @@ const SmartSelect = ({ name, value, onChange, options, disabled }) => {
         disabled ? "bg-gray-100" : "bg-white"
       }`}
     >
-      <option value="">{t('select')}</option>
+      <option value="">{t("select")}</option>
       {options.map((o) => (
         <option key={o} value={o}>
           {o}
@@ -392,7 +374,7 @@ const Select = ({ name, value, onChange, options, disabled }) => (
       disabled ? "bg-gray-100" : "bg-white"
     }`}
   >
-    <option value="">{t('select')}</option>
+    <option value="">{t("select")}</option>
     {options.map((o) => (
       <option key={o} value={o}>
         {o}
@@ -424,7 +406,7 @@ const AccidentRecordSystem = () => {
   const me = useAuth();
   const currentHospitalId = window.localStorage.getItem("hospital_id") || null;
 
-  // ---- Patient search (kept from your working code) ----
+  // ---- Patient search (kept from working code) ----
   const [patients, setPatients] = useState([]);
   const [q, setQ] = useState("");
   const [loadingPatients, setLoadingPatients] = useState(false);
@@ -491,91 +473,105 @@ const AccidentRecordSystem = () => {
   const [saving, setSaving] = useState(false);
 
   // Create translated options
-  const translatedOptions = useMemo(() => ({
-    ...OPTIONS,
-    discharge_outcome: [
-      t('partialRecovery'),
-      t('completeRecovery'),
-      t('furtherInterventions'),
-    ],
-    // Common Yes/No/Unknown options
-    road_signals_exist: [t('yes'), t('no'), t('unknown')],
-    alcohol_consumption: [t('yes'), t('no'), t('unknown')],
-    illicit_drugs: [t('yes'), t('no'), t('unknown')],
-    first_aid_given: [t('yes'), t('no'), t('unknown')],
-    vehicle_insured: [t('yes'), t('unknown'), t('no')],
-    helmet_worn: [t('yes'), t('no'), t('notNecessary'), t('unknown')],
-    // Vehicle types and collision details
-    mode_of_traveling: [
-      t('motorbike'),
-      t('bicycle'), 
-      t('threeWheeler'),
-      t('carVan'),
-      t('heavyVehicle'),
-      t('pedestrian'),
-      t('others'),
-      t('unknown'),
-    ],
-    collision_with: [
-      t('heavyVehicle'),
-      t('motorbike'),
-      t('fallFromVehicle'),
-      t('animal'),
-      t('threeWheeler'),
-      t('others'),
-      t('carVan'),
-      t('bicycle'),
-      t('pedestrian'),
-      t('unknown'),
-    ],
-    collision_force_from: [t('front'), t('rightSide'), t('leftSide'), t('behind'), t('unknown')],
-    // Visibility and road conditions
-    visibility: [t('adequate'), t('poor'), t('unknown')],
-    road_condition: [t('poor'), t('good'), t('unknown')],
-    road_type: [t('junction'), t('unknown'), t('bend'), t('straight')],
-    category_of_road: [t('sideRoad'), t('unknown'), t('highway'), t('pathOrField')],
-    // Family status options
-    family_status: [
-      t('severelyAffected'),
-      t('moderatelyAffected'),
-      t('unknown'),
-      t('mildlyAffected'),
-      t('notAffected'),
-    ],
-    // Speed ranges (partial translation available)
-    approximate_speed: [
-      t('lessThan40'),
-      t('unknown'),
-      t('from40To80'),
-      "More Than 80 km/h", // No translation available
-    ],
-    // Passenger types (partial translation available)
-    passenger_type: [
-      "Driver", // No translation available
-      t('unknown'),
-      t('pillionRider'),
-      "PassengerFallingOfVehicle", // No translation available
-      "N/A", // No translation available
-      "FrontSeatPassenger", // No translation available
-      "RearSeatPassenger", // No translation available
-    ],
-    // Transport to hospital (partial translation available)
-    mode_of_transport: [
-      t('threeWheeler'),
-      t('motorBike'),
-      t('unknown'),
-      "Ambulance", // No translation available
-      t('otherVehicle'),
-    ],
-    // Bystander expenditure (partial translation available)
-    bystander_expenditure: [
-      t('expenditure500to1000'),
-      "Less Than 500", // No translation available
-      t('notNecessary'),
-      t('moreThan1000'),
-      t('unknown'),
-    ],
-  }), []);
+  const translatedOptions = useMemo(
+    () => ({
+      ...OPTIONS,
+      discharge_outcome: [
+        t("partialRecovery"),
+        t("completeRecovery"),
+        t("furtherInterventions"),
+      ],
+      // Common Yes/No/Unknown options
+      road_signals_exist: [t("yes"), t("no"), t("unknown")],
+      alcohol_consumption: [t("yes"), t("no"), t("unknown")],
+      illicit_drugs: [t("yes"), t("no"), t("unknown")],
+      first_aid_given: [t("yes"), t("no"), t("unknown")],
+      vehicle_insured: [t("yes"), t("unknown"), t("no")],
+      helmet_worn: [t("yes"), t("no"), t("notNecessary"), t("unknown")],
+      // Vehicle types and collision details
+      mode_of_traveling: [
+        t("motorbike"),
+        t("bicycle"),
+        t("threeWheeler"),
+        t("carVan"),
+        t("heavyVehicle"),
+        t("pedestrian"),
+        t("others"),
+        t("unknown"),
+      ],
+      collision_with: [
+        t("heavyVehicle"),
+        t("motorbike"),
+        t("fallFromVehicle"),
+        t("animal"),
+        t("threeWheeler"),
+        t("others"),
+        t("carVan"),
+        t("bicycle"),
+        t("pedestrian"),
+        t("unknown"),
+      ],
+      collision_force_from: [
+        t("front"),
+        t("rightSide"),
+        t("leftSide"),
+        t("behind"),
+        t("unknown"),
+      ],
+      // Visibility and road conditions
+      visibility: [t("adequate"), t("poor"), t("unknown")],
+      road_condition: [t("poor"), t("good"), t("unknown")],
+      road_type: [t("junction"), t("unknown"), t("bend"), t("straight")],
+      category_of_road: [
+        t("sideRoad"),
+        t("unknown"),
+        t("highway"),
+        t("pathOrField"),
+      ],
+      // Family status options
+      family_status: [
+        t("severelyAffected"),
+        t("moderatelyAffected"),
+        t("unknown"),
+        t("mildlyAffected"),
+        t("notAffected"),
+      ],
+      // Speed ranges (partial translation available)
+      approximate_speed: [
+        t("lessThan40"),
+        t("unknown"),
+        t("from40To80"),
+        "More Than 80 km/h", // No translation available
+      ],
+      // Passenger types (partial translation available)
+      passenger_type: [
+        "Driver", // No translation available
+        t("unknown"),
+        t("pillionRider"),
+        "PassengerFallingOfVehicle", // No translation available
+        "N/A", // No translation available
+        "FrontSeatPassenger", // No translation available
+        "RearSeatPassenger", // No translation available
+      ],
+      // Transport to hospital (partial translation available)
+      mode_of_transport: [
+        t("threeWheeler"),
+        t("motorBike"),
+        t("unknown"),
+        "Ambulance", // No translation available
+        t("otherVehicle"),
+      ],
+      // Bystander expenditure (partial translation available)
+      bystander_expenditure: [
+        t("expenditure500to1000"),
+        "Less Than 500", // No translation available
+        t("notNecessary"),
+        t("moreThan1000"),
+        t("unknown"),
+      ],
+    }),
+    []
+  );
 
   // When patient changes, load records
   useEffect(() => {
@@ -864,7 +860,7 @@ const AccidentRecordSystem = () => {
       <NurseNav />
       <div className="container mx-auto p-4 flex-1">
         <h1 className="text-2xl font-bold mb-6">
-          {t('accidentRecordManagementSystem')}
+          {t("accidentRecordManagementSystem")}
         </h1>
 
         {message && (
@@ -883,7 +879,7 @@ const AccidentRecordSystem = () => {
           {/* Left: Patients (kept) */}
           <div className="bg-white p-4 rounded shadow">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xl font-semibold">{t('patients')}</h2>
+              <h2 className="text-xl font-semibold">{t("patients")}</h2>
             </div>
 
             {/* Search */}
@@ -891,13 +887,13 @@ const AccidentRecordSystem = () => {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder={t('searchByNameNicPhoneDob')}
+                placeholder={t("searchByNameNicPhoneDob")}
                 className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
               />
             </div>
 
             {loadingPatients ? (
-              <p>{t('loadingPatients')}</p>
+              <p>{t("loadingPatients")}</p>
             ) : (
               <div className="overflow-y-auto max-h-96">
                 {filteredPatients && filteredPatients.length > 0 ? (
@@ -924,16 +920,16 @@ const AccidentRecordSystem = () => {
                         </div>
                         <div className="text-sm text-gray-600">
                           {val(patient, "Contact Number", "contact_number") ||
-                            t('noContact')}{" "}
+                            t("noContact")}{" "}
                           •{" "}
                           {val(patient, "Date of Birth", "date_of_birth") ||
-                            t('noDob')}
+                            t("noDob")}
                         </div>
                       </div>
                     );
                   })
                 ) : (
-                  <p className="text-gray-500">{t('noPatientsFound')}</p>
+                  <p className="text-gray-500">{t("noPatientsFound")}</p>
                 )}
               </div>
             )}
@@ -944,10 +940,10 @@ const AccidentRecordSystem = () => {
             {/* Actions */}
             <div className="bg-white p-4 rounded shadow">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xl font-semibold">{t('actions')}</h2>
+                <h2 className="text-xl font-semibold">{t("actions")}</h2>
               </div>
               <div className="text-sm mb-3">
-                {t('signedInAs')} <b>{me.name}</b> (role: {me.role})
+                {t("signedInAs")} <b>{me.name}</b> (role: {me.role})
               </div>
               <button
                 onClick={startCreate}
@@ -958,7 +954,7 @@ const AccidentRecordSystem = () => {
                     : "bg-gray-200 text-gray-500"
                 }`}
               >
-                {t('createNewRecord')}
+                {t("createNewRecord")}
               </button>
             </div>
 
@@ -966,13 +962,15 @@ const AccidentRecordSystem = () => {
             {selectedPatient && mode === "idle" && (
               <div className="bg-white p-4 rounded shadow">
                 <h3 className="text-lg font-semibold mb-2">
-                  {t('existingAccidentRecords')}{" "}
+                  {t("existingAccidentRecords")}{" "}
                   {val(selectedPatient, "Full Name", "full_name", "name")}
                 </h3>
                 {loadingRecords ? (
-                  <div className="text-sm">{t('loadingRecords')}</div>
+                  <div className="text-sm">{t("loadingRecords")}</div>
                 ) : records.length === 0 ? (
-                  <div className="text-sm text-gray-500">{t('noRecordsYet')}</div>
+                  <div className="text-sm text-gray-500">
+                    {t("noRecordsYet")}
+                  </div>
                 ) : (
                   <div className="grid md:grid-cols-2 gap-3">
                     {records.map((rec) => (
@@ -998,13 +996,13 @@ const AccidentRecordSystem = () => {
                     <div>
                       <h3 className="text-xl md:text-2xl font-bold text-gray-800">
                         {mode === "create"
-                          ? t('createAccidentRecord')
+                          ? t("createAccidentRecord")
                           : mode === "edit"
-                          ? t('editAccidentRecord')
-                          : t('viewAccidentRecord')}
+                          ? t("editAccidentRecord")
+                          : t("viewAccidentRecord")}
                       </h3>
                       <p className="text-sm text-gray-500">
-                        {t('patient')}:{" "}
+                        {t("patient")}:{" "}
                         <b>
                           {val(
                             selectedPatient,
@@ -1024,7 +1022,7 @@ const AccidentRecordSystem = () => {
                         }}
                         className="text-gray-600 hover:text-gray-900 text-sm border px-3 py-1.5 rounded-lg"
                       >
-                        ✕ {t('close')}
+                        ✕ {t("close")}
                       </button>
                       {(mode === "create" ||
                         (mode === "edit" && canEdit(current))) && (
@@ -1037,7 +1035,7 @@ const AccidentRecordSystem = () => {
                               : "bg-blue-600 text-white hover:bg-blue-700"
                           }`}
                         >
-                          {saving ? t('saving') : t('save')}
+                          {saving ? t("saving") : t("save")}
                         </button>
                       )}
                     </div>
@@ -1047,7 +1045,7 @@ const AccidentRecordSystem = () => {
                   {mode !== "create" && current && !canEdit(current) && (
                     <div className="mx-auto max-w-5xl px-6">
                       <div className="mt-4 text-sm text-amber-700 p-3 rounded-md bg-amber-50 border">
-                        {t('readOnlyRecord')}
+                        {t("readOnlyRecord")}
                       </div>
                     </div>
                   )}
@@ -1056,15 +1054,15 @@ const AccidentRecordSystem = () => {
                   <div className="mx-auto max-w-5xl px-6">
                     <div className="mt-4 flex flex-wrap gap-2 text-sm">
                       {[
-                        ["incident", t('incident')],
-                        ["collision", t('collision')],
-                        ["road", t('roadEnvironment')],
-                        ["safety", t('substancesSafety')],
-                        ["transport", t('transport')],
-                        ["socio", t('socioeconomic')],
-                        ["injuries", t('injuries')],
-                        ["treatments", t('treatments')],
-                        ["outcome", t('outcomeNotes')],
+                        ["incident", t("incident")],
+                        ["collision", t("collision")],
+                        ["road", t("roadEnvironment")],
+                        ["safety", t("substancesSafety")],
+                        ["transport", t("transport")],
+                        ["socio", t("socioeconomic")],
+                        ["injuries", t("injuries")],
+                        ["treatments", t("treatments")],
+                        ["outcome", t("outcomeNotes")],
                       ].map(([id, label]) => (
                         <a
                           key={id}
@@ -1083,12 +1081,12 @@ const AccidentRecordSystem = () => {
                     <section id="incident" className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
                         <h4 className="font-semibold text-gray-800">
-                          {t('incident')}
+                          {t("incident")}
                         </h4>
                       </header>
                       <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label>{t('incidentDate')}</Label>
+                          <Label>{t("incidentDate")}</Label>
                           <DateInput
                             name="incident_at_date"
                             value={model.incident_at_date}
@@ -1100,7 +1098,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>{t('timeOfCollision')}</Label>
+                          <Label>{t("timeOfCollision")}</Label>
                           <SmartSelect
                             name="time_of_collision"
                             value={model.time_of_collision}
@@ -1119,12 +1117,12 @@ const AccidentRecordSystem = () => {
                     <section id="collision" className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
                         <h4 className="font-semibold text-gray-800">
-                          {t('collision')}
+                          {t("collision")}
                         </h4>
                       </header>
                       <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label>{t('collisionForceFrom')}</Label>
+                          <Label>{t("collisionForceFrom")}</Label>
                           <SmartSelect
                             name="collision_force_from"
                             value={model.collision_force_from}
@@ -1137,7 +1135,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>{t('collisionWith')}</Label>
+                          <Label>{t("collisionWith")}</Label>
                           <SmartSelect
                             name="collision_with"
                             value={model.collision_with}
@@ -1150,7 +1148,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>{t('modeOfTraveling')}</Label>
+                          <Label>{t("modeOfTraveling")}</Label>
                           <SmartSelect
                             name="mode_of_traveling"
                             value={model.mode_of_traveling}
@@ -1163,7 +1161,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>{t('approximateSpeed')}</Label>
+                          <Label>{t("approximateSpeed")}</Label>
                           <SmartSelect
                             name="approximate_speed"
                             value={model.approximate_speed}
@@ -1176,7 +1174,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>{t('passengerType')}</Label>
+                          <Label>{t("passengerType")}</Label>
                           <SmartSelect
                             name="passenger_type"
                             value={model.passenger_type}
@@ -1195,12 +1193,12 @@ const AccidentRecordSystem = () => {
                     <section id="road" className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
                         <h4 className="font-semibold text-gray-800">
-                          {t('roadEnvironment')}
+                          {t("roadEnvironment")}
                         </h4>
                       </header>
                       <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label>{t('roadCondition')}</Label>
+                          <Label>{t("roadCondition")}</Label>
                           <SmartSelect
                             name="road_condition"
                             value={model.road_condition}
@@ -1213,7 +1211,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>{t('roadType')}</Label>
+                          <Label>{t("roadType")}</Label>
                           <SmartSelect
                             name="road_type"
                             value={model.road_type}
@@ -1226,7 +1224,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>{t('categoryOfRoad')}</Label>
+                          <Label>{t("categoryOfRoad")}</Label>
                           <SmartSelect
                             name="category_of_road"
                             value={model.category_of_road}
@@ -1239,7 +1237,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>{t('roadSignalsExist')}</Label>
+                          <Label>{t("roadSignalsExist")}</Label>
                           <SmartSelect
                             name="road_signals_exist"
                             value={model.road_signals_exist}
@@ -1253,7 +1251,7 @@ const AccidentRecordSystem = () => {
                         </div>
 
                         <div>
-                          <Label>{t('visibility')}</Label>
+                          <Label>{t("visibility")}</Label>
                           <SmartSelect
                             name="visibility"
                             value={model.visibility}
@@ -1272,12 +1270,12 @@ const AccidentRecordSystem = () => {
                     <section id="safety" className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
                         <h4 className="font-semibold text-gray-800">
-                          {t('substancesSafety')}
+                          {t("substancesSafety")}
                         </h4>
                       </header>
                       <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label>{t('alcoholConsumption')}</Label>
+                          <Label>{t("alcoholConsumption")}</Label>
                           <SmartSelect
                             name="alcohol_consumption"
                             value={model.alcohol_consumption}
@@ -1290,9 +1288,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>
-                            {t('timeBetweenAlcohol')}
-                          </Label>
+                          <Label>{t("timeBetweenAlcohol")}</Label>
                           <SmartSelect
                             name="time_between_alcohol"
                             value={model.time_between_alcohol}
@@ -1305,7 +1301,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>{t('illicitDrugs')}</Label>
+                          <Label>{t("illicitDrugs")}</Label>
                           <SmartSelect
                             name="illicit_drugs"
                             value={model.illicit_drugs}
@@ -1318,7 +1314,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>{t('helmetWorn')}</Label>
+                          <Label>{t("helmetWorn")}</Label>
                           <SmartSelect
                             name="helmet_worn"
                             value={model.helmet_worn}
@@ -1331,7 +1327,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>{t('engineCapacity')}</Label>
+                          <Label>{t("engineCapacity")}</Label>
                           <SmartSelect
                             name="engine_capacity"
                             value={model.engine_capacity}
@@ -1350,12 +1346,12 @@ const AccidentRecordSystem = () => {
                     <section id="transport" className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
                         <h4 className="font-semibold text-gray-800">
-                          {t('transportToHospital')}
+                          {t("transportToHospital")}
                         </h4>
                       </header>
                       <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label>{t('modeOfTransport')}</Label>
+                          <Label>{t("modeOfTransport")}</Label>
                           <SmartSelect
                             name="mode_of_transport"
                             value={model.mode_of_transport}
@@ -1368,7 +1364,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>{t('timeToHospital')}</Label>
+                          <Label>{t("timeToHospital")}</Label>
                           <SmartSelect
                             name="time_to_hospital"
                             value={model.time_to_hospital}
@@ -1381,7 +1377,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>{t('firstAidGiven')}</Label>
+                          <Label>{t("firstAidGiven")}</Label>
                           <SmartSelect
                             name="first_aid_given"
                             value={model.first_aid_given}
@@ -1400,12 +1396,12 @@ const AccidentRecordSystem = () => {
                     <section id="socio" className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
                         <h4 className="font-semibold text-gray-800">
-                          {t('socioeconomicImpact')}
+                          {t("socioeconomicImpact")}
                         </h4>
                       </header>
                       <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label>{t('bystanderExpenditure')}</Label>
+                          <Label>{t("bystanderExpenditure")}</Label>
                           <SmartSelect
                             name="bystander_expenditure"
                             value={model.bystander_expenditure}
@@ -1418,7 +1414,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>{t('incomeBeforeAccident')}</Label>
+                          <Label>{t("incomeBeforeAccident")}</Label>
                           <SmartSelect
                             name="income_before_accident"
                             value={model.income_before_accident}
@@ -1431,7 +1427,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>{t('incomeAfterAccident')}</Label>
+                          <Label>{t("incomeAfterAccident")}</Label>
                           <SmartSelect
                             name="income_after_accident"
                             value={model.income_after_accident}
@@ -1444,7 +1440,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>{t('familyStatus')}</Label>
+                          <Label>{t("familyStatus")}</Label>
                           <SmartSelect
                             name="family_status"
                             value={model.family_status}
@@ -1457,7 +1453,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div>
-                          <Label>{t('vehicleInsured')}</Label>
+                          <Label>{t("vehicleInsured")}</Label>
                           <SmartSelect
                             name="vehicle_insured"
                             value={model.vehicle_insured}
@@ -1476,7 +1472,7 @@ const AccidentRecordSystem = () => {
                     <section id="injuries" className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl flex items-center justify-between">
                         <h4 className="font-semibold text-gray-800">
-                          {t('injuries')}
+                          {t("injuries")}
                         </h4>
                         {mode !== "view" && (
                           <button
@@ -1489,7 +1485,7 @@ const AccidentRecordSystem = () => {
                                 : "bg-white hover:bg-gray-50"
                             }`}
                           >
-                            + {t('addInjury')}
+                            + {t("addInjury")}
                           </button>
                         )}
                       </header>
@@ -1517,7 +1513,7 @@ const AccidentRecordSystem = () => {
                               >
                                 <div className="flex items-center justify-between mb-3">
                                   <div className="font-medium text-gray-800">
-                                    {t('injury')} #{idx + 1}
+                                    {t("injury")} #{idx + 1}
                                   </div>
                                   {mode !== "view" && (
                                     <button
@@ -1530,7 +1526,7 @@ const AccidentRecordSystem = () => {
                                           : "bg-white hover:bg-gray-50"
                                       }`}
                                     >
-                                      {t('remove')}
+                                      {t("remove")}
                                     </button>
                                   )}
                                 </div>
@@ -1538,7 +1534,7 @@ const AccidentRecordSystem = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                   {/* Site of injury */}
                                   <div>
-                                    <Label>{t('siteOfInjury')}</Label>
+                                    <Label>{t("siteOfInjury")}</Label>
                                     <SmartSelect
                                       name={`site_of_injury_${idx}`}
                                       value={inj.site_of_injury}
@@ -1552,7 +1548,7 @@ const AccidentRecordSystem = () => {
 
                                   {/* Type of injury (depends on site) */}
                                   <div>
-                                    <Label>{t('typeOfInjury')}</Label>
+                                    <Label>{t("typeOfInjury")}</Label>
                                     <SmartSelect
                                       name={`type_of_injury_${idx}`}
                                       value={inj.type_of_injury}
@@ -1566,7 +1562,7 @@ const AccidentRecordSystem = () => {
 
                                   {/* Side */}
                                   <div>
-                                    <Label>{t('side')}</Label>
+                                    <Label>{t("side")}</Label>
                                     <SmartSelect
                                       name={`side_${idx}`}
                                       value={inj.side}
@@ -1580,7 +1576,7 @@ const AccidentRecordSystem = () => {
 
                                   {/* Investigation Done */}
                                   <div>
-                                    <Label>{t('investigationDone')}</Label>
+                                    <Label>{t("investigationDone")}</Label>
                                     <input
                                       type="text"
                                       name={`investigation_done_${idx}`}
@@ -1593,7 +1589,7 @@ const AccidentRecordSystem = () => {
                                         )
                                       }
                                       disabled={readOnly}
-                                      placeholder={t('leaveBlankIfNone')}
+                                      placeholder={t("leaveBlankIfNone")}
                                       className={`mt-1 block w-full p-2 border border-gray-300 rounded ${
                                         readOnly ? "bg-gray-100" : "bg-white"
                                       }`}
@@ -1602,7 +1598,7 @@ const AccidentRecordSystem = () => {
 
                                   {/* Severity (ML) */}
                                   <div className="md:col-span-2">
-                                    <Label>{t('severity')}</Label>
+                                    <Label>{t("severity")}</Label>
                                     <div className="mt-1 text-sm">
                                       <span className="inline-flex items-center rounded-full px-3 py-1 border bg-gray-50 text-gray-700">
                                         {inj.severity
@@ -1610,7 +1606,7 @@ const AccidentRecordSystem = () => {
                                           : SEVERITY_LABEL}
                                       </span>
                                       <span className="ml-2 text-xs text-gray-500">
-                                        {t('autoPopulatedBySeverity')}
+                                        {t("autoPopulatedBySeverity")}
                                       </span>
                                     </div>
                                   </div>
@@ -1631,7 +1627,7 @@ const AccidentRecordSystem = () => {
                     <section id="treatments" className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl flex items-center justify-between">
                         <h4 className="font-semibold text-gray-800">
-                          {t('treatments')}
+                          {t("treatments")}
                         </h4>
                         {mode !== "view" && (
                           <button
@@ -1644,7 +1640,7 @@ const AccidentRecordSystem = () => {
                                 : "bg-white hover:bg-gray-50"
                             }`}
                           >
-                            + {t('addTreatment')}
+                            + {t("addTreatment")}
                           </button>
                         )}
                       </header>
@@ -1830,12 +1826,12 @@ const AccidentRecordSystem = () => {
                     <section id="outcome" className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
                         <h4 className="font-semibold text-gray-800">
-                          {t('outcomeNotes')}
+                          {t("outcomeNotes")}
                         </h4>
                       </header>
                       <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <Label>{t('dischargeOutcome')}</Label>
+                          <Label>{t("dischargeOutcome")}</Label>
                           <SmartSelect
                             name="discharge_outcome"
                             value={model.discharge_outcome}
@@ -1848,7 +1844,7 @@ const AccidentRecordSystem = () => {
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <Label>{t('notesOptional')}</Label>
+                          <Label>{t("notesOptional")}</Label>
                           <textarea
                             name="notes"
                             value={model.notes}
@@ -1874,7 +1870,7 @@ const AccidentRecordSystem = () => {
                     <section className="rounded-xl border">
                       <header className="px-4 py-3 border-b bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
                         <h4 className="font-semibold text-gray-800">
-                          {t('finalize')}
+                          {t("finalize")}
                         </h4>
                       </header>
                       <div className="p-4">
@@ -1889,7 +1885,7 @@ const AccidentRecordSystem = () => {
                             }
                           />
                           <Label htmlFor="completed" className="cursor-pointer">
-                            {t('markCompleted')}
+                            {t("markCompleted")}
                           </Label>
                         </div>
                         <div className="text-xs text-gray-500 mt-1">
@@ -1907,7 +1903,7 @@ const AccidentRecordSystem = () => {
                         }}
                         className="px-4 py-2 rounded-lg border bg-gray-100 hover:bg-gray-200 text-sm"
                       >
-                        {t('cancel')}
+                        {t("cancel")}
                       </button>
                       {(mode === "create" ||
                         (mode === "edit" && canEdit(current))) && (
@@ -1920,7 +1916,7 @@ const AccidentRecordSystem = () => {
                               : "bg-blue-600 text-white hover:bg-blue-700"
                           }`}
                         >
-                          {saving ? t('saving') : t('save')}
+                          {saving ? t("saving") : t("save")}
                         </button>
                       )}
                     </div>
@@ -1930,7 +1926,7 @@ const AccidentRecordSystem = () => {
           </div>
         </div>
       </div>
-      
+
       <Footer />
     </div>
   );

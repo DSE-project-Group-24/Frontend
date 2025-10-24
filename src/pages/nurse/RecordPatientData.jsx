@@ -1,11 +1,9 @@
-// src/pages/nurse/RecordPatientData.jsx
 import React, { useMemo, useState } from "react";
 import NurseNav from "../../navbars/NurseNav";
 import Footer from "../../components/Footer";
 import API from "../../utils/api";
 import { t } from "../../utils/translations";
 
-// --- Categories (unchanged) ---
 const EDUCATION = [
   "None",
   "Grade 5 Scholarship",
@@ -58,7 +56,6 @@ function getHospitalId(propHospitalId) {
   return stored || null;
 }
 
-// ---------- UI atoms ----------
 const Card = ({ title, children }) => (
   <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     {title && (
@@ -80,7 +77,6 @@ const Field = ({ label, required, hint, children }) => (
   </label>
 );
 
-// Single-select “checkbox chips” (enforced single value)
 function ChoiceChips({ name, value, options, onChange, required }) {
   const toggle = (opt) => {
     // single-select: clicking the same option clears it; otherwise sets it
@@ -135,7 +131,6 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
   const [message, setMessage] = useState({ type: "", text: "" });
   const [loading, setLoading] = useState(false);
 
-  // Only Full Name + Gender are required
   const [form, setForm] = useState({
     full_name: "",
     gender: "",
@@ -199,7 +194,7 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
     setMessage({ type: "", text: "" });
 
     if (!form.full_name.trim() || !form.gender) {
-      setMessage({ type: "error", text: t('fullNameGenderRequired') });
+      setMessage({ type: "error", text: t("fullNameGenderRequired") });
       return;
     }
 
@@ -207,11 +202,11 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
       setLoading(true);
       const payload = buildPayload();
       await API.post("/patients/", payload);
-      setMessage({ type: "success", text: t('patientCreatedLinked') });
+      setMessage({ type: "success", text: t("patientCreatedLinked") });
     } catch (err) {
       setMessage({
         type: "error",
-        text: err?.response?.data?.detail || t('failedToCreatePatient'),
+        text: err?.response?.data?.detail || t("failedToCreatePatient"),
       });
     } finally {
       setLoading(false);
@@ -220,7 +215,7 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
 
   const handleSaveAndNew = async (e) => {
     await handleSubmit(e);
-    // if we just set an error, it’ll remain visible; still reset for speed if success:
+    // if we just set an error, it’ll remain visible. still reset for speed if success:
     // we can check last message via callback, but keeping it simple
     setTimeout(() => {
       if (message.type !== "error") resetForNext();
@@ -234,10 +229,10 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
         {/* Page header */}
         <div className="mb-5">
           <h2 className="text-2xl font-bold text-gray-800">
-            {t('patientQuickIntake')}
+            {t("patientQuickIntake")}
           </h2>
           <p className="text-sm text-gray-600">
-            {t('onlyFullNameGenderRequired')}
+            {t("onlyFullNameGenderRequired")}
           </p>
         </div>
 
@@ -256,9 +251,9 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Essentials */}
-          <Card title={t('essentials')}>
+          <Card title={t("essentials")}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label={t('fullName')} required>
+              <Field label={t("fullName")} required>
                 <input
                   name="full_name"
                   value={form.full_name}
@@ -270,7 +265,7 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
                 />
               </Field>
 
-              <Field label={t('gender')} required>
+              <Field label={t("gender")} required>
                 {/* Chips instead of dropdown (single-select) */}
                 <ChoiceChips
                   name="gender"
@@ -281,18 +276,18 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
                 />
               </Field>
 
-              <Field label={t('contactNumber')} hint={t('phoneExample')}>
+              <Field label={t("contactNumber")} hint={t("phoneExample")}>
                 <input
                   name="contact_number"
                   value={form.contact_number}
                   onChange={onChange}
                   className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
                   inputMode="tel"
-                  placeholder={t('phoneExample')}
+                  placeholder={t("phoneExample")}
                 />
               </Field>
 
-              <Field label={t('registeredDate')}>
+              <Field label={t("registeredDate")}>
                 <input
                   type="date"
                   name="registered_date"
@@ -305,9 +300,9 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
           </Card>
 
           {/* Demographics */}
-          <Card title={t('demographics')}>
+          <Card title={t("demographics")}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Field label={t('dateOfBirth')}>
+              <Field label={t("dateOfBirth")}>
                 <input
                   type="date"
                   name="date_of_birth"
@@ -317,14 +312,14 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
                 />
               </Field>
 
-              <Field label={t('ethnicity')}>
+              <Field label={t("ethnicity")}>
                 <select
                   name="ethnicity"
                   value={form.ethnicity}
                   onChange={onChange}
                   className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
                 >
-                  <option value="">{t('selectEthnicityOption')}</option>
+                  <option value="">{t("selectEthnicityOption")}</option>
                   {ETHNICITY.map((e) => (
                     <option key={e} value={e}>
                       {e}
@@ -333,7 +328,7 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
                 </select>
               </Field>
 
-              <Field label={t('bloodGroup')}>
+              <Field label={t("bloodGroup")}>
                 <select
                   name="blood_group"
                   value={form.blood_group}
@@ -351,9 +346,9 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
           </Card>
 
           {/* Contact & Identity */}
-          <Card title={t('contactIdentity')}>
+          <Card title={t("contactIdentity")}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label={t('nic')} hint={t('oldOrNewFormat')}>
+              <Field label={t("nic")} hint={t("oldOrNewFormat")}>
                 <input
                   name="nic"
                   value={form.nic}
@@ -362,12 +357,12 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
                   placeholder="e.g., 941234567V / 200045600123"
                 />
               </Field>
-              <Field label={t('addressStreet')}>
+              <Field label={t("addressStreet")}>
                 <input
                   name="address_street"
                   value={form.address_street}
                   onChange={onChange}
-                  placeholder={t('addressExample')}
+                  placeholder={t("addressExample")}
                   className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
                 />
               </Field>
@@ -375,16 +370,16 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
           </Card>
 
           {/* Socioeconomic */}
-          <Card title={t('socioeconomic')}>
+          <Card title={t("socioeconomic")}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label={t('lifeStyle')}>
+              <Field label={t("lifeStyle")}>
                 <select
                   name="life_style"
                   value={form.life_style}
                   onChange={onChange}
                   className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
                 >
-                  <option value="">{t('selectLifeStyle')}</option>
+                  <option value="">{t("selectLifeStyle")}</option>
                   {LIFESTYLE.map((l) => (
                     <option key={l} value={l}>
                       {l}
@@ -393,14 +388,14 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
                 </select>
               </Field>
 
-              <Field label={t('educationQualification')}>
+              <Field label={t("educationQualification")}>
                 <select
                   name="education_qualification"
                   value={form.education_qualification}
                   onChange={onChange}
                   className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
                 >
-                  <option value="">{t('selectEducation')}</option>
+                  <option value="">{t("selectEducation")}</option>
                   {EDUCATION.map((q) => (
                     <option key={q} value={q}>
                       {q}
@@ -409,14 +404,14 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
                 </select>
               </Field>
 
-              <Field label={t('occupation')}>
+              <Field label={t("occupation")}>
                 <select
                   name="occupation"
                   value={form.occupation}
                   onChange={onChange}
                   className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
                 >
-                  <option value="">{t('selectOccupation')}</option>
+                  <option value="">{t("selectOccupation")}</option>
                   {OCCUPATION.map((o) => (
                     <option key={o} value={o}>
                       {o}
@@ -425,14 +420,14 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
                 </select>
               </Field>
 
-              <Field label={t('familyMonthlyIncome')}>
+              <Field label={t("familyMonthlyIncome")}>
                 <select
                   name="family_monthly_income"
                   value={form.family_monthly_income}
                   onChange={onChange}
                   className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
                 >
-                  <option value="">{t('selectIncomeRange')}</option>
+                  <option value="">{t("selectIncomeRange")}</option>
                   {FAMILY_INCOME.map((i) => (
                     <option key={i} value={i}>
                       {i}
@@ -451,22 +446,24 @@ export default function RecordPatientData({ hospitalId: hospitalIdProp }) {
               disabled={loading}
               className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
             >
-              {loading ? t('saving') : t('saveNew')}
+              {loading ? t("saving") : t("saveNew")}
             </button>
             <button
               type="button"
               onClick={() => resetForNext()}
               className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-200 transition"
             >
-              {t('reset')}
+              {t("reset")}
             </button>
             <div className="md:ml-auto text-sm text-gray-500 self-center">
-              {hospitalId ? `${t('hospitalLabel')} ${hospitalId}` : t('noHospitalSelected')}
+              {hospitalId
+                ? `${t("hospitalLabel")} ${hospitalId}`
+                : t("noHospitalSelected")}
             </div>
           </div>
         </form>
       </div>
-      
+
       <Footer />
     </div>
   );
