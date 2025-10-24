@@ -7,7 +7,7 @@ This README describes the project layout, how to run the app, where to change th
 ---
 
 ## Project structure (selected)
-
+```
 Frontend/
 │
 ├── public/ # static assets
