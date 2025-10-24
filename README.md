@@ -29,6 +29,7 @@ Frontend/
 ├── package.json
 ├── vite.config.js
 └── README.md
+```
 
 ---
 
