@@ -1,4 +1,3 @@
-// src/pages/admin/ApproveTransfers.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import AdminNav from "../../navbars/AdminNav";
 import API from "../../utils/api";
@@ -105,7 +104,6 @@ export default function ApproveTransfers() {
   // For quick filtering/searching if needed later
   const sortedTransfers = useMemo(() => {
     const copy = [...transfers];
-    // If your transfer rows have created_on, you can sort by it. Otherwise stable by id.
     return copy.sort((a, b) =>
       String(a.transfer_id || "").localeCompare(String(b.transfer_id || ""))
     );
@@ -235,7 +233,6 @@ export default function ApproveTransfers() {
                               {t.to_hospital || "—"}
                             </span>
                           </Row>
-                          {/* If your table has created_on or requested_by etc., show them here */}
                         </div>
                       </div>
 
